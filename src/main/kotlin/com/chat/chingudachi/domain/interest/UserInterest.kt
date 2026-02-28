@@ -10,9 +10,18 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 
 @Entity
-@Table(name = "user_interest")
+@Table(
+    name = "user_interest",
+    uniqueConstraints = [
+        UniqueConstraint(
+            name = "uk_user_interest_account_tag",
+            columnNames = ["account_id", "interest_tag_id"],
+        ),
+    ],
+)
 class UserInterest(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_interest_id")

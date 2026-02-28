@@ -13,9 +13,9 @@ import java.time.Instant
 abstract class BaseTimeEntity {
     @CreatedDate
     @Column(nullable = false, updatable = false)
-    lateinit var createdAt: Instant
+    var createdAt: Instant = Instant.MIN
 
     @LastModifiedDate
     @Column(nullable = false)
-    lateinit var updatedAt: Instant
+    var updatedAt: Instant = Instant.MIN
 }

@@ -3,6 +3,8 @@ package com.chat.chingudachi.domain.account
 import com.chat.chingudachi.domain.common.BaseTimeEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -17,11 +19,13 @@ class Account(
     @Column(name = "account_id")
     val id: Long = 0,
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "account_type", nullable = false, length = 10)
-    var accountType: String,
+    var accountType: AccountType,
 
-    @Column(name = "account_status", nullable = false, length = 10)
-    var accountStatus: String,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "account_status", nullable = false, length = 20)
+    var accountStatus: AccountStatus,
 
     @Column(length = 255)
     var email: String? = null,
@@ -32,11 +36,13 @@ class Account(
     @Column(name = "birth_date")
     var birthDate: LocalDate? = null,
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    var nation: String? = null,
+    var nation: Nation? = null,
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "native_language", length = 2)
-    var nativeLanguage: String? = null,
+    var nativeLanguage: NativeLanguage? = null,
 
     @Column(length = 20)
     var city: String? = null,

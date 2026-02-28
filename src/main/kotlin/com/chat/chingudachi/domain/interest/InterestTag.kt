@@ -1,5 +1,6 @@
 package com.chat.chingudachi.domain.interest
 
+import com.chat.chingudachi.domain.common.BaseTimeEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -25,4 +26,4 @@ class InterestTag(
 
     @Column(name = "display_order", nullable = false)
     val displayOrder: Int,
-)
+) : BaseTimeEntity()

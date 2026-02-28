@@ -1,6 +1,7 @@
 package com.chat.chingudachi.domain.auth
 
 import com.chat.chingudachi.domain.account.Account
+import com.chat.chingudachi.domain.common.BaseTimeEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -28,7 +29,4 @@ class AuthToken(
 
     @Column(name = "expires_at", nullable = false)
     val expiresAt: Instant,
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    val createdAt: Instant = Instant.now(),
-)
+) : BaseTimeEntity()
