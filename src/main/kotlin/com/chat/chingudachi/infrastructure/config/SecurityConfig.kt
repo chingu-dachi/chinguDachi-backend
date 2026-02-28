@@ -1,6 +1,7 @@
 package com.chat.chingudachi.infrastructure.config
 
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -13,10 +14,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity
-class SecurityConfig(
-    @Value("\${cors.allowed-origin}")
-    private val allowedOrigin: String,
-) {
+@EnableConfigurationProperties(CorsProperties::class)
+class SecurityConfig {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http {
@@ -31,14 +30,28 @@ class SecurityConfig(
         }
         return http.build()
     }
-
-    @Bean
-    fun corsConfigurationSource() = UrlBasedCorsConfigurationSource().apply {
-        registerCorsConfiguration("/**", CorsConfiguration().apply {
-            allowedOrigins = listOf(allowedOrigin)
-            allowedMethods = listOf("GET", "POST", "PUT", "DELETE")
-            allowedHeaders = listOf("Authorization", "Content-Type", "Accept")
-            allowCredentials = true
-        })
-    }
 }
+
+@Configuration
+class CorsConfiguration(
+    private val corsProperties: CorsProperties,
+) {
+    @Bean
+    fun corsConfigurationSource() =
+        UrlBasedCorsConfigurationSource().apply {
+            registerCorsConfiguration(
+                "/**",
+                CorsConfiguration().apply {
+                    allowedOrigins = corsProperties.allowedOrigins
+                    allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH")
+                    allowedHeaders = listOf("Authorization", "Content-Type", "Accept")
+                    allowCredentials = true
+                },
+            )
+        }
+}
+
+@ConfigurationProperties("cors")
+data class CorsProperties(
+    val allowedOrigins: List<String> = emptyList(),
+)
