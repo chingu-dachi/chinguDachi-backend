@@ -4,7 +4,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: true
@@ -15,4 +15,5 @@ spring:
       lifecycle-management: start-and-stop
 
 cors:
-  allowed-origin: "http://localhost:3000"
+  allowed-origins:
+    - "http://localhost:3000"
