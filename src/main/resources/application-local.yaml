@@ -15,4 +15,4 @@ spring:
       lifecycle-management: start-and-stop
 
 cors:
-  allow_url: "localhost:3000"
+  allowed-origin: "http://localhost:3000"
