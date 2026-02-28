@@ -13,9 +13,9 @@ import java.time.Instant
 abstract class BaseTimeEntity {
     @CreatedDate
     @Column(nullable = false, updatable = false)
-    var createdAt: Instant = Instant.MIN
+    var createdAt: Instant = Instant.EPOCH
 
     @LastModifiedDate
     @Column(nullable = false)
-    var updatedAt: Instant = Instant.MIN
+    var updatedAt: Instant = Instant.EPOCH
 }
