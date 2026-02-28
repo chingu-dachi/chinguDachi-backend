@@ -30,10 +30,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-security-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-h2console")
+    developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 
     // Database
-    runtimeOnly("com.h2database:h2")
     runtimeOnly("org.postgresql:postgresql")
 
     // Test

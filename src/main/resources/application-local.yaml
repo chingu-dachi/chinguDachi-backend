@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: chinguDachi
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+    open-in-view: false
+  docker:
+    compose:
+      lifecycle-management: start-and-stop
+
+cors:
+  allow_url: "localhost:3000"

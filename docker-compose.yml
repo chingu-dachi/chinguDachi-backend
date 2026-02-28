@@ -1,0 +1,13 @@
+services:
+  postgres:
+    image: 'postgres:17'
+    environment:
+      POSTGRES_DB: chingudachi
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+    ports:
+      - '5432:5432'
+    volumes:
+      - chingudachi-data:/var/lib/postgresql/data
+volumes:
+  chingudachi-data:
