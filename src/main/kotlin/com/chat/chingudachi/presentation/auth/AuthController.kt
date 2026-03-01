@@ -1,8 +1,8 @@
 package com.chat.chingudachi.presentation.auth
 
-import com.chat.chingudachi.application.auth.AuthConstants
 import com.chat.chingudachi.application.auth.AuthenticateUseCase
 import com.chat.chingudachi.application.auth.RefreshTokenUseCase
+import com.chat.chingudachi.application.auth.port.TokenProvider
 import com.chat.chingudachi.application.auth.command.AuthenticateCommand
 import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.domain.common.UnauthorizedException
@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController
 class AuthController(
     private val authenticateUseCase: AuthenticateUseCase,
     private val refreshTokenUseCase: RefreshTokenUseCase,
+    private val tokenProvider: TokenProvider,
 ) {
     @PostMapping("/google")
     fun googleLogin(
@@ -55,7 +56,7 @@ class AuthController(
             .secure(true)
             .sameSite("Lax")
             .path("/api/auth/refresh")
-            .maxAge(AuthConstants.REFRESH_TOKEN_TTL)
+            .maxAge(tokenProvider.refreshTokenExpiry)
             .build()
         response.addHeader("Set-Cookie", cookie.toString())
     }

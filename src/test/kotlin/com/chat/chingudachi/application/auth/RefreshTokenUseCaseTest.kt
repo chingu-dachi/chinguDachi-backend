@@ -33,6 +33,7 @@ class RefreshTokenUseCaseTest : DescribeSpec() {
     init {
         beforeEach {
             clearMocks(authTokenStore, tokenProvider)
+            every { tokenProvider.refreshTokenExpiry } returns Duration.ofDays(30)
         }
 
         describe("refresh") {

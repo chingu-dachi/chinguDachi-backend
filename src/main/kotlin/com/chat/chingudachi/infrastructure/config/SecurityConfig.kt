@@ -10,6 +10,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
+import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.invoke
@@ -37,6 +38,7 @@ class SecurityConfig(
             }
             authorizeHttpRequests {
                 authorize("/api/auth/**", permitAll)
+                authorize(HttpMethod.GET, "/api/interest-tags", permitAll)
                 authorize(anyRequest, authenticated)
             }
             exceptionHandling {
