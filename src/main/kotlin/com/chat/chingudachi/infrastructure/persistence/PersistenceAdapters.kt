@@ -20,7 +20,7 @@ class AccountStoreAdapter(
 ) : AccountStore {
     override fun save(account: Account): Account = accountRepository.save(account)
     override fun findById(id: Long): Account? = accountRepository.findByIdOrNull(id)
-    override fun existsByNickname(nickname: String): Boolean = accountRepository.existsByNickname(Nickname(nickname))
+    override fun existsByNickname(nickname: Nickname): Boolean = accountRepository.existsByNickname(nickname)
 }
 
 @Repository

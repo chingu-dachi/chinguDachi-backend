@@ -3,11 +3,12 @@ package com.chat.chingudachi.application.auth.port
 import com.chat.chingudachi.domain.account.Account
 import com.chat.chingudachi.domain.account.AccountCredential
 import com.chat.chingudachi.domain.account.CredentialType
+import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.auth.AuthToken
 interface AccountStore {
     fun save(account: Account): Account
     fun findById(id: Long): Account?
-    fun existsByNickname(nickname: String): Boolean
+    fun existsByNickname(nickname: Nickname): Boolean
 }
 
 interface AccountCredentialStore {
