@@ -24,6 +24,7 @@ dependencies {
     // Kotlin
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("tools.jackson.module:jackson-module-kotlin")
+    implementation("io.github.oshai:kotlin-logging-jvm:7.0.13")
 
     // Spring Dependencies
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
