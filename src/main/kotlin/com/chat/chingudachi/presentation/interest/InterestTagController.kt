@@ -1,6 +1,7 @@
 package com.chat.chingudachi.presentation.interest
 
 import com.chat.chingudachi.application.interest.GetInterestTagsUseCase
+import com.chat.chingudachi.domain.interest.InterestTag
 import org.springframework.http.CacheControl
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -31,7 +32,7 @@ data class InterestTagResponse(
     val displayOrder: Int,
 ) {
     companion object {
-        fun from(tag: com.chat.chingudachi.domain.interest.InterestTag) = InterestTagResponse(
+        fun from(tag: InterestTag) = InterestTagResponse(
             id = tag.id,
             tagKey = tag.tagKey,
             labelKo = tag.labelKo,

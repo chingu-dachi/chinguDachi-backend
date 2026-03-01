@@ -1,6 +1,6 @@
 package com.chat.chingudachi.application.interest
 
-import com.chat.chingudachi.application.user.port.InterestTagStore
+import com.chat.chingudachi.application.interest.port.InterestTagStore
 import com.chat.chingudachi.domain.interest.InterestTag
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldBeEmpty

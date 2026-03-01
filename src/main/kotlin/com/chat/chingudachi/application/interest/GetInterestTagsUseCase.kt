@@ -1,6 +1,6 @@
 package com.chat.chingudachi.application.interest
 
-import com.chat.chingudachi.application.user.port.InterestTagStore
+import com.chat.chingudachi.application.interest.port.InterestTagStore
 import com.chat.chingudachi.domain.interest.InterestTag
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
