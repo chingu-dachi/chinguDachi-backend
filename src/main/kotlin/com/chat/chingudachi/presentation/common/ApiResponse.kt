@@ -1,8 +1,10 @@
 package com.chat.chingudachi.presentation.common
 
+import com.chat.chingudachi.domain.common.ErrorCode
 import java.time.Instant
 
 data class ApiResponse<T>(
+    val code: String?,
     val data: T?,
     val message: String,
     val isSuccess: Boolean,
@@ -13,18 +15,31 @@ data class ApiResponse<T>(
             data: T?,
             message: String = "success",
         ) = ApiResponse(
+            code = null,
             data = data,
             message = message,
             isSuccess = true,
             timestamp = Instant.now(),
         )
 
-        fun error(message: String) =
+        fun error(errorCode: ErrorCode) =
             ApiResponse(
+                code = errorCode.code,
                 data = null,
-                message = message,
+                message = errorCode.message,
                 isSuccess = false,
                 timestamp = Instant.now(),
             )
+
+        fun error(
+            code: String,
+            message: String,
+        ) = ApiResponse(
+            code = code,
+            data = null,
+            message = message,
+            isSuccess = false,
+            timestamp = Instant.now(),
+        )
     }
 }

@@ -1,38 +1,71 @@
 package com.chat.chingudachi.presentation.common
 
+import com.chat.chingudachi.domain.common.BusinessException
+import com.chat.chingudachi.domain.common.ErrorCode
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.servlet.resource.NoResourceFoundException
 
 @RestControllerAdvice(basePackages = ["com.chat.chingudachi"])
 class ErrorResponseWrappingAdvice {
     private val log = LoggerFactory.getLogger(javaClass)
 
+    @ExceptionHandler(BusinessException::class)
+    fun handleBusinessException(ex: BusinessException): ResponseEntity<ApiResponse<Nothing>> {
+        log.warn("Business exception: {} - {}", ex.errorCode.code, ex.message)
+        return ResponseEntity
+            .status(ex.errorCode.status)
+            .body(ApiResponse.error(ex.errorCode))
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidation(ex: MethodArgumentNotValidException): ResponseEntity<ApiResponse<Nothing>> {
-        log.warn("Validation failed: {}", ex.message)
+        val detail =
+            ex.bindingResult.fieldErrors.joinToString(", ") { "${it.field}: ${it.defaultMessage}" }
+        log.warn("Validation failed: {}", detail)
         return ResponseEntity
             .badRequest()
-            .body(ApiResponse.error("Invalid input"))
+            .body(ApiResponse.error(ErrorCode.INVALID_INPUT.code, detail))
+    }
+
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handleIllegalArgument(ex: IllegalArgumentException): ResponseEntity<ApiResponse<Nothing>> {
+        log.warn("Illegal argument: {}", ex.message)
+        return ResponseEntity
+            .badRequest()
+            .body(
+                ApiResponse.error(
+                    ErrorCode.INVALID_INPUT.code,
+                    ex.message ?: ErrorCode.INVALID_INPUT.message,
+                ),
+            )
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
     fun handleMethodNotAllowed(ex: HttpRequestMethodNotSupportedException): ResponseEntity<ApiResponse<Nothing>> {
         log.warn("Method not allowed: {}", ex.message)
         return ResponseEntity
-            .status(HttpStatus.METHOD_NOT_ALLOWED)
-            .body(ApiResponse.error("Method not allowed"))
+            .status(ErrorCode.METHOD_NOT_ALLOWED.status)
+            .body(ApiResponse.error(ErrorCode.METHOD_NOT_ALLOWED))
+    }
+
+    @ExceptionHandler(NoResourceFoundException::class)
+    fun handleNoResourceFound(ex: NoResourceFoundException): ResponseEntity<ApiResponse<Nothing>> {
+        log.warn("Resource not found: {}", ex.message)
+        return ResponseEntity
+            .status(ErrorCode.RESOURCE_NOT_FOUND.status)
+            .body(ApiResponse.error(ErrorCode.RESOURCE_NOT_FOUND))
     }
 
     @ExceptionHandler(Exception::class)
     fun handleException(ex: Exception): ResponseEntity<ApiResponse<Nothing>> {
         log.error("Unhandled exception", ex)
         return ResponseEntity
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(ApiResponse.error("An unexpected system error has occurred"))
+            .status(ErrorCode.INTERNAL_ERROR.status)
+            .body(ApiResponse.error(ErrorCode.INTERNAL_ERROR))
     }
 }
