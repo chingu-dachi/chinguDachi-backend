@@ -1,7 +1,8 @@
 package com.chat.chingudachi.application.user
 
-import com.chat.chingudachi.application.auth.port.AccountStore
 import com.chat.chingudachi.application.interest.port.InterestTagStore
+import com.chat.chingudachi.application.user.command.CompleteOnboardingCommand
+import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.application.user.port.UserInterestStore
 import com.chat.chingudachi.domain.account.AccountStatus
 import com.chat.chingudachi.domain.account.Nation

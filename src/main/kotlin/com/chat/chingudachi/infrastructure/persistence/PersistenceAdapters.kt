@@ -1,7 +1,7 @@
 package com.chat.chingudachi.infrastructure.persistence
 
 import com.chat.chingudachi.application.auth.port.AccountCredentialStore
-import com.chat.chingudachi.application.auth.port.AccountStore
+import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.application.auth.port.AuthTokenStore
 import com.chat.chingudachi.domain.account.Account
 import com.chat.chingudachi.domain.account.AccountCredential

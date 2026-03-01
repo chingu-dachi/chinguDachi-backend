@@ -1,8 +1,8 @@
 package com.chat.chingudachi.presentation.user
 
 import com.chat.chingudachi.application.user.CheckNicknameUseCase
-import com.chat.chingudachi.application.user.CompleteOnboardingCommand
 import com.chat.chingudachi.application.user.CompleteOnboardingUseCase
+import com.chat.chingudachi.application.user.command.CompleteOnboardingCommand
 import com.chat.chingudachi.application.user.GetMyProfileUseCase
 import com.chat.chingudachi.application.user.MyProfile
 import com.chat.chingudachi.domain.account.Nation
