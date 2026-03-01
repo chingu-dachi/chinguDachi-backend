@@ -1,10 +1,12 @@
 package com.chat.chingudachi.presentation.user
 
+import com.chat.chingudachi.application.user.CheckNicknameUseCase
 import com.chat.chingudachi.application.user.GetMyProfileUseCase
 import com.chat.chingudachi.application.user.MyProfile
 import com.chat.chingudachi.presentation.common.AuthAccountId
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 
@@ -12,11 +14,18 @@ import java.time.LocalDate
 @RequestMapping("/api/users")
 class UserController(
     private val getMyProfileUseCase: GetMyProfileUseCase,
+    private val checkNicknameUseCase: CheckNicknameUseCase,
 ) {
     @GetMapping("/me")
     fun getMyProfile(@AuthAccountId accountId: Long): MyProfileResponse {
         val profile = getMyProfileUseCase.execute(accountId)
         return MyProfileResponse.from(profile)
+    }
+
+    @GetMapping("/check-nickname")
+    fun checkNickname(@RequestParam nickname: String): NicknameCheckResponse {
+        val available = checkNicknameUseCase.execute(nickname)
+        return NicknameCheckResponse(available)
     }
 }
 
@@ -60,4 +69,8 @@ data class InterestResponse(
     val tagKey: String,
     val labelKo: String,
     val labelJa: String,
+)
+
+data class NicknameCheckResponse(
+    val available: Boolean,
 )

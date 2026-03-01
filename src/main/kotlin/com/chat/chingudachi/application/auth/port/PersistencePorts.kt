@@ -7,6 +7,7 @@ import com.chat.chingudachi.domain.auth.AuthToken
 interface AccountStore {
     fun save(account: Account): Account
     fun findById(id: Long): Account?
+    fun existsByNickname(nickname: String): Boolean
 }
 
 interface AccountCredentialStore {

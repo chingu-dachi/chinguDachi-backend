@@ -6,6 +6,7 @@ import com.chat.chingudachi.application.auth.port.AuthTokenStore
 import com.chat.chingudachi.domain.account.Account
 import com.chat.chingudachi.domain.account.AccountCredential
 import com.chat.chingudachi.domain.account.CredentialType
+import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.auth.AuthToken
 import com.chat.chingudachi.infrastructure.persistence.account.AccountCredentialRepository
 import com.chat.chingudachi.infrastructure.persistence.account.AccountRepository
@@ -19,6 +20,7 @@ class AccountStoreAdapter(
 ) : AccountStore {
     override fun save(account: Account): Account = accountRepository.save(account)
     override fun findById(id: Long): Account? = accountRepository.findByIdOrNull(id)
+    override fun existsByNickname(nickname: String): Boolean = accountRepository.existsByNickname(Nickname(nickname))
 }
 
 @Repository

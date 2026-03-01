@@ -1,8 +1,10 @@
 package com.chat.chingudachi.presentation.user
 
 import com.chat.chingudachi.application.auth.port.OAuthClient
+import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.auth.OAuthProvider
 import com.chat.chingudachi.domain.auth.OAuthUserInfo
+import com.chat.chingudachi.fixture.AccountFixture
 import com.chat.chingudachi.infrastructure.persistence.account.AccountCredentialRepository
 import com.chat.chingudachi.infrastructure.persistence.account.AccountRepository
 import com.chat.chingudachi.infrastructure.persistence.auth.AuthTokenRepository
@@ -68,6 +70,59 @@ class UserControllerTest(
             context("인증 없이 요청하면") {
                 it("401을 반환한다") {
                     mockMvc.get("/api/users/me")
+                        .andExpect {
+                            status { isUnauthorized() }
+                        }
+                }
+            }
+        }
+
+        describe("GET /api/users/check-nickname") {
+            fun loginAndGetToken(): String {
+                every { oAuthClient.authenticate("valid-code") } returns
+                    OAuthUserInfo(OAuthProvider.GOOGLE, "google-200", "nick@example.com")
+
+                val result = mockMvc.post("/api/auth/google") {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = """{"code":"valid-code"}"""
+                }.andReturn()
+
+                return com.jayway.jsonpath.JsonPath.read(
+                    result.response.contentAsString,
+                    "$.data.accessToken",
+                )
+            }
+
+            context("사용 가능한 닉네임") {
+                it("available: true를 반환한다") {
+                    val token = loginAndGetToken()
+
+                    mockMvc.get("/api/users/check-nickname?nickname=새닉네임") {
+                        header("Authorization", "Bearer $token")
+                    }.andExpect {
+                        status { isOk() }
+                        jsonPath("$.data.available") { value(true) }
+                    }
+                }
+            }
+
+            context("이미 사용 중인 닉네임") {
+                it("available: false를 반환한다") {
+                    val token = loginAndGetToken()
+                    accountRepository.save(AccountFixture.create(id = 0, nickname = Nickname("중복닉네임")))
+
+                    mockMvc.get("/api/users/check-nickname?nickname=중복닉네임") {
+                        header("Authorization", "Bearer $token")
+                    }.andExpect {
+                        status { isOk() }
+                        jsonPath("$.data.available") { value(false) }
+                    }
+                }
+            }
+
+            context("인증 없이 요청하면") {
+                it("401을 반환한다") {
+                    mockMvc.get("/api/users/check-nickname?nickname=테스트")
                         .andExpect {
                             status { isUnauthorized() }
                         }
