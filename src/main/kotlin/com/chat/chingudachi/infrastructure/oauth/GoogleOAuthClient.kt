@@ -20,8 +20,8 @@ class GoogleOAuthClient(
     private val restClient: RestClient,
     private val properties: GoogleOAuthProperties,
 ) : OAuthClient {
-    override fun authenticate(code: String): OAuthUserInfo {
-        val tokenResponse = exchangeToken(code)
+    override fun authenticate(code: String, redirectUri: String?): OAuthUserInfo {
+        val tokenResponse = exchangeToken(code, redirectUri ?: properties.redirectUri)
         val userInfo = fetchUserInfo(tokenResponse.accessToken)
         return OAuthUserInfo(
             provider = OAuthProvider.GOOGLE,
@@ -30,12 +30,12 @@ class GoogleOAuthClient(
         )
     }
 
-    private fun exchangeToken(code: String): GoogleTokenResponse {
+    private fun exchangeToken(code: String, redirectUri: String): GoogleTokenResponse {
         val formData = LinkedMultiValueMap<String, String>().apply {
             add("code", code)
             add("client_id", properties.clientId)
             add("client_secret", properties.clientSecret)
-            add("redirect_uri", properties.redirectUri)
+            add("redirect_uri", redirectUri)
             add("grant_type", "authorization_code")
         }
 

@@ -29,7 +29,7 @@ class AuthenticateUseCase(
     private val tokenProvider: TokenProvider,
 ) {
     fun authenticate(command: AuthenticateCommand): AuthenticateResult {
-        val oAuthUserInfo = oAuthClient.authenticate(command.code)
+        val oAuthUserInfo = oAuthClient.authenticate(command.code, command.redirectUri)
         val account = findOrCreateAccount(oAuthUserInfo)
         return issueTokens(account)
     }

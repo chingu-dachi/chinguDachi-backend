@@ -25,7 +25,7 @@ class AuthController(
         @RequestBody request: GoogleLoginRequest,
         response: HttpServletResponse,
     ): LoginResponse {
-        val result = authenticateUseCase.authenticate(AuthenticateCommand(request.code))
+        val result = authenticateUseCase.authenticate(AuthenticateCommand(request.code, request.redirectUri))
         addRefreshTokenCookie(response, result.refreshToken)
         return LoginResponse(
             accessToken = result.accessToken,
@@ -61,7 +61,10 @@ class AuthController(
     }
 }
 
-data class GoogleLoginRequest(val code: String)
+data class GoogleLoginRequest(
+    val code: String,
+    val redirectUri: String? = null,
+)
 
 data class LoginResponse(
     val accessToken: String,
