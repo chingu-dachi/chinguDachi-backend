@@ -10,6 +10,7 @@ import com.chat.chingudachi.domain.auth.AuthToken
 import com.chat.chingudachi.infrastructure.persistence.account.AccountCredentialRepository
 import com.chat.chingudachi.infrastructure.persistence.account.AccountRepository
 import com.chat.chingudachi.infrastructure.persistence.auth.AuthTokenRepository
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -17,6 +18,7 @@ class AccountStoreAdapter(
     private val accountRepository: AccountRepository,
 ) : AccountStore {
     override fun save(account: Account): Account = accountRepository.save(account)
+    override fun findById(id: Long): Account? = accountRepository.findByIdOrNull(id)
 }
 
 @Repository

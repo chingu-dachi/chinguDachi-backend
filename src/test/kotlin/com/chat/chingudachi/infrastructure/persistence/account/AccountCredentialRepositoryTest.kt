@@ -10,10 +10,7 @@ import io.kotest.matchers.shouldBe
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase
 import jakarta.persistence.EntityManager
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
-import org.springframework.test.context.ActiveProfiles
-
 @DataJpaTest
-@ActiveProfiles("test")
 @AutoConfigureEmbeddedDatabase
 class AccountCredentialRepositoryTest(
     private val accountCredentialRepository: AccountCredentialRepository,

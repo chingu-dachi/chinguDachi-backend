@@ -3,6 +3,7 @@ package com.chat.chingudachi.infrastructure.oauth
 import com.chat.chingudachi.application.auth.port.OAuthClient
 import com.chat.chingudachi.domain.auth.OAuthProvider
 import com.chat.chingudachi.domain.auth.OAuthUserInfo
+import com.chat.chingudachi.domain.common.BadRequestException
 import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.domain.common.InternalServerException
 import com.chat.chingudachi.domain.common.UnauthorizedException
@@ -20,8 +21,10 @@ class GoogleOAuthClient(
     private val restClient: RestClient,
     private val properties: GoogleOAuthProperties,
 ) : OAuthClient {
-    override fun authenticate(code: String): OAuthUserInfo {
-        val tokenResponse = exchangeToken(code)
+    override fun authenticate(code: String, redirectUri: String?): OAuthUserInfo {
+        val resolvedUri = redirectUri ?: properties.redirectUri
+        validateRedirectUri(resolvedUri)
+        val tokenResponse = exchangeToken(code, resolvedUri)
         val userInfo = fetchUserInfo(tokenResponse.accessToken)
         return OAuthUserInfo(
             provider = OAuthProvider.GOOGLE,
@@ -30,12 +33,22 @@ class GoogleOAuthClient(
         )
     }
 
-    private fun exchangeToken(code: String): GoogleTokenResponse {
+    private fun validateRedirectUri(redirectUri: String) {
+        val allowed = buildSet {
+            add(properties.redirectUri)
+            addAll(properties.allowedRedirectUris)
+        }
+        if (redirectUri !in allowed) {
+            throw BadRequestException(ErrorCode.AUTH_OAUTH_REDIRECT_URI_NOT_ALLOWED)
+        }
+    }
+
+    private fun exchangeToken(code: String, redirectUri: String): GoogleTokenResponse {
         val formData = LinkedMultiValueMap<String, String>().apply {
             add("code", code)
             add("client_id", properties.clientId)
             add("client_secret", properties.clientSecret)
-            add("redirect_uri", properties.redirectUri)
+            add("redirect_uri", redirectUri)
             add("grant_type", "authorization_code")
         }
 

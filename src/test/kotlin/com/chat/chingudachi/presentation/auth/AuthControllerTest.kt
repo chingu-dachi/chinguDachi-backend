@@ -19,7 +19,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
@@ -28,7 +27,6 @@ import org.springframework.test.web.servlet.post
 @AutoConfigureMockMvc
 @AutoConfigureEmbeddedDatabase
 @Import(MockOAuthConfig::class)
-@ActiveProfiles("test")
 class AuthControllerTest(
     private val mockMvc: MockMvc,
     private val oAuthClient: OAuthClient,
@@ -133,7 +131,7 @@ class AuthControllerTest(
             }
 
             context("인증이 필요한 엔드포인트에 유효한 JWT로 요청하면") {
-                it("인증을 통과한다 (엔드포인트가 없으면 404)") {
+                it("인증을 통과한다") {
                     every { oAuthClient.authenticate("valid-code") } returns
                         OAuthUserInfo(OAuthProvider.GOOGLE, "google-789", "test@example.com")
 
@@ -151,7 +149,7 @@ class AuthControllerTest(
                     mockMvc.get("/api/users/me") {
                         header("Authorization", "Bearer $accessToken")
                     }.andExpect {
-                        status { isNotFound() }
+                        status { isOk() }
                     }
                 }
             }

@@ -4,9 +4,9 @@ import com.chat.chingudachi.domain.account.Account
 import com.chat.chingudachi.domain.account.AccountCredential
 import com.chat.chingudachi.domain.account.CredentialType
 import com.chat.chingudachi.domain.auth.AuthToken
-
 interface AccountStore {
     fun save(account: Account): Account
+    fun findById(id: Long): Account?
 }
 
 interface AccountCredentialStore {

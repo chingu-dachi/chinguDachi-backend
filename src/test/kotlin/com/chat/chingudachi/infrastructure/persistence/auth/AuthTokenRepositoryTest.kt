@@ -10,12 +10,10 @@ import io.kotest.matchers.shouldBe
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase
 import jakarta.persistence.EntityManager
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
-import org.springframework.test.context.ActiveProfiles
 import java.time.Duration
 import java.time.Instant
 
 @DataJpaTest
-@ActiveProfiles("test")
 @AutoConfigureEmbeddedDatabase
 class AuthTokenRepositoryTest(
     private val authTokenRepository: AuthTokenRepository,
