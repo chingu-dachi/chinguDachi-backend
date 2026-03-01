@@ -10,4 +10,10 @@ class UserInterestStoreAdapter(
 ) : UserInterestStore {
     override fun findByAccountId(accountId: Long): List<UserInterest> =
         userInterestRepository.findByAccountId(accountId)
+
+    override fun saveAll(userInterests: List<UserInterest>): List<UserInterest> =
+        userInterestRepository.saveAll(userInterests)
+
+    override fun deleteByAccountId(accountId: Long) =
+        userInterestRepository.deleteByAccountId(accountId)
 }
