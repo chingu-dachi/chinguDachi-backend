@@ -9,3 +9,8 @@ spring:
   docker:
     compose:
       enabled: false
+
+jwt:
+  secret: "dGVzdC1qd3Qtc2VjcmV0LWtleS1mb3ItdGVzdGluZy1vbmx5LTI1NmJpdHM="
+  access-token-expiry: 10s
+  refresh-token-expiry: 1m
