@@ -1,4 +1,4 @@
-package com.chat.chingudachi.infrastructure.config
+package com.chat.chingudachi.presentation.config
 
 import com.chat.chingudachi.presentation.common.AuthAccountIdArgumentResolver
 import org.springframework.context.annotation.Configuration

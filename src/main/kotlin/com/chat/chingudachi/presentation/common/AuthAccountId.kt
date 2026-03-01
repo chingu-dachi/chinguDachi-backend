@@ -1,7 +1,9 @@
 package com.chat.chingudachi.presentation.common
 
-import com.chat.chingudachi.infrastructure.security.SecurityContextUtil
+import com.chat.chingudachi.domain.common.ErrorCode
+import com.chat.chingudachi.domain.common.UnauthorizedException
 import org.springframework.core.MethodParameter
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.support.WebDataBinderFactory
 import org.springframework.web.context.request.NativeWebRequest
@@ -22,5 +24,10 @@ class AuthAccountIdArgumentResolver : HandlerMethodArgumentResolver {
         mavContainer: ModelAndViewContainer?,
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?,
-    ): Long = SecurityContextUtil.getCurrentAccountId()
+    ): Long {
+        val authentication = SecurityContextHolder.getContext().authentication
+            ?: throw UnauthorizedException(ErrorCode.UNAUTHORIZED)
+        return authentication.principal as? Long
+            ?: throw UnauthorizedException(ErrorCode.UNAUTHORIZED)
+    }
 }

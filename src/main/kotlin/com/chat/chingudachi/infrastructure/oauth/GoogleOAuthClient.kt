@@ -3,6 +3,7 @@ package com.chat.chingudachi.infrastructure.oauth
 import com.chat.chingudachi.application.auth.port.OAuthClient
 import com.chat.chingudachi.domain.auth.OAuthProvider
 import com.chat.chingudachi.domain.auth.OAuthUserInfo
+import com.chat.chingudachi.domain.common.BadRequestException
 import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.domain.common.InternalServerException
 import com.chat.chingudachi.domain.common.UnauthorizedException
@@ -21,13 +22,25 @@ class GoogleOAuthClient(
     private val properties: GoogleOAuthProperties,
 ) : OAuthClient {
     override fun authenticate(code: String, redirectUri: String?): OAuthUserInfo {
-        val tokenResponse = exchangeToken(code, redirectUri ?: properties.redirectUri)
+        val resolvedUri = redirectUri ?: properties.redirectUri
+        validateRedirectUri(resolvedUri)
+        val tokenResponse = exchangeToken(code, resolvedUri)
         val userInfo = fetchUserInfo(tokenResponse.accessToken)
         return OAuthUserInfo(
             provider = OAuthProvider.GOOGLE,
             providerUserId = userInfo.sub,
             email = userInfo.email,
         )
+    }
+
+    private fun validateRedirectUri(redirectUri: String) {
+        val allowed = buildSet {
+            add(properties.redirectUri)
+            addAll(properties.allowedRedirectUris)
+        }
+        if (redirectUri !in allowed) {
+            throw BadRequestException(ErrorCode.AUTH_OAUTH_REDIRECT_URI_NOT_ALLOWED)
+        }
     }
 
     private fun exchangeToken(code: String, redirectUri: String): GoogleTokenResponse {

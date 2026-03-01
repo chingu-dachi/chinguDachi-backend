@@ -28,3 +28,5 @@ oauth:
     client-id: ${GOOGLE_CLIENT_ID:your-client-id}
     client-secret: ${GOOGLE_CLIENT_SECRET:your-client-secret}
     redirect-uri: "http://localhost:3000/auth/callback"
+    allowed-redirect-uris:
+      - "https://auth.expo.io/@won123457/chingu-dachi"
