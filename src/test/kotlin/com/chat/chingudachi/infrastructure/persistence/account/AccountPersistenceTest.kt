@@ -10,11 +10,9 @@ import io.kotest.matchers.shouldNotBe
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase
 import jakarta.persistence.EntityManager
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
-import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
 @DataJpaTest
-@ActiveProfiles("test")
 @AutoConfigureEmbeddedDatabase
 class AccountPersistenceTest(
     private val accountRepository: AccountRepository,
