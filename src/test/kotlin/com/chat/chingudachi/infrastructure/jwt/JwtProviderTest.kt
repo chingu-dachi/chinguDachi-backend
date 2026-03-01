@@ -69,8 +69,8 @@ class JwtProviderTest : DescribeSpec() {
                 val expiredProvider = JwtProvider(
                     JwtProperties(
                         secret = testSecret,
-                        accessTokenExpiry = Duration.ZERO,
-                        refreshTokenExpiry = Duration.ZERO,
+                        accessTokenExpiry = Duration.ofMillis(-1),
+                        refreshTokenExpiry = Duration.ofMillis(-1),
                     ),
                 )
                 val token = expiredProvider.createAccessToken(1L)
@@ -108,8 +108,8 @@ class JwtProviderTest : DescribeSpec() {
                 val expiredProvider = JwtProvider(
                     JwtProperties(
                         secret = testSecret,
-                        accessTokenExpiry = Duration.ZERO,
-                        refreshTokenExpiry = Duration.ZERO,
+                        accessTokenExpiry = Duration.ofMillis(-1),
+                        refreshTokenExpiry = Duration.ofMillis(-1),
                     ),
                 )
                 val token = expiredProvider.createAccessToken(1L)

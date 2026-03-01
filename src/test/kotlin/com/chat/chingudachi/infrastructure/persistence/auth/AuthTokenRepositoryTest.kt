@@ -5,8 +5,8 @@ import com.chat.chingudachi.fixture.AuthTokenFixture
 import com.chat.chingudachi.infrastructure.persistence.account.AccountRepository
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase
 import jakarta.persistence.EntityManager
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
@@ -60,8 +60,8 @@ class AuthTokenRepositoryTest(
                     refreshToken = "matching-token",
                 )
 
-                found shouldNotBe null
-                found!!.id shouldBe authToken.id
+                found.shouldNotBeNull()
+                found.id shouldBe authToken.id
             }
 
             it("일치하지 않는 refreshToken이면 null을 반환한다") {

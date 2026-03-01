@@ -1,7 +1,7 @@
 package com.chat.chingudachi.domain.auth
 
 data class OAuthUserInfo(
-    val provider: String,
-    val sub: String,
+    val provider: OAuthProvider,
+    val providerUserId: String,
     val email: String,
 )
