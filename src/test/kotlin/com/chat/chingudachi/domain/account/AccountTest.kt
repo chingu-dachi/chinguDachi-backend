@@ -9,10 +9,10 @@ class AccountTest : DescribeSpec() {
     init {
         describe("isOnboardingComplete") {
             context("계정 생성 후 ") {
-                it("모든 필수 onBoarding 항목을 채우면 onBoarding이 완료된 것으로 간주한다.") {
+                it("모든 필수 onBoarding 항목을 채우면 완료된 것으로 간주한다.") {
                     val account =
                         AccountFixture.create(
-                            nickname = "test",
+                            nickname = Nickname("test"),
                             birthDate = LocalDate.now(),
                             nation = Nation.KR,
                             nativeLanguage = Nation.KR.toNativeLanguage(),
@@ -20,39 +20,49 @@ class AccountTest : DescribeSpec() {
 
                     account.isOnboardingComplete() shouldBe true
                 }
-                it("하나라도 마무리되지 않은 항목이 있으면 완료되지 않은 것으로 간주한다..") {
-                    val account1 =
+
+                it("nativeLanguage가 없으면 완료되지 않는다.") {
+                    val account =
                         AccountFixture.create(
-                            nickname = "test",
+                            nickname = Nickname("test"),
                             birthDate = LocalDate.now(),
                             nation = Nation.KR,
                         )
 
-                    val account2 =
+                    account.isOnboardingComplete() shouldBe false
+                }
+
+                it("nickname이 없으면 완료되지 않는다.") {
+                    val account =
                         AccountFixture.create(
                             birthDate = LocalDate.now(),
                             nation = Nation.KR,
                             nativeLanguage = Nation.KR.toNativeLanguage(),
                         )
 
-                    val account3 =
+                    account.isOnboardingComplete() shouldBe false
+                }
+
+                it("birthDate가 없으면 완료되지 않는다.") {
+                    val account =
                         AccountFixture.create(
-                            nickname = "test",
+                            nickname = Nickname("test"),
                             nation = Nation.KR,
                             nativeLanguage = Nation.KR.toNativeLanguage(),
                         )
 
-                    val account4 =
+                    account.isOnboardingComplete() shouldBe false
+                }
+
+                it("nation이 없으면 완료되지 않는다.") {
+                    val account =
                         AccountFixture.create(
-                            nickname = "test",
+                            nickname = Nickname("test"),
                             birthDate = LocalDate.now(),
                             nativeLanguage = Nation.KR.toNativeLanguage(),
                         )
 
-                    account1.isOnboardingComplete() shouldBe false
-                    account2.isOnboardingComplete() shouldBe false
-                    account3.isOnboardingComplete() shouldBe false
-                    account4.isOnboardingComplete() shouldBe false
+                    account.isOnboardingComplete() shouldBe false
                 }
             }
         }

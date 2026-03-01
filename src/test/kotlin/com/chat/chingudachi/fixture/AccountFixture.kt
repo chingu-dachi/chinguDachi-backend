@@ -5,6 +5,7 @@ import com.chat.chingudachi.domain.account.AccountStatus
 import com.chat.chingudachi.domain.account.AccountType
 import com.chat.chingudachi.domain.account.Nation
 import com.chat.chingudachi.domain.account.NativeLanguage
+import com.chat.chingudachi.domain.account.Nickname
 import java.time.LocalDate
 
 object AccountFixture {
@@ -13,7 +14,7 @@ object AccountFixture {
         accountType: AccountType = AccountType.USER,
         accountStatus: AccountStatus = AccountStatus.NOT_CONSENT,
         email: String? = "test@example.com",
-        nickname: String? = null,
+        nickname: Nickname? = null,
         birthDate: LocalDate? = null,
         nation: Nation? = null,
         nativeLanguage: NativeLanguage? = null,

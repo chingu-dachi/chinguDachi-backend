@@ -1,31 +1,29 @@
 package com.chat.chingudachi.domain.account
 
+import io.kotest.assertions.throwables.shouldNotThrowAny
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 
 class NicknameTest : DescribeSpec() {
     init {
         describe("Nickname") {
             context("nickname 초기화 시 ") {
-                it("2~12자 이내면 정상적으로 Nickname 객체가 새성된다.") {
-                    val name = "te"
-                    val name2 = "test"
-                    val name3 = "testtesttest"
-
-                    assertDoesNotThrow { Nickname(name) }
-                    assertDoesNotThrow { Nickname(name2) }
-                    assertDoesNotThrow { Nickname(name3) }
+                it("2~12자 이내면 정상적으로 Nickname 객체가 생성된다.") {
+                    shouldNotThrowAny { Nickname("te") }
+                    shouldNotThrowAny { Nickname("test") }
+                    shouldNotThrowAny { Nickname("testtesttest") }
                 }
 
-                it("2자 미만이나 12자 이상, 공백포함 시 예외가 발생한다.") {
-                    val name = "t"
-                    val name2 = "te st"
-                    val name3 = "testtesttestt"
+                it("한글/일본어 닉네임이 정상적으로 생성된다.") {
+                    shouldNotThrowAny { Nickname("친구다치") }
+                    shouldNotThrowAny { Nickname("ともだち") }
+                    shouldNotThrowAny { Nickname("한일친구") }
+                }
 
-                    assertThrows<IllegalArgumentException> { Nickname(name) }
-                    assertThrows<IllegalArgumentException> { Nickname(name2) }
-                    assertThrows<IllegalArgumentException> { Nickname(name3) }
+                it("2자 미만이나 12자 초과, 공백포함 시 예외가 발생한다.") {
+                    shouldThrow<IllegalArgumentException> { Nickname("t") }
+                    shouldThrow<IllegalArgumentException> { Nickname("te st") }
+                    shouldThrow<IllegalArgumentException> { Nickname("testtesttestt") }
                 }
             }
         }

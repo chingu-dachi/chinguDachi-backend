@@ -27,7 +27,7 @@ class Account(
     @Column(length = 255)
     var email: String? = null,
     @Column(length = 20)
-    var nickname: String? = null,
+    var nickname: Nickname? = null,
     @Column(name = "birth_date")
     var birthDate: LocalDate? = null,
     @Enumerated(EnumType.STRING)
@@ -53,24 +53,12 @@ class Account(
 }
 
 @JvmInline
-value class Nationality(
-    val nation: Nation,
-) {
-    val nativeLanguage: NativeLanguage
-        get() =
-            when (nation) {
-                Nation.KR -> NativeLanguage.KO
-                Nation.JP -> NativeLanguage.JA
-            }
-}
-
-@JvmInline
 value class Nickname(
     val value: String,
 ) {
     init {
         require(!value.isBlank() && value.length in 2..12) { "닉네임은 2~12자여야 합니다" }
-        require(!value.contains(" "))
+        require(!value.contains(" ")) { "닉네임에 공백을 포함할 수 없습니다" }
     }
 }
 
