@@ -21,6 +21,7 @@ enum class ErrorCode(
     ACCOUNT_ALREADY_EXISTS(HttpStatus.CONFLICT, "Account already exists"),
     ACCOUNT_NICKNAME_INVALID(HttpStatus.BAD_REQUEST, "Nickname must be 2-12 characters without spaces"),
     ACCOUNT_NICKNAME_DUPLICATE(HttpStatus.CONFLICT, "Nickname is already taken"),
+    ACCOUNT_ALREADY_ONBOARDED(HttpStatus.CONFLICT, "Onboarding is already completed"),
 
     // Interest
     INTEREST_TAG_NOT_FOUND(HttpStatus.BAD_REQUEST, "One or more interest tags not found"),

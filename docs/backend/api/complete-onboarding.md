@@ -58,4 +58,5 @@ PUT /api/users/profile
 | 400 | INTEREST_TAG_NOT_FOUND | 존재하지 않는 관심사 태그 ID |
 | 401 | UNAUTHORIZED | JWT 없음 또는 유효하지 않음 |
 | 404 | ACCOUNT_NOT_FOUND | 계정을 찾을 수 없음 |
+| 409 | ACCOUNT_ALREADY_ONBOARDED | 이미 온보딩이 완료된 계정 |
 | 409 | ACCOUNT_NICKNAME_DUPLICATE | 닉네임이 이미 사용 중 |

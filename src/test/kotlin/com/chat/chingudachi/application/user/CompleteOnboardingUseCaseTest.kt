@@ -73,6 +73,17 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
                 }
             }
 
+            context("이미 온보딩 완료된 계정") {
+                it("ConflictException을 던진다") {
+                    val account = AccountFixture.create(id = 1, accountStatus = AccountStatus.ACTIVE)
+                    every { accountStore.findById(1L) } returns account
+
+                    shouldThrow<ConflictException> {
+                        useCase.execute(1L, validCommand)
+                    }
+                }
+            }
+
             context("중복 닉네임") {
                 it("ConflictException을 던진다") {
                     val account = AccountFixture.create(id = 1)
