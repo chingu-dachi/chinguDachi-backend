@@ -11,11 +11,11 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 @Service
-@Transactional
 class RefreshTokenUseCase(
     private val authTokenStore: AuthTokenStore,
     private val tokenProvider: TokenProvider,
 ) {
+    @Transactional
     fun refresh(refreshToken: String): AuthenticateResult {
         val accountId = tokenProvider.parseAccountId(refreshToken)
 

@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 @Service
-@Transactional
 class AuthenticateUseCase(
     private val oAuthClient: OAuthClient,
     private val accountStore: AccountStore,
@@ -28,6 +27,7 @@ class AuthenticateUseCase(
     private val authTokenStore: AuthTokenStore,
     private val tokenProvider: TokenProvider,
 ) {
+    @Transactional
     fun authenticate(command: AuthenticateCommand): AuthenticateResult {
         val oAuthUserInfo = oAuthClient.authenticate(command.code, command.redirectUri)
         val account = findOrCreateAccount(oAuthUserInfo)

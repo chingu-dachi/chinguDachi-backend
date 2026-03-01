@@ -3,16 +3,13 @@ package com.chat.chingudachi.infrastructure.persistence
 import com.chat.chingudachi.application.auth.port.AccountCredentialStore
 import com.chat.chingudachi.application.auth.port.AccountStore
 import com.chat.chingudachi.application.auth.port.AuthTokenStore
-import com.chat.chingudachi.application.auth.port.UserInterestStore
 import com.chat.chingudachi.domain.account.Account
 import com.chat.chingudachi.domain.account.AccountCredential
 import com.chat.chingudachi.domain.account.CredentialType
 import com.chat.chingudachi.domain.auth.AuthToken
-import com.chat.chingudachi.domain.interest.UserInterest
 import com.chat.chingudachi.infrastructure.persistence.account.AccountCredentialRepository
 import com.chat.chingudachi.infrastructure.persistence.account.AccountRepository
 import com.chat.chingudachi.infrastructure.persistence.auth.AuthTokenRepository
-import com.chat.chingudachi.infrastructure.persistence.interest.UserInterestRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Repository
 
@@ -48,12 +45,4 @@ class AuthTokenStoreAdapter(
         authTokenRepository.findByAccountIdAndRefreshToken(accountId, refreshToken)
 
     override fun deleteByAccountId(accountId: Long) = authTokenRepository.deleteByAccountId(accountId)
-}
-
-@Repository
-class UserInterestStoreAdapter(
-    private val userInterestRepository: UserInterestRepository,
-) : UserInterestStore {
-    override fun findByAccountId(accountId: Long): List<UserInterest> =
-        userInterestRepository.findByAccountId(accountId)
 }

@@ -2,7 +2,7 @@ package com.chat.chingudachi.presentation.user
 
 import com.chat.chingudachi.application.user.GetMyProfileUseCase
 import com.chat.chingudachi.application.user.MyProfile
-import com.chat.chingudachi.infrastructure.security.SecurityContextUtil
+import com.chat.chingudachi.presentation.common.AuthAccountId
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -14,8 +14,7 @@ class UserController(
     private val getMyProfileUseCase: GetMyProfileUseCase,
 ) {
     @GetMapping("/me")
-    fun getMyProfile(): MyProfileResponse {
-        val accountId = SecurityContextUtil.getCurrentAccountId()
+    fun getMyProfile(@AuthAccountId accountId: Long): MyProfileResponse {
         val profile = getMyProfileUseCase.execute(accountId)
         return MyProfileResponse.from(profile)
     }

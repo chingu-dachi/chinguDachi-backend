@@ -1,7 +1,7 @@
 package com.chat.chingudachi.application.user
 
 import com.chat.chingudachi.application.auth.port.AccountStore
-import com.chat.chingudachi.application.auth.port.UserInterestStore
+import com.chat.chingudachi.application.user.port.UserInterestStore
 import com.chat.chingudachi.domain.account.AccountStatus
 import com.chat.chingudachi.domain.account.Nation
 import com.chat.chingudachi.domain.account.NativeLanguage
