@@ -38,5 +38,9 @@ class AuthTokenStoreAdapter(
     private val authTokenRepository: AuthTokenRepository,
 ) : AuthTokenStore {
     override fun save(authToken: AuthToken): AuthToken = authTokenRepository.save(authToken)
+
+    override fun findByAccountIdAndRefreshToken(accountId: Long, refreshToken: String): AuthToken? =
+        authTokenRepository.findByAccountIdAndRefreshToken(accountId, refreshToken)
+
     override fun deleteByAccountId(accountId: Long) = authTokenRepository.deleteByAccountId(accountId)
 }
