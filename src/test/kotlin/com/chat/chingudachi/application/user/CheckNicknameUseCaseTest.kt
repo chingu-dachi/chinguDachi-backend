@@ -1,6 +1,6 @@
 package com.chat.chingudachi.application.user
 
-import com.chat.chingudachi.application.auth.port.AccountStore
+import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.domain.account.Nickname
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec

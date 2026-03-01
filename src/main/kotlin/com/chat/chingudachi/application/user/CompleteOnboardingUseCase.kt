@@ -1,10 +1,10 @@
 package com.chat.chingudachi.application.user
 
-import com.chat.chingudachi.application.auth.port.AccountStore
 import com.chat.chingudachi.application.interest.port.InterestTagStore
+import com.chat.chingudachi.application.user.command.CompleteOnboardingCommand
+import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.application.user.port.UserInterestStore
 import com.chat.chingudachi.domain.account.AccountStatus
-import com.chat.chingudachi.domain.account.Nation
 import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.common.BadRequestException
 import com.chat.chingudachi.domain.common.ConflictException
@@ -14,16 +14,8 @@ import com.chat.chingudachi.domain.interest.UserInterest
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 
 private val log = KotlinLogging.logger {}
-
-data class CompleteOnboardingCommand(
-    val nickname: String,
-    val birthDate: LocalDate,
-    val nation: Nation,
-    val interestTagIds: List<Long>,
-)
 
 @Service
 class CompleteOnboardingUseCase(

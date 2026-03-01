@@ -2,7 +2,7 @@ package com.chat.chingudachi.application.auth
 
 import com.chat.chingudachi.application.auth.command.AuthenticateCommand
 import com.chat.chingudachi.application.auth.port.AccountCredentialStore
-import com.chat.chingudachi.application.auth.port.AccountStore
+import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.application.auth.port.AuthTokenStore
 import com.chat.chingudachi.application.auth.port.OAuthClient
 import com.chat.chingudachi.application.auth.port.TokenProvider
