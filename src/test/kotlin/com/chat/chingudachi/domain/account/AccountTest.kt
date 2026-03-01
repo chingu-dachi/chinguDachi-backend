@@ -15,13 +15,13 @@ class AccountTest : DescribeSpec() {
                             nickname = Nickname("test"),
                             birthDate = LocalDate.now(),
                             nation = Nation.KR,
-                            nativeLanguage = Nation.KR.toNativeLanguage(),
+                            translateLanguage = Nation.KR.toTranslateLanguage(),
                         )
 
                     account.isOnboardingComplete() shouldBe true
                 }
 
-                it("nativeLanguage가 없으면 완료되지 않는다.") {
+                it("translateLanguage가 없으면 완료되지 않는다.") {
                     val account =
                         AccountFixture.create(
                             nickname = Nickname("test"),
@@ -37,7 +37,7 @@ class AccountTest : DescribeSpec() {
                         AccountFixture.create(
                             birthDate = LocalDate.now(),
                             nation = Nation.KR,
-                            nativeLanguage = Nation.KR.toNativeLanguage(),
+                            translateLanguage = Nation.KR.toTranslateLanguage(),
                         )
 
                     account.isOnboardingComplete() shouldBe false
@@ -48,7 +48,7 @@ class AccountTest : DescribeSpec() {
                         AccountFixture.create(
                             nickname = Nickname("test"),
                             nation = Nation.KR,
-                            nativeLanguage = Nation.KR.toNativeLanguage(),
+                            translateLanguage = Nation.KR.toTranslateLanguage(),
                         )
 
                     account.isOnboardingComplete() shouldBe false
@@ -59,7 +59,7 @@ class AccountTest : DescribeSpec() {
                         AccountFixture.create(
                             nickname = Nickname("test"),
                             birthDate = LocalDate.now(),
-                            nativeLanguage = Nation.KR.toNativeLanguage(),
+                            translateLanguage = Nation.KR.toTranslateLanguage(),
                         )
 
                     account.isOnboardingComplete() shouldBe false
