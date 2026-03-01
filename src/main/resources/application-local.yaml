@@ -22,3 +22,9 @@ jwt:
   secret: "Y2hpbmd1ZGFjaGktand0LXNlY3JldC1rZXktZm9yLWxvY2FsLWRldi0yNTZiaXQ"
   access-token-expiry: 1h
   refresh-token-expiry: 30d
+
+oauth:
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:your-client-id}
+    client-secret: ${GOOGLE_CLIENT_SECRET:your-client-secret}
+    redirect-uri: "http://localhost:3000/auth/callback"
