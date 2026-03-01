@@ -1,7 +1,7 @@
 package com.chat.chingudachi.infrastructure.persistence.account
 
 import com.chat.chingudachi.domain.account.Nation
-import com.chat.chingudachi.domain.account.NativeLanguage
+import com.chat.chingudachi.domain.account.TranslateLanguage
 import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.fixture.AccountFixture
 import io.kotest.core.spec.style.DescribeSpec
@@ -28,7 +28,7 @@ class AccountPersistenceTest(
                     nickname = Nickname("테스트"),
                     birthDate = LocalDate.of(2000, 1, 1),
                     nation = Nation.KR,
-                    nativeLanguage = NativeLanguage.KO,
+                    translateLanguage = TranslateLanguage.JA,
                 )
 
                 val saved = accountRepository.saveAndFlush(account)
@@ -37,7 +37,7 @@ class AccountPersistenceTest(
                 val found = accountRepository.findById(saved.id).get()
                 found.nickname?.value shouldBe "테스트"
                 found.nation shouldBe Nation.KR
-                found.nativeLanguage shouldBe NativeLanguage.KO
+                found.translateLanguage shouldBe TranslateLanguage.JA
             }
 
             it("nickname이 null이어도 저장/조회가 정상 동작한다") {

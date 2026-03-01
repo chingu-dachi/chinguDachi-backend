@@ -34,8 +34,8 @@ class Account(
     @Column(length = 20)
     var nation: Nation? = null,
     @Enumerated(EnumType.STRING)
-    @Column(name = "native_language", length = 2)
-    var nativeLanguage: NativeLanguage? = null,
+    @Column(name = "translate_language", length = 2)
+    var translateLanguage: TranslateLanguage? = null,
     @Column(length = 20)
     var city: String? = null,
     @Column(name = "profile_image_url", length = 255)
@@ -49,7 +49,7 @@ class Account(
         nickname != null &&
             birthDate != null &&
             nation != null &&
-            nativeLanguage != null
+            translateLanguage != null
 }
 
 @JvmInline
@@ -79,14 +79,14 @@ enum class Nation {
     KR,
     JP, ;
 
-    fun toNativeLanguage(): NativeLanguage =
+    fun toTranslateLanguage(): TranslateLanguage =
         when (this) {
-            KR -> NativeLanguage.KO
-            JP -> NativeLanguage.JA
+            KR -> TranslateLanguage.JA
+            JP -> TranslateLanguage.KO
         }
 }
 
-enum class NativeLanguage {
+enum class TranslateLanguage {
     KO,
     JA,
 }
