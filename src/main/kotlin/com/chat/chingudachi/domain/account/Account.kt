@@ -26,7 +26,7 @@ class Account(
     var accountStatus: AccountStatus,
     @Column(length = 255)
     var email: String? = null,
-    @Column(length = 20)
+    @Column(length = 20, unique = true)
     var nickname: Nickname? = null,
     @Column(name = "birth_date")
     var birthDate: LocalDate? = null,
