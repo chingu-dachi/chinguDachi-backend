@@ -8,7 +8,6 @@ import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.domain.common.UnauthorizedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.Duration
 import java.time.Instant
 
 @Service
@@ -40,7 +39,7 @@ class RefreshTokenUseCase(
             AuthToken(
                 account = account,
                 refreshToken = newRefreshToken,
-                expiresAt = Instant.now().plus(REFRESH_TOKEN_TTL),
+                expiresAt = Instant.now().plus(AuthConstants.REFRESH_TOKEN_TTL),
             ),
         )
 
@@ -51,7 +50,4 @@ class RefreshTokenUseCase(
         )
     }
 
-    companion object {
-        private val REFRESH_TOKEN_TTL = Duration.ofDays(30)
-    }
 }

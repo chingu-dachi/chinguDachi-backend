@@ -56,7 +56,7 @@ class SecurityConfig(
 }
 
 @Configuration
-class CorsConfiguration(
+class AppCorsConfig(
     private val corsProperties: CorsProperties,
 ) {
     @Bean

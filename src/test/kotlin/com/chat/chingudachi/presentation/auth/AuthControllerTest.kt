@@ -4,7 +4,6 @@ import com.chat.chingudachi.application.auth.port.OAuthClient
 import com.chat.chingudachi.domain.auth.OAuthProvider
 import com.chat.chingudachi.domain.auth.OAuthUserInfo
 import com.chat.chingudachi.domain.common.UnauthorizedException
-import com.chat.chingudachi.infrastructure.jwt.JwtProvider
 import com.chat.chingudachi.infrastructure.persistence.account.AccountCredentialRepository
 import com.chat.chingudachi.infrastructure.persistence.account.AccountRepository
 import com.chat.chingudachi.infrastructure.persistence.auth.AuthTokenRepository
@@ -32,7 +31,6 @@ import org.springframework.test.web.servlet.post
 @ActiveProfiles("test")
 class AuthControllerTest(
     private val mockMvc: MockMvc,
-    private val jwtProvider: JwtProvider,
     private val oAuthClient: OAuthClient,
     private val authTokenRepository: AuthTokenRepository,
     private val accountCredentialRepository: AccountCredentialRepository,

@@ -21,17 +21,23 @@ class JwtAuthenticationFilter(
         response: HttpServletResponse,
         filterChain: FilterChain,
     ) {
-        extractToken(request)?.let { token ->
-            if (tokenProvider.validateToken(token)) {
-                val accountId = tokenProvider.parseAccountId(token)
-                val authentication = UsernamePasswordAuthenticationToken.authenticated(
-                    accountId, null, emptyList(),
-                )
-                SecurityContextHolder.getContext().authentication = authentication
-                MDC.put("userId", accountId.toString())
+        try {
+            extractToken(request)?.let { token ->
+                if (tokenProvider.validateToken(token)) {
+                    val accountId = tokenProvider.parseAccountId(token)
+                    val authentication = UsernamePasswordAuthenticationToken.authenticated(
+                        accountId, null, emptyList(),
+                    )
+                    SecurityContextHolder.getContext().authentication = authentication
+                    MDC.put("userId", accountId.toString())
+                } else {
+                    log.debug { "JWT validation failed for request: ${request.requestURI}" }
+                }
             }
+            filterChain.doFilter(request, response)
+        } finally {
+            MDC.remove("userId")
         }
-        filterChain.doFilter(request, response)
     }
 
     private fun extractToken(request: HttpServletRequest): String? {

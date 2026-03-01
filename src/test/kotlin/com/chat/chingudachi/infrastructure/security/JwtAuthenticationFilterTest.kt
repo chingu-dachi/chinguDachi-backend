@@ -4,6 +4,7 @@ import com.chat.chingudachi.application.auth.port.TokenProvider
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import org.slf4j.MDC
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -37,6 +38,19 @@ class JwtAuthenticationFilterTest : DescribeSpec() {
                     val auth = SecurityContextHolder.getContext().authentication!!
                     auth.principal shouldBe 42L
                     auth.isAuthenticated shouldBe true
+                }
+
+                it("필터 완료 후 MDC userId가 정리된다") {
+                    val request = MockHttpServletRequest("GET", "/api/users/me")
+                    request.addHeader("Authorization", "Bearer valid-token")
+                    val response = MockHttpServletResponse()
+
+                    every { tokenProvider.validateToken("valid-token") } returns true
+                    every { tokenProvider.parseAccountId("valid-token") } returns 42L
+
+                    filter.doFilter(request, response, MockFilterChain())
+
+                    MDC.get("userId").shouldBeNull()
                 }
             }
 
