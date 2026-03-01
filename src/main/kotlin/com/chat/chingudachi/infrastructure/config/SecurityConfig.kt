@@ -37,6 +37,7 @@ class SecurityConfig(
             }
             authorizeHttpRequests {
                 authorize("/api/auth/**", permitAll)
+                authorize("/api/interest-tags", permitAll)
                 authorize(anyRequest, authenticated)
             }
             exceptionHandling {
