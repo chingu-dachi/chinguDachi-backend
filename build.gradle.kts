@@ -42,6 +42,15 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // Kotest
+    testImplementation("io.kotest:kotest-runner-junit5:6.1.4")
+    testImplementation("io.kotest:kotest-assertions-core:6.1.4")
+    testImplementation("io.kotest:kotest-extensions-spring:6.1.4")
+    testImplementation("io.mockk:mockk:1.14.9")
+
+    // Embedded PostgreSQL
+    testImplementation("io.zonky.test:embedded-database-spring-test:2.7.1")
 }
 
 kotlin {

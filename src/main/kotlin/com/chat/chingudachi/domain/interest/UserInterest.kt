@@ -1,6 +1,7 @@
 package com.chat.chingudachi.domain.interest
 
 import com.chat.chingudachi.domain.account.Account
+import com.chat.chingudachi.domain.common.BaseTimeEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -34,4 +35,4 @@ class UserInterest(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "interest_tag_id", nullable = false)
     val interestTag: InterestTag,
-)
+) : BaseTimeEntity()

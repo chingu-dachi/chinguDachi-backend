@@ -29,5 +29,5 @@ class AccountTermsAgreement(
     val isPrivacyPolicyAgree: Boolean,
 
     @Column(name = "is_marketing_agree", nullable = false)
-    val isMarketingAgree: Boolean,
+    var isMarketingAgree: Boolean,
 ) : BaseTimeEntity()
