@@ -17,7 +17,6 @@ import com.chat.chingudachi.domain.auth.OAuthProvider
 import com.chat.chingudachi.domain.auth.OAuthUserInfo
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.Duration
 import java.time.Instant
 
 @Service
@@ -74,7 +73,7 @@ class AuthenticateUseCase(
             AuthToken(
                 account = account,
                 refreshToken = refreshToken,
-                expiresAt = Instant.now().plus(REFRESH_TOKEN_TTL),
+                expiresAt = Instant.now().plus(AuthConstants.REFRESH_TOKEN_TTL),
             ),
         )
 
@@ -90,7 +89,4 @@ class AuthenticateUseCase(
             OAuthProvider.GOOGLE -> CredentialType.GOOGLE_OAUTH
         }
 
-    companion object {
-        private val REFRESH_TOKEN_TTL = Duration.ofDays(30)
-    }
 }

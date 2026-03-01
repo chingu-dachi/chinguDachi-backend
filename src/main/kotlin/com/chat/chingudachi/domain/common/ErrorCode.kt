@@ -24,6 +24,8 @@ enum class ErrorCode(
     // Auth
     AUTH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "Token has expired"),
     AUTH_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "Invalid token"),
+    AUTH_REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "Refresh token has expired"),
+    AUTH_REFRESH_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "Invalid refresh token"),
     AUTH_OAUTH_CODE_INVALID(HttpStatus.UNAUTHORIZED, "Invalid OAuth authorization code"),
     AUTH_OAUTH_PROVIDER_ERROR(HttpStatus.BAD_GATEWAY, "OAuth provider communication failed"),
 }

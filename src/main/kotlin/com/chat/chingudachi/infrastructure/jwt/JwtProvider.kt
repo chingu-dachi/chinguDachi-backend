@@ -26,7 +26,7 @@ class JwtProvider(
     override fun createRefreshToken(accountId: Long): String =
         createToken(accountId, jwtProperties.refreshTokenExpiry.toMillis())
 
-    fun validateToken(token: String): Boolean =
+    override fun validateToken(token: String): Boolean =
         try {
             Jwts.parser()
                 .verifyWith(secretKey)
@@ -39,7 +39,7 @@ class JwtProvider(
             false
         }
 
-    fun parseAccountId(token: String): Long =
+    override fun parseAccountId(token: String): Long =
         try {
             Jwts.parser()
                 .verifyWith(secretKey)

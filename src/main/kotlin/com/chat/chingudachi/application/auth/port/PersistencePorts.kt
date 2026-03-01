@@ -16,5 +16,6 @@ interface AccountCredentialStore {
 
 interface AuthTokenStore {
     fun save(authToken: AuthToken): AuthToken
+    fun findByAccountIdAndRefreshToken(accountId: Long, refreshToken: String): AuthToken?
     fun deleteByAccountId(accountId: Long)
 }
