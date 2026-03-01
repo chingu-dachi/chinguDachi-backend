@@ -1,7 +1,11 @@
 package com.chat.chingudachi.application.auth
 
 import com.chat.chingudachi.application.auth.command.AuthenticateCommand
+import com.chat.chingudachi.application.auth.port.AccountCredentialStore
+import com.chat.chingudachi.application.auth.port.AccountStore
+import com.chat.chingudachi.application.auth.port.AuthTokenStore
 import com.chat.chingudachi.application.auth.port.OAuthClient
+import com.chat.chingudachi.application.auth.port.TokenProvider
 import com.chat.chingudachi.domain.account.AccountStatus
 import com.chat.chingudachi.domain.account.AccountType
 import com.chat.chingudachi.domain.account.CredentialType
@@ -11,10 +15,6 @@ import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.common.UnauthorizedException
 import com.chat.chingudachi.fixture.AccountFixture
 import com.chat.chingudachi.fixture.OAuthUserInfoFixture
-import com.chat.chingudachi.infrastructure.jwt.JwtProvider
-import com.chat.chingudachi.infrastructure.persistence.account.AccountCredentialRepository
-import com.chat.chingudachi.infrastructure.persistence.account.AccountRepository
-import com.chat.chingudachi.infrastructure.persistence.auth.AuthTokenRepository
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
@@ -27,22 +27,22 @@ import java.time.LocalDate
 
 class AuthenticateUseCaseTest : DescribeSpec() {
     private val oAuthClient = mockk<OAuthClient>()
-    private val accountRepository = mockk<AccountRepository>(relaxUnitFun = true)
-    private val accountCredentialRepository = mockk<AccountCredentialRepository>(relaxUnitFun = true)
-    private val authTokenRepository = mockk<AuthTokenRepository>(relaxUnitFun = true)
-    private val jwtProvider = mockk<JwtProvider>()
+    private val accountStore = mockk<AccountStore>(relaxUnitFun = true)
+    private val accountCredentialStore = mockk<AccountCredentialStore>(relaxUnitFun = true)
+    private val authTokenStore = mockk<AuthTokenStore>(relaxUnitFun = true)
+    private val tokenProvider = mockk<TokenProvider>()
 
     private val useCase = AuthenticateUseCase(
         oAuthClient = oAuthClient,
-        accountRepository = accountRepository,
-        accountCredentialRepository = accountCredentialRepository,
-        authTokenRepository = authTokenRepository,
-        jwtProvider = jwtProvider,
+        accountStore = accountStore,
+        accountCredentialStore = accountCredentialStore,
+        authTokenStore = authTokenStore,
+        tokenProvider = tokenProvider,
     )
 
     init {
         beforeEach {
-            clearMocks(oAuthClient, accountRepository, accountCredentialRepository, authTokenRepository, jwtProvider)
+            clearMocks(oAuthClient, accountStore, accountCredentialStore, authTokenStore, tokenProvider)
         }
 
         describe("authenticate") {
@@ -53,17 +53,17 @@ class AuthenticateUseCaseTest : DescribeSpec() {
                 it("Account + Credential을 생성하고, NOT_CONSENT 상태, onboardingRequired=true를 반환한다") {
                     every { oAuthClient.authenticate("valid-auth-code") } returns oAuthUserInfo
                     every {
-                        accountCredentialRepository.findByCredentialTypeAndOauthKey(
+                        accountCredentialStore.findByCredentialTypeAndOauthKey(
                             CredentialType.GOOGLE_OAUTH,
                             oAuthUserInfo.providerUserId,
                         )
                     } returns null
                     val savedAccountSlot = slot<com.chat.chingudachi.domain.account.Account>()
-                    every { accountRepository.save(capture(savedAccountSlot)) } answers { savedAccountSlot.captured }
-                    every { accountCredentialRepository.save(any()) } answers { firstArg() }
-                    every { jwtProvider.createAccessToken(any()) } returns "access-token"
-                    every { jwtProvider.createRefreshToken(any()) } returns "refresh-token"
-                    every { authTokenRepository.save(any()) } answers { firstArg() }
+                    every { accountStore.save(capture(savedAccountSlot)) } answers { savedAccountSlot.captured }
+                    every { accountCredentialStore.save(any()) } answers { firstArg() }
+                    every { tokenProvider.createAccessToken(any()) } returns "access-token"
+                    every { tokenProvider.createRefreshToken(any()) } returns "refresh-token"
+                    every { authTokenStore.save(any()) } answers { firstArg() }
 
                     val result = useCase.authenticate(command)
 
@@ -75,8 +75,8 @@ class AuthenticateUseCaseTest : DescribeSpec() {
                     savedAccountSlot.captured.accountType shouldBe AccountType.USER
                     savedAccountSlot.captured.email shouldBe oAuthUserInfo.email
 
-                    verify { authTokenRepository.deleteByAccountId(any()) }
-                    verify { authTokenRepository.save(any()) }
+                    verify { authTokenStore.deleteByAccountId(any()) }
+                    verify { authTokenStore.save(any()) }
                 }
             }
 
@@ -92,14 +92,14 @@ class AuthenticateUseCaseTest : DescribeSpec() {
 
                     every { oAuthClient.authenticate("valid-auth-code") } returns oAuthUserInfo
                     every {
-                        accountCredentialRepository.findByCredentialTypeAndOauthKey(
+                        accountCredentialStore.findByCredentialTypeAndOauthKey(
                             CredentialType.GOOGLE_OAUTH,
                             oAuthUserInfo.providerUserId,
                         )
                     } returns existingCredential
-                    every { jwtProvider.createAccessToken(10L) } returns "existing-access"
-                    every { jwtProvider.createRefreshToken(10L) } returns "existing-refresh"
-                    every { authTokenRepository.save(any()) } answers { firstArg() }
+                    every { tokenProvider.createAccessToken(10L) } returns "existing-access"
+                    every { tokenProvider.createRefreshToken(10L) } returns "existing-refresh"
+                    every { authTokenStore.save(any()) } answers { firstArg() }
 
                     val result = useCase.authenticate(command)
 
@@ -107,8 +107,8 @@ class AuthenticateUseCaseTest : DescribeSpec() {
                     result.refreshToken shouldBe "existing-refresh"
                     result.onboardingRequired shouldBe true
 
-                    verify(exactly = 0) { accountRepository.save(any()) }
-                    verify { authTokenRepository.deleteByAccountId(10L) }
+                    verify(exactly = 0) { accountStore.save(any()) }
+                    verify { authTokenStore.deleteByAccountId(10L) }
                 }
             }
 
@@ -131,14 +131,14 @@ class AuthenticateUseCaseTest : DescribeSpec() {
 
                     every { oAuthClient.authenticate("valid-auth-code") } returns oAuthUserInfo
                     every {
-                        accountCredentialRepository.findByCredentialTypeAndOauthKey(
+                        accountCredentialStore.findByCredentialTypeAndOauthKey(
                             CredentialType.GOOGLE_OAUTH,
                             oAuthUserInfo.providerUserId,
                         )
                     } returns existingCredential
-                    every { jwtProvider.createAccessToken(20L) } returns "completed-access"
-                    every { jwtProvider.createRefreshToken(20L) } returns "completed-refresh"
-                    every { authTokenRepository.save(any()) } answers { firstArg() }
+                    every { tokenProvider.createAccessToken(20L) } returns "completed-access"
+                    every { tokenProvider.createRefreshToken(20L) } returns "completed-refresh"
+                    every { authTokenStore.save(any()) } answers { firstArg() }
 
                     val result = useCase.authenticate(command)
 
@@ -158,19 +158,19 @@ class AuthenticateUseCaseTest : DescribeSpec() {
 
                     every { oAuthClient.authenticate("valid-auth-code") } returns oAuthUserInfo
                     every {
-                        accountCredentialRepository.findByCredentialTypeAndOauthKey(
+                        accountCredentialStore.findByCredentialTypeAndOauthKey(
                             CredentialType.GOOGLE_OAUTH,
                             oAuthUserInfo.providerUserId,
                         )
                     } returns existingCredential
-                    every { jwtProvider.createAccessToken(30L) } returns "new-access"
-                    every { jwtProvider.createRefreshToken(30L) } returns "new-refresh"
-                    every { authTokenRepository.save(any()) } answers { firstArg() }
+                    every { tokenProvider.createAccessToken(30L) } returns "new-access"
+                    every { tokenProvider.createRefreshToken(30L) } returns "new-refresh"
+                    every { authTokenStore.save(any()) } answers { firstArg() }
 
                     useCase.authenticate(command)
 
-                    verify(exactly = 1) { authTokenRepository.deleteByAccountId(30L) }
-                    verify(exactly = 1) { authTokenRepository.save(any()) }
+                    verify(exactly = 1) { authTokenStore.deleteByAccountId(30L) }
+                    verify(exactly = 1) { authTokenStore.save(any()) }
                 }
             }
 

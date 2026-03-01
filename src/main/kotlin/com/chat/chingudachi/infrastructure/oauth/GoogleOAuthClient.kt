@@ -8,7 +8,6 @@ import com.chat.chingudachi.domain.common.InternalServerException
 import com.chat.chingudachi.domain.common.UnauthorizedException
 import com.chat.chingudachi.infrastructure.oauth.dto.GoogleTokenResponse
 import com.chat.chingudachi.infrastructure.oauth.dto.GoogleUserInfoResponse
-import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -17,7 +16,6 @@ import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClientException
 
 @Component
-@EnableConfigurationProperties(GoogleOAuthProperties::class)
 class GoogleOAuthClient(
     private val restClient: RestClient,
     private val properties: GoogleOAuthProperties,
