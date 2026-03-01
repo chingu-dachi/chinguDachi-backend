@@ -1,4 +1,4 @@
-package com.chat.chingudachi.filter
+package com.chat.chingudachi.infrastructure.filter
 
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.nulls.shouldBeNull

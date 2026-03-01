@@ -1,4 +1,4 @@
-package com.chat.chingudachi.filter
+package com.chat.chingudachi.infrastructure.filter
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.FilterChain
@@ -21,6 +21,8 @@ class MdcLoggingFilter : OncePerRequestFilter() {
         const val USER_ID = "userId"
         const val USER_AGENT = "userAgent"
         const val ORIGIN = "origin"
+
+        private const val REQUEST_ID_LENGTH = 8
     }
 
     override fun doFilterInternal(
@@ -30,7 +32,7 @@ class MdcLoggingFilter : OncePerRequestFilter() {
     ) {
         val startTime = System.nanoTime()
         try {
-            setMdc(request)
+            initializeMdc(request)
             filterChain.doFilter(request, response)
         } finally {
             val durationMs = (System.nanoTime() - startTime) / 1_000_000
@@ -39,15 +41,19 @@ class MdcLoggingFilter : OncePerRequestFilter() {
         }
     }
 
-    private fun setMdc(request: HttpServletRequest) {
-        MDC.put(REQUEST_ID, UUID.randomUUID().toString().substring(0, 8))
+    private fun initializeMdc(request: HttpServletRequest) {
+        MDC.put(REQUEST_ID, generateRequestId())
         MDC.put(METHOD, request.method)
         MDC.put(URI, request.requestURI)
         MDC.put(CLIENT_IP, resolveClientIp(request))
+        // TODO: Auth 구현 시 SecurityContextHolder에서 userId 추출로 교체
         MDC.put(USER_ID, "anonymous")
         MDC.put(USER_AGENT, request.getHeader("User-Agent") ?: "")
         MDC.put(ORIGIN, request.getHeader("Origin") ?: "")
     }
+
+    private fun generateRequestId(): String =
+        UUID.randomUUID().toString().substring(0, REQUEST_ID_LENGTH)
 
     private fun resolveClientIp(request: HttpServletRequest): String {
         val forwarded = request.getHeader("X-Forwarded-For")
