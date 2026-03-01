@@ -6,8 +6,6 @@ import com.chat.chingudachi.application.auth.RefreshTokenUseCase
 import com.chat.chingudachi.application.auth.command.AuthenticateCommand
 import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.domain.common.UnauthorizedException
-import com.chat.chingudachi.presentation.auth.dto.GoogleLoginRequest
-import com.chat.chingudachi.presentation.auth.dto.LoginResponse
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.ResponseCookie
 import org.springframework.web.bind.annotation.CookieValue
@@ -15,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+
 @RestController
 @RequestMapping("/api/auth")
 class AuthController(
@@ -60,5 +59,11 @@ class AuthController(
             .build()
         response.addHeader("Set-Cookie", cookie.toString())
     }
-
 }
+
+data class GoogleLoginRequest(val code: String)
+
+data class LoginResponse(
+    val accessToken: String,
+    val onboardingRequired: Boolean,
+)
