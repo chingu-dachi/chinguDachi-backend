@@ -1,12 +1,12 @@
 package com.chat.chingudachi
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.runApplication
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 import java.util.TimeZone
 
-@EnableConfigurationProperties
+@ConfigurationPropertiesScan
 @SpringBootApplication
 @EnableJpaAuditing
 class ChinguDachiApplication
