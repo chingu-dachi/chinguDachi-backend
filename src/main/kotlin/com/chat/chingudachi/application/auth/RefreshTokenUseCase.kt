@@ -39,7 +39,7 @@ class RefreshTokenUseCase(
             AuthToken(
                 account = account,
                 refreshToken = newRefreshToken,
-                expiresAt = Instant.now().plus(AuthConstants.REFRESH_TOKEN_TTL),
+                expiresAt = Instant.now().plus(tokenProvider.refreshTokenExpiry),
             ),
         )
 

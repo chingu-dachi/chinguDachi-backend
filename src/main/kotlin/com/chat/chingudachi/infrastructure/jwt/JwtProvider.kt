@@ -9,6 +9,7 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
 import org.springframework.stereotype.Component
+import java.time.Duration
 import java.util.Date
 import javax.crypto.SecretKey
 
@@ -19,6 +20,9 @@ class JwtProvider(
     private val secretKey: SecretKey = Keys.hmacShaKeyFor(
         Decoders.BASE64.decode(jwtProperties.secret),
     )
+
+    override val refreshTokenExpiry: Duration
+        get() = jwtProperties.refreshTokenExpiry
 
     override fun createAccessToken(accountId: Long): String =
         createToken(accountId, jwtProperties.accessTokenExpiry.toMillis())

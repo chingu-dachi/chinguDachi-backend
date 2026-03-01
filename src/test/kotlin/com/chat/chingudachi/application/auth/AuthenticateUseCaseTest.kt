@@ -23,6 +23,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import java.time.Duration
 import java.time.LocalDate
 
 class AuthenticateUseCaseTest : DescribeSpec() {
@@ -43,6 +44,7 @@ class AuthenticateUseCaseTest : DescribeSpec() {
     init {
         beforeEach {
             clearMocks(oAuthClient, accountStore, accountCredentialStore, authTokenStore, tokenProvider)
+            every { tokenProvider.refreshTokenExpiry } returns Duration.ofDays(30)
         }
 
         describe("authenticate") {
