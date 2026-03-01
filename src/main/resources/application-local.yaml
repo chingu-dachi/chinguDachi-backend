@@ -17,3 +17,8 @@ spring:
 cors:
   allowed-origins:
     - "http://localhost:3000"
+
+jwt:
+  secret: "Y2hpbmd1ZGFjaGktand0LXNlY3JldC1rZXktZm9yLWxvY2FsLWRldi0yNTZiaXQ"
+  access-token-expiry: 1h
+  refresh-token-expiry: 30d
