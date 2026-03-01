@@ -2,6 +2,7 @@ package com.chat.chingudachi.presentation.common
 
 import com.chat.chingudachi.domain.common.BusinessException
 import com.chat.chingudachi.domain.common.ErrorCode
+import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.HttpRequestMethodNotSupportedException
@@ -16,7 +17,11 @@ class ErrorResponseWrappingAdvice {
 
     @ExceptionHandler(BusinessException::class)
     fun handleBusinessException(ex: BusinessException): ResponseEntity<ApiResponse<Nothing>> {
-        log.warn("Business exception: {} - {}", ex.errorCode.code, ex.message)
+        if (ex.errorCode.status.is5xxServerError) {
+            log.error("Business exception: {} - {}", ex.errorCode.name, ex.message, ex)
+        } else {
+            log.warn("Business exception: {} - {}", ex.errorCode.name, ex.message)
+        }
         return ResponseEntity
             .status(ex.errorCode.status)
             .body(ApiResponse.error(ex.errorCode))
@@ -29,7 +34,7 @@ class ErrorResponseWrappingAdvice {
         log.warn("Validation failed: {}", detail)
         return ResponseEntity
             .badRequest()
-            .body(ApiResponse.error(ErrorCode.INVALID_INPUT.code, detail))
+            .body(ApiResponse.error(ErrorCode.INVALID_INPUT.name, detail))
     }
 
     @ExceptionHandler(IllegalArgumentException::class)
@@ -39,7 +44,7 @@ class ErrorResponseWrappingAdvice {
             .badRequest()
             .body(
                 ApiResponse.error(
-                    ErrorCode.INVALID_INPUT.code,
+                    ErrorCode.INVALID_INPUT.name,
                     ex.message ?: ErrorCode.INVALID_INPUT.message,
                 ),
             )
@@ -62,8 +67,11 @@ class ErrorResponseWrappingAdvice {
     }
 
     @ExceptionHandler(Exception::class)
-    fun handleException(ex: Exception): ResponseEntity<ApiResponse<Nothing>> {
-        log.error("Unhandled exception", ex)
+    fun handleException(
+        ex: Exception,
+        request: HttpServletRequest,
+    ): ResponseEntity<ApiResponse<Nothing>> {
+        log.error("Unhandled exception [{}] {}", request.method, request.requestURI, ex)
         return ResponseEntity
             .status(ErrorCode.INTERNAL_ERROR.status)
             .body(ApiResponse.error(ErrorCode.INTERNAL_ERROR))

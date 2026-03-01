@@ -53,10 +53,10 @@ class BusinessExceptionTest : DescribeSpec() {
                     ErrorCode.AUTH_TOKEN_INVALID.status shouldBe HttpStatus.UNAUTHORIZED
                 }
 
-                it("code 문자열이 enum name과 일치한다.") {
-                    ErrorCode.entries.forEach { errorCode ->
-                        errorCode.code shouldBe errorCode.name
-                    }
+                it("name이 에러 코드 식별자로 사용된다.") {
+                    ErrorCode.INVALID_INPUT.name shouldBe "INVALID_INPUT"
+                    ErrorCode.ACCOUNT_NOT_FOUND.name shouldBe "ACCOUNT_NOT_FOUND"
+                    ErrorCode.AUTH_TOKEN_EXPIRED.name shouldBe "AUTH_TOKEN_EXPIRED"
                 }
             }
         }
