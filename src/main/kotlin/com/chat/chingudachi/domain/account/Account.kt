@@ -50,6 +50,14 @@ class Account(
             birthDate != null &&
             nation != null &&
             nativeLanguage != null
+
+    fun completeOnboarding(nickname: Nickname, birthDate: LocalDate, nation: Nation) {
+        this.nickname = nickname
+        this.birthDate = birthDate
+        this.nation = nation
+        this.nativeLanguage = nation.toNativeLanguage()
+        this.accountStatus = AccountStatus.ACTIVE
+    }
 }
 
 @JvmInline

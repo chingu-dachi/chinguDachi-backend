@@ -1,10 +1,15 @@
 package com.chat.chingudachi.presentation.user
 
 import com.chat.chingudachi.application.user.CheckNicknameUseCase
+import com.chat.chingudachi.application.user.CompleteOnboardingCommand
+import com.chat.chingudachi.application.user.CompleteOnboardingUseCase
 import com.chat.chingudachi.application.user.GetMyProfileUseCase
 import com.chat.chingudachi.application.user.MyProfile
+import com.chat.chingudachi.domain.account.Nation
 import com.chat.chingudachi.presentation.common.AuthAccountId
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -15,6 +20,7 @@ import java.time.LocalDate
 class UserController(
     private val getMyProfileUseCase: GetMyProfileUseCase,
     private val checkNicknameUseCase: CheckNicknameUseCase,
+    private val completeOnboardingUseCase: CompleteOnboardingUseCase,
 ) {
     @GetMapping("/me")
     fun getMyProfile(@AuthAccountId accountId: Long): MyProfileResponse {
@@ -26,6 +32,14 @@ class UserController(
     fun checkNickname(@RequestParam nickname: String): NicknameCheckResponse {
         val available = checkNicknameUseCase.execute(nickname)
         return NicknameCheckResponse(available)
+    }
+
+    @PutMapping("/profile")
+    fun completeOnboarding(
+        @AuthAccountId accountId: Long,
+        @RequestBody request: CompleteOnboardingRequest,
+    ) {
+        completeOnboardingUseCase.execute(accountId, request.toCommand())
     }
 }
 
@@ -74,3 +88,17 @@ data class InterestResponse(
 data class NicknameCheckResponse(
     val available: Boolean,
 )
+
+data class CompleteOnboardingRequest(
+    val nickname: String,
+    val birthDate: LocalDate,
+    val nation: Nation,
+    val interestTagIds: List<Long>,
+) {
+    fun toCommand() = CompleteOnboardingCommand(
+        nickname = nickname,
+        birthDate = birthDate,
+        nation = nation,
+        interestTagIds = interestTagIds,
+    )
+}

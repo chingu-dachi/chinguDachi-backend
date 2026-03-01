@@ -20,6 +20,11 @@ enum class ErrorCode(
     ACCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND, "Account not found"),
     ACCOUNT_ALREADY_EXISTS(HttpStatus.CONFLICT, "Account already exists"),
     ACCOUNT_NICKNAME_INVALID(HttpStatus.BAD_REQUEST, "Nickname must be 2-12 characters without spaces"),
+    ACCOUNT_NICKNAME_DUPLICATE(HttpStatus.CONFLICT, "Nickname is already taken"),
+
+    // Interest
+    INTEREST_TAG_NOT_FOUND(HttpStatus.BAD_REQUEST, "One or more interest tags not found"),
+    INTEREST_REQUIRED(HttpStatus.BAD_REQUEST, "At least one interest is required"),
 
     // Auth
     AUTH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "Token has expired"),
