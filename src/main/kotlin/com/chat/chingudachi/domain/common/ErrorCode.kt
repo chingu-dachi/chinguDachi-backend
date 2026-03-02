@@ -22,6 +22,11 @@ enum class ErrorCode(
     ACCOUNT_NICKNAME_INVALID(HttpStatus.BAD_REQUEST, "Nickname must be 2-12 characters without spaces"),
     ACCOUNT_NICKNAME_DUPLICATE(HttpStatus.CONFLICT, "Nickname is already taken"),
     ACCOUNT_ALREADY_ONBOARDED(HttpStatus.CONFLICT, "Onboarding is already completed"),
+    ACCOUNT_ALREADY_DELETED(HttpStatus.CONFLICT, "Account is already deleted"),
+
+    // Upload
+    UPLOAD_FILE_TOO_LARGE(HttpStatus.BAD_REQUEST, "File size must be 5MB or less"),
+    UPLOAD_INVALID_FORMAT(HttpStatus.BAD_REQUEST, "Only JPEG, PNG, WebP formats are allowed"),
 
     // Interest
     INTEREST_TAG_NOT_FOUND(HttpStatus.BAD_REQUEST, "One or more interest tags not found"),

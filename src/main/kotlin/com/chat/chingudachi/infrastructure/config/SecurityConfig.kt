@@ -4,13 +4,12 @@ import com.chat.chingudachi.application.auth.port.TokenProvider
 import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.infrastructure.security.JwtAuthenticationFilter
 import jakarta.servlet.http.HttpServletResponse
-import java.time.Instant
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.MediaType
 import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.invoke
@@ -20,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import tools.jackson.databind.ObjectMapper
+import java.time.Instant
 
 @Configuration
 @EnableWebSecurity
@@ -39,6 +39,9 @@ class SecurityConfig(
             authorizeHttpRequests {
                 authorize("/api/auth/**", permitAll)
                 authorize(HttpMethod.GET, "/api/interest-tags", permitAll)
+                authorize(HttpMethod.GET, "/api/users/check-nickname", permitAll)
+                authorize(HttpMethod.GET, "/uploads/**", permitAll)
+                authorize("/error", permitAll)
                 authorize(anyRequest, authenticated)
             }
             exceptionHandling {
@@ -52,13 +55,14 @@ class SecurityConfig(
     private fun authenticationEntryPoint() =
         org.springframework.security.web.AuthenticationEntryPoint { _, response, _ ->
             val errorCode = ErrorCode.UNAUTHORIZED
-            val errorBody = mapOf(
-                "code" to errorCode.name,
-                "data" to null,
-                "message" to errorCode.message,
-                "isSuccess" to false,
-                "timestamp" to Instant.now(),
-            )
+            val errorBody =
+                mapOf(
+                    "code" to errorCode.name,
+                    "data" to null,
+                    "message" to errorCode.message,
+                    "isSuccess" to false,
+                    "timestamp" to Instant.now(),
+                )
             response.status = HttpServletResponse.SC_UNAUTHORIZED
             response.contentType = MediaType.APPLICATION_JSON_VALUE
             objectMapper.writeValue(response.outputStream, errorBody)
@@ -77,7 +81,7 @@ class AppCorsConfig(
                 CorsConfiguration().apply {
                     allowedOrigins = corsProperties.allowedOrigins
                     allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH")
-                    allowedHeaders = listOf("Authorization", "Content-Type", "Accept")
+                    allowedHeaders = listOf("Authorization", "Content-Type", "Accept", "x-auth-retry")
                     allowCredentials = true
                 },
             )
