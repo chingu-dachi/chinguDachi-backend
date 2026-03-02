@@ -10,9 +10,19 @@ spring:
         format_sql: true
         show_sql: true
     open-in-view: false
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 6MB
   docker:
     compose:
       lifecycle-management: start-and-stop
+
+upload:
+  profile-image:
+    directory: uploads/profile-images
+    base-url: http://localhost:8080/uploads/profile-images
 
 cors:
   allowed-origins:

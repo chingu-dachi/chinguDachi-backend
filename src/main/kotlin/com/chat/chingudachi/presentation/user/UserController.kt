@@ -5,7 +5,6 @@ import com.chat.chingudachi.application.user.CompleteOnboardingUseCase
 import com.chat.chingudachi.application.user.command.CompleteOnboardingCommand
 import com.chat.chingudachi.application.user.GetMyProfileUseCase
 import com.chat.chingudachi.application.user.MyProfile
-import com.chat.chingudachi.domain.account.Nation
 import com.chat.chingudachi.presentation.common.AuthAccountId
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.time.LocalDate
+import java.time.Instant
 
 @RestController
 @RequestMapping("/api/users")
@@ -34,7 +33,7 @@ class UserController(
         return NicknameCheckResponse(available)
     }
 
-    @PutMapping("/profile")
+    @PutMapping("/me")
     fun completeOnboarding(
         @AuthAccountId accountId: Long,
         @RequestBody request: CompleteOnboardingRequest,
@@ -44,46 +43,40 @@ class UserController(
 }
 
 data class MyProfileResponse(
-    val id: Long,
+    val userId: String,
     val email: String?,
     val nickname: String?,
-    val birthDate: LocalDate?,
-    val nation: String?,
+    val birthYear: Int?,
+    val nationality: String?,
     val translateLanguage: String?,
     val city: String?,
     val profileImageUrl: String?,
     val bio: String?,
-    val accountStatus: String,
-    val interests: List<InterestResponse>,
+    val onboardingRequired: Boolean,
+    val isOnline: Boolean,
+    val lastSeenAt: Instant?,
+    val createdAt: Instant,
+    val interests: List<String>,
 ) {
     companion object {
         fun from(profile: MyProfile) = MyProfileResponse(
-            id = profile.account.id,
+            userId = profile.account.id.toString(),
             email = profile.account.email,
             nickname = profile.account.nickname?.value,
-            birthDate = profile.account.birthDate,
-            nation = profile.account.nation?.name,
-            translateLanguage = profile.account.translateLanguage?.name,
+            birthYear = profile.account.birthDate?.year,
+            nationality = profile.account.nation?.name,
+            translateLanguage = profile.account.translateLanguage?.name?.lowercase(),
             city = profile.account.city,
             profileImageUrl = profile.account.profileImageUrl,
             bio = profile.account.bio,
-            accountStatus = profile.account.accountStatus.name,
-            interests = profile.interests.map { ui ->
-                InterestResponse(
-                    tagKey = ui.interestTag.tagKey,
-                    labelKo = ui.interestTag.labelKo,
-                    labelJa = ui.interestTag.labelJa,
-                )
-            },
+            onboardingRequired = !profile.account.isOnboardingComplete(),
+            isOnline = false, // TODO: 온라인 상태 구현 시 교체
+            lastSeenAt = null, // TODO: 온라인 상태 구현 시 교체
+            createdAt = profile.account.createdAt,
+            interests = profile.interests.map { it.interestTag.tagKey },
         )
     }
 }
-
-data class InterestResponse(
-    val tagKey: String,
-    val labelKo: String,
-    val labelJa: String,
-)
 
 data class NicknameCheckResponse(
     val available: Boolean,
@@ -91,14 +84,20 @@ data class NicknameCheckResponse(
 
 data class CompleteOnboardingRequest(
     val nickname: String,
-    val birthDate: LocalDate,
-    val nation: Nation,
-    val interestTagIds: List<Long>,
+    val birthYear: Int,
+    val nationality: String,
+    val interests: List<String>,
+    val bio: String? = null,
+    val city: String? = null,
+    val profileImageUrl: String? = null,
 ) {
     fun toCommand() = CompleteOnboardingCommand(
         nickname = nickname,
-        birthDate = birthDate,
-        nation = nation,
-        interestTagIds = interestTagIds,
+        birthYear = birthYear,
+        nationality = nationality,
+        interests = interests,
+        bio = bio,
+        city = city,
+        profileImageUrl = profileImageUrl,
     )
 }

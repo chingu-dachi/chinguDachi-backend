@@ -4,6 +4,7 @@ import com.chat.chingudachi.application.interest.port.InterestTagStore
 import com.chat.chingudachi.application.user.command.CompleteOnboardingCommand
 import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.application.user.port.UserInterestStore
+import com.chat.chingudachi.domain.account.Nation
 import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.common.BadRequestException
 import com.chat.chingudachi.domain.common.ConflictException
@@ -31,30 +32,44 @@ class CompleteOnboardingUseCase(
             throw ConflictException(ErrorCode.ACCOUNT_ALREADY_ONBOARDED)
         }
 
+        val nation = Nation.entries.find { it.name == command.nationality }
+            ?: throw BadRequestException(ErrorCode.INVALID_INPUT)
+
+        if (command.birthYear < 1900 || command.birthYear > java.time.Year.now().value) {
+            throw BadRequestException(ErrorCode.INVALID_INPUT)
+        }
+
         val nickname = Nickname(command.nickname)
 
         if (accountStore.existsByNickname(nickname)) {
             throw ConflictException(ErrorCode.ACCOUNT_NICKNAME_DUPLICATE)
         }
 
-        val distinctTagIds = command.interestTagIds.distinct()
+        val distinctTagKeys = command.interests.distinct()
 
-        if (distinctTagIds.isEmpty()) {
+        if (distinctTagKeys.isEmpty()) {
             throw BadRequestException(ErrorCode.INTEREST_REQUIRED)
         }
 
-        val interestTags = interestTagStore.findAllByIds(distinctTagIds)
-        if (interestTags.size != distinctTagIds.size) {
+        val interestTags = interestTagStore.findAllByTagKeys(distinctTagKeys)
+        if (interestTags.size != distinctTagKeys.size) {
             throw BadRequestException(ErrorCode.INTEREST_TAG_NOT_FOUND)
         }
 
-        account.completeOnboarding(nickname, command.birthDate, command.nation)
+        account.completeOnboarding(
+            nickname = nickname,
+            birthYear = command.birthYear,
+            nation = nation,
+            bio = command.bio,
+            city = command.city,
+            profileImageUrl = command.profileImageUrl,
+        )
         accountStore.save(account)
 
         userInterestStore.deleteByAccountId(accountId)
         val userInterests = interestTags.map { tag -> UserInterest(account = account, interestTag = tag) }
         userInterestStore.saveAll(userInterests)
 
-        log.info { "Onboarding completed: accountId=$accountId, nickname=${nickname.value}, nation=${command.nation}" }
+        log.info { "Onboarding completed: accountId=$accountId, nickname=${nickname.value}, nation=$nation" }
     }
 }

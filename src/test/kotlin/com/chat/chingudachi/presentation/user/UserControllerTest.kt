@@ -61,7 +61,7 @@ class UserControllerTest(
                     }.andExpect {
                         status { isOk() }
                         jsonPath("$.data.email") { value("user@example.com") }
-                        jsonPath("$.data.accountStatus") { value("NOT_CONSENT") }
+                        jsonPath("$.data.onboardingRequired") { value(true) }
                         jsonPath("$.data.interests") { isArray() }
                     }
                 }
@@ -120,11 +120,12 @@ class UserControllerTest(
                 }
             }
 
-            context("인증 없이 요청하면") {
-                it("401을 반환한다") {
+            context("인증 없이 요청해도") {
+                it("200을 반환한다") {
                     mockMvc.get("/api/users/check-nickname?nickname=테스트")
                         .andExpect {
-                            status { isUnauthorized() }
+                            status { isOk() }
+                            jsonPath("$.data.available") { value(true) }
                         }
                 }
             }

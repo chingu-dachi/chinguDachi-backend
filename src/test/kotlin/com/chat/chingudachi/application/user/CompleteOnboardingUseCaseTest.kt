@@ -20,7 +20,6 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
 import java.time.LocalDate
 
@@ -32,9 +31,9 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
 
     private val validCommand = CompleteOnboardingCommand(
         nickname = "테스트닉네임",
-        birthDate = LocalDate.of(2000, 1, 1),
-        nation = Nation.KR,
-        interestTagIds = listOf(1L, 2L),
+        birthYear = 2000,
+        nationality = "KR",
+        interests = listOf("TRAVEL", "FOOD"),
     )
 
     private val testTags = listOf(
@@ -51,7 +50,7 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
                     val account = AccountFixture.create(id = 1)
                     every { accountStore.findById(1L) } returns account
                     every { accountStore.existsByNickname(Nickname("테스트닉네임")) } returns false
-                    every { interestTagStore.findAllByIds(listOf(1L, 2L)) } returns testTags
+                    every { interestTagStore.findAllByTagKeys(listOf("TRAVEL", "FOOD")) } returns testTags
 
                     useCase.execute(1L, validCommand)
 
@@ -111,7 +110,7 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
                     every { accountStore.findById(1L) } returns account
                     every { accountStore.existsByNickname(Nickname("테스트닉네임")) } returns false
 
-                    val emptyInterests = validCommand.copy(interestTagIds = emptyList())
+                    val emptyInterests = validCommand.copy(interests = emptyList())
 
                     shouldThrow<BadRequestException> {
                         useCase.execute(1L, emptyInterests)
@@ -119,14 +118,40 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
                 }
             }
 
-            context("존재하지 않는 관심사 태그 ID") {
+            context("유효하지 않은 nationality") {
+                it("BadRequestException을 던진다") {
+                    val account = AccountFixture.create(id = 1)
+                    every { accountStore.findById(1L) } returns account
+
+                    val invalidNationality = validCommand.copy(nationality = "US")
+
+                    shouldThrow<BadRequestException> {
+                        useCase.execute(1L, invalidNationality)
+                    }
+                }
+            }
+
+            context("유효하지 않은 birthYear") {
+                it("BadRequestException을 던진다") {
+                    val account = AccountFixture.create(id = 1)
+                    every { accountStore.findById(1L) } returns account
+
+                    val invalidBirthYear = validCommand.copy(birthYear = 2030)
+
+                    shouldThrow<BadRequestException> {
+                        useCase.execute(1L, invalidBirthYear)
+                    }
+                }
+            }
+
+            context("존재하지 않는 관심사 태그 키") {
                 it("BadRequestException을 던진다") {
                     val account = AccountFixture.create(id = 1)
                     every { accountStore.findById(1L) } returns account
                     every { accountStore.existsByNickname(Nickname("테스트닉네임")) } returns false
-                    every { interestTagStore.findAllByIds(listOf(1L, 999L)) } returns listOf(testTags[0])
+                    every { interestTagStore.findAllByTagKeys(listOf("TRAVEL", "INVALID")) } returns listOf(testTags[0])
 
-                    val invalidTags = validCommand.copy(interestTagIds = listOf(1L, 999L))
+                    val invalidTags = validCommand.copy(interests = listOf("TRAVEL", "INVALID"))
 
                     shouldThrow<BadRequestException> {
                         useCase.execute(1L, invalidTags)

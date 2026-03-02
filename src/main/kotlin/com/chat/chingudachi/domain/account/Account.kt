@@ -47,11 +47,21 @@ class Account(
 ) : BaseTimeEntity() {
     fun isOnboardingComplete(): Boolean = accountStatus.isOnboarded
 
-    fun completeOnboarding(nickname: Nickname, birthDate: LocalDate, nation: Nation) {
+    fun completeOnboarding(
+        nickname: Nickname,
+        birthYear: Int,
+        nation: Nation,
+        bio: String?,
+        city: String?,
+        profileImageUrl: String?,
+    ) {
         this.nickname = nickname
-        this.birthDate = birthDate
+        this.birthDate = LocalDate.of(birthYear, 1, 1)
         this.nation = nation
         this.translateLanguage = nation.toTranslateLanguage()
+        this.bio = bio
+        this.city = city
+        this.profileImageUrl = profileImageUrl
         this.accountStatus = AccountStatus.ACTIVE
     }
 }
