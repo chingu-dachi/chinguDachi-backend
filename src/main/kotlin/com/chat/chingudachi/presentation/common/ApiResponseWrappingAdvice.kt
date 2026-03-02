@@ -2,6 +2,7 @@ package com.chat.chingudachi.presentation.common
 
 import org.springframework.core.MethodParameter
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.http.server.ServerHttpRequest
@@ -17,6 +18,7 @@ class ApiResponseWrappingAdvice : ResponseBodyAdvice<Any> {
     ): Boolean =
         converterType != StringHttpMessageConverter::class.java
             && returnType.parameterType != ApiResponse::class.java
+            && !ResponseEntity::class.java.isAssignableFrom(returnType.parameterType)
 
     override fun beforeBodyWrite(
         body: Any?,
