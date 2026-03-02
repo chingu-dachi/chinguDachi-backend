@@ -1,8 +1,7 @@
 package com.chat.chingudachi.application.chat
 
 import com.chat.chingudachi.application.chat.port.RoomMemberStore
-import com.chat.chingudachi.domain.common.ErrorCode
-import com.chat.chingudachi.domain.common.ForbiddenException
+import com.chat.chingudachi.application.chat.port.getJoinedMember
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -12,12 +11,7 @@ class ReadMessagesUseCase(
 ) {
     @Transactional
     fun execute(accountId: Long, roomId: Long) {
-        val member = roomMemberStore.findByRoomIdAndAccountId(roomId, accountId)
-            ?: throw ForbiddenException(ErrorCode.CHAT_NOT_A_MEMBER)
-        if (!member.isJoined()) {
-            throw ForbiddenException(ErrorCode.CHAT_NOT_A_MEMBER)
-        }
-
+        val member = roomMemberStore.getJoinedMember(roomId, accountId)
         member.resetUnread()
     }
 }

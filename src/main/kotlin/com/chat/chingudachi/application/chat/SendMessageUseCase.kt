@@ -3,11 +3,11 @@ package com.chat.chingudachi.application.chat
 import com.chat.chingudachi.application.chat.port.ChatMessageStore
 import com.chat.chingudachi.application.chat.port.ChatRoomStore
 import com.chat.chingudachi.application.chat.port.RoomMemberStore
+import com.chat.chingudachi.application.chat.port.getJoinedMember
 import com.chat.chingudachi.application.chat.result.SendMessageResult
 import com.chat.chingudachi.domain.chat.ChatMessage
 import com.chat.chingudachi.domain.common.BadRequestException
 import com.chat.chingudachi.domain.common.ErrorCode
-import com.chat.chingudachi.domain.common.ForbiddenException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -25,11 +25,7 @@ class SendMessageUseCase(
             throw BadRequestException(ErrorCode.CHAT_ROOM_NOT_ACTIVE)
         }
 
-        val member = roomMemberStore.findByRoomIdAndAccountId(roomId, accountId)
-            ?: throw ForbiddenException(ErrorCode.CHAT_NOT_A_MEMBER)
-        if (!member.isJoined()) {
-            throw ForbiddenException(ErrorCode.CHAT_NOT_A_MEMBER)
-        }
+        roomMemberStore.getJoinedMember(roomId, accountId)
 
         if (content.isBlank()) {
             throw BadRequestException(ErrorCode.CHAT_MESSAGE_EMPTY)

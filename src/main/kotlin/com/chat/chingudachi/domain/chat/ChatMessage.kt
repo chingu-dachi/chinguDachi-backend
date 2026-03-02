@@ -30,7 +30,9 @@ class ChatMessage(
         const val MAX_CONTENT_LENGTH = 1000
 
         fun create(chatRoomId: Long, senderId: Long, content: String): ChatMessage {
-            require(content.isNotBlank() && content.length <= MAX_CONTENT_LENGTH)
+            require(content.isNotBlank() && content.length <= MAX_CONTENT_LENGTH) {
+                "Domain invariant violation: content must be non-blank and <= $MAX_CONTENT_LENGTH chars"
+            }
             return ChatMessage(chatRoomId = chatRoomId, senderId = senderId, content = content)
         }
     }

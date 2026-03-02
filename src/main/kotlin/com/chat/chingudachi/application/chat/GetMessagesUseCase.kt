@@ -3,11 +3,10 @@ package com.chat.chingudachi.application.chat
 import com.chat.chingudachi.application.chat.port.ChatMessageStore
 import com.chat.chingudachi.application.chat.port.ChatRoomStore
 import com.chat.chingudachi.application.chat.port.RoomMemberStore
+import com.chat.chingudachi.application.chat.port.getJoinedMember
 import com.chat.chingudachi.application.chat.result.MessageItem
 import com.chat.chingudachi.application.chat.result.MessagesResult
 import com.chat.chingudachi.application.common.PaginationConstants
-import com.chat.chingudachi.domain.common.ErrorCode
-import com.chat.chingudachi.domain.common.ForbiddenException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -21,11 +20,7 @@ class GetMessagesUseCase(
     fun execute(accountId: Long, roomId: Long, cursor: Long?): MessagesResult {
         chatRoomStore.getById(roomId)
 
-        val member = roomMemberStore.findByRoomIdAndAccountId(roomId, accountId)
-            ?: throw ForbiddenException(ErrorCode.CHAT_NOT_A_MEMBER)
-        if (!member.isJoined()) {
-            throw ForbiddenException(ErrorCode.CHAT_NOT_A_MEMBER)
-        }
+        roomMemberStore.getJoinedMember(roomId, accountId)
 
         val fetchSize = PaginationConstants.DEFAULT_SIZE + 1
         val messages = chatMessageStore.findByRoomId(roomId, cursor, fetchSize)

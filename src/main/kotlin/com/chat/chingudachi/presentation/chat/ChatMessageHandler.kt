@@ -3,9 +3,9 @@ package com.chat.chingudachi.presentation.chat
 import com.chat.chingudachi.application.chat.ReadMessagesUseCase
 import com.chat.chingudachi.application.chat.SendMessageUseCase
 import com.chat.chingudachi.application.chat.port.RoomMemberStore
+import com.chat.chingudachi.application.chat.port.getJoinedMember
 import com.chat.chingudachi.domain.common.BusinessException
 import com.chat.chingudachi.domain.common.ErrorCode
-import com.chat.chingudachi.domain.common.ForbiddenException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler
 import org.springframework.messaging.handler.annotation.MessageMapping
@@ -40,12 +40,13 @@ class ChatMessageHandler(
                 createdAt = result.createdAt,
             ),
         )
-        messagingTemplate.convertAndSend("/topic/chat/${payload.roomId}", event)
+        broadcast("/topic/chat/${payload.roomId}", event, "roomId=${payload.roomId}, messageId=${result.messageId}")
 
-        messagingTemplate.convertAndSendToUser(
+        sendToUser(
             principal.name,
             "/queue/chat.ack",
             MessageAck(messageId = result.messageId, status = "SENT"),
+            "messageId=${result.messageId}",
         )
         log.debug { "Message sent: roomId=${payload.roomId}, senderId=$accountId, messageId=${result.messageId}" }
     }
@@ -53,23 +54,23 @@ class ChatMessageHandler(
     @MessageMapping("/chat.typing.start")
     fun handleTypingStart(payload: TypingPayload, principal: Principal) {
         val accountId = principal.name.toLong()
-        verifyJoinedMember(payload.roomId, accountId)
+        roomMemberStore.getJoinedMember(payload.roomId, accountId)
         val event = ChatEvent(
             type = ChatEventType.TYPING_START,
             data = TypingEventData(userId = accountId),
         )
-        messagingTemplate.convertAndSend("/topic/chat/${payload.roomId}", event)
+        broadcast("/topic/chat/${payload.roomId}", event, "roomId=${payload.roomId}, type=TYPING_START")
     }
 
     @MessageMapping("/chat.typing.stop")
     fun handleTypingStop(payload: TypingPayload, principal: Principal) {
         val accountId = principal.name.toLong()
-        verifyJoinedMember(payload.roomId, accountId)
+        roomMemberStore.getJoinedMember(payload.roomId, accountId)
         val event = ChatEvent(
             type = ChatEventType.TYPING_STOP,
             data = TypingEventData(userId = accountId),
         )
-        messagingTemplate.convertAndSend("/topic/chat/${payload.roomId}", event)
+        broadcast("/topic/chat/${payload.roomId}", event, "roomId=${payload.roomId}, type=TYPING_STOP")
     }
 
     @MessageMapping("/chat.read")
@@ -80,7 +81,7 @@ class ChatMessageHandler(
             type = ChatEventType.READ,
             data = ReadEventData(userId = accountId, readAt = Instant.now()),
         )
-        messagingTemplate.convertAndSend("/topic/chat/${payload.roomId}", event)
+        broadcast("/topic/chat/${payload.roomId}", event, "roomId=${payload.roomId}, type=READ")
         log.debug { "Messages read: roomId=${payload.roomId}, accountId=$accountId" }
     }
 
@@ -98,10 +99,19 @@ class ChatMessageHandler(
         return ChatErrorEvent(code = ErrorCode.INTERNAL_ERROR.name, message = ErrorCode.INTERNAL_ERROR.message)
     }
 
-    private fun verifyJoinedMember(roomId: Long, accountId: Long) {
-        val member = roomMemberStore.findByRoomIdAndAccountId(roomId, accountId)
-        if (member == null || !member.isJoined()) {
-            throw ForbiddenException(ErrorCode.CHAT_NOT_A_MEMBER)
+    private fun broadcast(destination: String, event: ChatEvent, context: String) {
+        try {
+            messagingTemplate.convertAndSend(destination, event)
+        } catch (e: Exception) {
+            log.error(e) { "Broadcast failed: destination=$destination, $context" }
+        }
+    }
+
+    private fun sendToUser(user: String, destination: String, payload: Any, context: String) {
+        try {
+            messagingTemplate.convertAndSendToUser(user, destination, payload)
+        } catch (e: Exception) {
+            log.error(e) { "Send to user failed: user=$user, destination=$destination, $context" }
         }
     }
 }

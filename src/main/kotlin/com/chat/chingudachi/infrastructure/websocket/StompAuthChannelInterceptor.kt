@@ -2,6 +2,7 @@ package com.chat.chingudachi.infrastructure.websocket
 
 import com.chat.chingudachi.application.auth.port.TokenProvider
 import com.chat.chingudachi.application.chat.port.RoomMemberStore
+import com.chat.chingudachi.application.chat.port.getJoinedMember
 import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.domain.common.ForbiddenException
 import com.chat.chingudachi.domain.common.UnauthorizedException
@@ -59,10 +60,11 @@ class StompAuthChannelInterceptor(
         val accountId = (accessor.user as? StompPrincipal)?.accountId
             ?: throw UnauthorizedException(ErrorCode.UNAUTHORIZED)
 
-        val member = roomMemberStore.findByRoomIdAndAccountId(roomId, accountId)
-        if (member == null || !member.isJoined()) {
+        try {
+            roomMemberStore.getJoinedMember(roomId, accountId)
+        } catch (e: ForbiddenException) {
             log.warn { "STOMP SUBSCRIBE denied: accountId=$accountId, roomId=$roomId" }
-            throw ForbiddenException(ErrorCode.CHAT_NOT_A_MEMBER)
+            throw e
         }
         log.debug { "STOMP SUBSCRIBE: accountId=$accountId, roomId=$roomId" }
     }
