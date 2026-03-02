@@ -55,6 +55,7 @@ class DiscoverUsersUseCaseTest : DescribeSpec() {
                         accountStore.findDiscoverableUsers(
                             excludeAccountId = currentUserId,
                             nationality = null,
+                            interests = null,
                             cursor = null,
                             size = 21,
                         )
@@ -90,6 +91,7 @@ class DiscoverUsersUseCaseTest : DescribeSpec() {
                         accountStore.findDiscoverableUsers(
                             excludeAccountId = currentUserId,
                             nationality = null,
+                            interests = null,
                             cursor = null,
                             size = 3,
                         )
@@ -125,6 +127,7 @@ class DiscoverUsersUseCaseTest : DescribeSpec() {
                         accountStore.findDiscoverableUsers(
                             excludeAccountId = currentUserId,
                             nationality = Nation.KR,
+                            interests = null,
                             cursor = null,
                             size = 21,
                         )
@@ -139,7 +142,7 @@ class DiscoverUsersUseCaseTest : DescribeSpec() {
             }
 
             context("interests 필터") {
-                it("관심사가 하나라도 일치하는 유저를 반환한다") {
+                it("DB에서 관심사 필터링된 유저를 반환한다") {
                     val user1 = AccountFixture.create(
                         id = 1L,
                         accountStatus = AccountStatus.ACTIVE,
@@ -148,20 +151,9 @@ class DiscoverUsersUseCaseTest : DescribeSpec() {
                         nation = Nation.KR,
                         translateLanguage = TranslateLanguage.JA,
                     )
-                    val user2 = AccountFixture.create(
-                        id = 2L,
-                        accountStatus = AccountStatus.ACTIVE,
-                        nickname = Nickname("게임유저"),
-                        birthDate = LocalDate.of(1996, 2, 2),
-                        nation = Nation.JP,
-                        translateLanguage = TranslateLanguage.KO,
-                    )
 
                     val travelTag = InterestTag(id = 1, tagKey = "TRAVEL", labelKo = "여행", labelJa = "旅行", displayOrder = 1)
-                    val gamingTag = InterestTag(id = 2, tagKey = "GAMING", labelKo = "게임", labelJa = "ゲーム", displayOrder = 2)
-
                     val interest1 = UserInterest(account = user1, interestTag = travelTag)
-                    val interest2 = UserInterest(account = user2, interestTag = gamingTag)
 
                     val query = DiscoverUsersQuery(
                         currentUserId = currentUserId,
@@ -173,11 +165,12 @@ class DiscoverUsersUseCaseTest : DescribeSpec() {
                         accountStore.findDiscoverableUsers(
                             excludeAccountId = currentUserId,
                             nationality = null,
+                            interests = listOf("TRAVEL"),
                             cursor = null,
                             size = 21,
                         )
-                    } returns listOf(user1, user2)
-                    every { userInterestStore.findByAccountIds(listOf(1L, 2L)) } returns listOf(interest1, interest2)
+                    } returns listOf(user1)
+                    every { userInterestStore.findByAccountIds(listOf(1L)) } returns listOf(interest1)
 
                     val result = useCase.execute(query)
 
@@ -196,6 +189,7 @@ class DiscoverUsersUseCaseTest : DescribeSpec() {
                         accountStore.findDiscoverableUsers(
                             excludeAccountId = currentUserId,
                             nationality = null,
+                            interests = null,
                             cursor = null,
                             size = 21,
                         )

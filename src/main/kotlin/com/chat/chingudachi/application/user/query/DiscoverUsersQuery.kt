@@ -1,5 +1,6 @@
 package com.chat.chingudachi.application.user.query
 
+import com.chat.chingudachi.application.common.PaginationConstants
 import com.chat.chingudachi.domain.account.Nation
 
 data class DiscoverUsersQuery(
@@ -7,5 +8,5 @@ data class DiscoverUsersQuery(
     val nationality: Nation? = null,
     val interests: List<String>? = null,
     val cursor: Long? = null,
-    val size: Int = 20,
+    val size: Int = PaginationConstants.DEFAULT_SIZE,
 )

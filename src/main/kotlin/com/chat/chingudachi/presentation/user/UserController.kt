@@ -1,5 +1,6 @@
 package com.chat.chingudachi.presentation.user
 
+import com.chat.chingudachi.application.common.PaginationConstants
 import com.chat.chingudachi.application.user.CheckNicknameUseCase
 import com.chat.chingudachi.application.user.CompleteOnboardingUseCase
 import com.chat.chingudachi.application.user.DiscoverUsersUseCase
@@ -29,22 +30,22 @@ class UserController(
     @GetMapping
     fun discoverUsers(
         @AuthAccountId accountId: Long,
-        @RequestParam(required = false) nationality: String?,
+        @RequestParam(required = false) nationality: Nation?,
         @RequestParam(required = false) interests: List<String>?,
-        @RequestParam(required = false) cursor: String?,
+        @RequestParam(required = false) cursor: Long?,
         @RequestParam(defaultValue = "20") size: Int,
     ): PaginatedResponse<UserResponse> {
         val query = DiscoverUsersQuery(
             currentUserId = accountId,
-            nationality = nationality?.let { Nation.valueOf(it) },
+            nationality = nationality,
             interests = interests,
-            cursor = cursor?.toLongOrNull(),
-            size = size.coerceIn(1, 50),
+            cursor = cursor,
+            size = size.coerceIn(1, PaginationConstants.MAX_SIZE),
         )
         val result = discoverUsersUseCase.execute(query)
         return PaginatedResponse(
             items = result.items.map { UserResponse.from(it.account, it.interests) },
-            nextCursor = result.nextCursor?.toString(),
+            nextCursor = result.nextCursor,
             hasMore = result.hasMore,
         )
     }

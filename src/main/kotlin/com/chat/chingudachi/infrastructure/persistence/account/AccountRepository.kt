@@ -28,4 +28,26 @@ interface AccountRepository : JpaRepository<Account, Long> {
         @Param("cursor") cursor: Long?,
         pageable: Pageable,
     ): List<Account>
+
+    @Query(
+        """
+        SELECT DISTINCT a FROM Account a
+        JOIN UserInterest ui ON ui.account = a
+        JOIN ui.interestTag it
+        WHERE a.accountStatus = 'ACTIVE'
+        AND a.deletedAt IS NULL
+        AND a.id != :excludeAccountId
+        AND (:nationality IS NULL OR a.nation = :nationality)
+        AND it.tagKey IN :interests
+        AND (:cursor IS NULL OR a.id < :cursor)
+        ORDER BY a.id DESC
+        """,
+    )
+    fun findDiscoverableUsersByInterests(
+        @Param("excludeAccountId") excludeAccountId: Long,
+        @Param("nationality") nationality: Nation?,
+        @Param("interests") interests: List<String>,
+        @Param("cursor") cursor: Long?,
+        pageable: Pageable,
+    ): List<Account>
 }

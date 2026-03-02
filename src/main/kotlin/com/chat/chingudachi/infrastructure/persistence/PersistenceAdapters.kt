@@ -27,14 +27,28 @@ class AccountStoreAdapter(
     override fun findDiscoverableUsers(
         excludeAccountId: Long,
         nationality: Nation?,
+        interests: List<String>?,
         cursor: Long?,
         size: Int,
-    ): List<Account> = accountRepository.findDiscoverableUsers(
-        excludeAccountId = excludeAccountId,
-        nationality = nationality,
-        cursor = cursor,
-        pageable = PageRequest.of(0, size),
-    )
+    ): List<Account> {
+        val pageable = PageRequest.of(0, size)
+        return if (interests.isNullOrEmpty()) {
+            accountRepository.findDiscoverableUsers(
+                excludeAccountId = excludeAccountId,
+                nationality = nationality,
+                cursor = cursor,
+                pageable = pageable,
+            )
+        } else {
+            accountRepository.findDiscoverableUsersByInterests(
+                excludeAccountId = excludeAccountId,
+                nationality = nationality,
+                interests = interests,
+                cursor = cursor,
+                pageable = pageable,
+            )
+        }
+    }
 }
 
 @Repository

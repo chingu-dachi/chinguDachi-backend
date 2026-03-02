@@ -11,7 +11,8 @@ interface AccountStore {
     fun findDiscoverableUsers(
         excludeAccountId: Long,
         nationality: Nation? = null,
+        interests: List<String>? = null,
         cursor: Long? = null,
-        size: Int = 21,
+        size: Int,
     ): List<Account>
 }

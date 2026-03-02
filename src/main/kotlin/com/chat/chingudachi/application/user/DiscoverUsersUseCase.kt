@@ -18,6 +18,7 @@ class DiscoverUsersUseCase(
         val accounts = accountStore.findDiscoverableUsers(
             excludeAccountId = query.currentUserId,
             nationality = query.nationality,
+            interests = query.interests,
             cursor = query.cursor,
             size = query.size + 1,
         )
@@ -25,30 +26,21 @@ class DiscoverUsersUseCase(
         val hasMore = accounts.size > query.size
         val resultAccounts = if (hasMore) accounts.dropLast(1) else accounts
 
-        val accountIds = resultAccounts.map { it.id }
-        val interestsByAccountId = if (accountIds.isNotEmpty()) {
-            userInterestStore.findByAccountIds(accountIds).groupBy { it.account.id }
-        } else {
-            emptyMap()
-        }
-
-        val filteredAccounts = if (query.interests.isNullOrEmpty()) {
-            resultAccounts
-        } else {
-            resultAccounts.filter { account ->
-                val accountInterests = interestsByAccountId[account.id] ?: emptyList()
-                accountInterests.any { it.interestTag.tagKey in query.interests }
-            }
-        }
-
+        val interestsByAccountId = loadInterests(resultAccounts)
         val nextCursor = if (hasMore) resultAccounts.lastOrNull()?.id else null
 
-        val items = filteredAccounts.map { account ->
+        val items = resultAccounts.map { account ->
             val interests = interestsByAccountId[account.id] ?: emptyList()
             DiscoverUserItem(account, interests)
         }
 
         return DiscoverUsersResult(items, nextCursor, hasMore)
+    }
+
+    private fun loadInterests(accounts: List<Account>): Map<Long, List<UserInterest>> {
+        val accountIds = accounts.map { it.id }
+        if (accountIds.isEmpty()) return emptyMap()
+        return userInterestStore.findByAccountIds(accountIds).groupBy { it.account.id }
     }
 }
 
