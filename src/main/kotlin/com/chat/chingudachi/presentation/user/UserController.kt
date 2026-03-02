@@ -3,15 +3,25 @@ package com.chat.chingudachi.presentation.user
 import com.chat.chingudachi.application.common.PaginationConstants
 import com.chat.chingudachi.application.user.CheckNicknameUseCase
 import com.chat.chingudachi.application.user.CompleteOnboardingUseCase
+import com.chat.chingudachi.application.user.DeleteAccountUseCase
 import com.chat.chingudachi.application.user.DiscoverUsersUseCase
-import com.chat.chingudachi.application.user.command.CompleteOnboardingCommand
 import com.chat.chingudachi.application.user.GetMyProfileUseCase
+import com.chat.chingudachi.application.user.GetUserProfileUseCase
 import com.chat.chingudachi.application.user.MyProfile
+import com.chat.chingudachi.application.user.UpdateProfileUseCase
+import com.chat.chingudachi.application.user.command.CompleteOnboardingCommand
+import com.chat.chingudachi.application.user.command.UpdateProfileCommand
 import com.chat.chingudachi.application.user.query.DiscoverUsersQuery
 import com.chat.chingudachi.domain.account.Nation
 import com.chat.chingudachi.presentation.common.AuthAccountId
 import com.chat.chingudachi.presentation.common.PaginatedResponse
+import com.chat.chingudachi.presentation.common.clearRefreshTokenCookie
+import jakarta.servlet.http.HttpServletResponse
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -26,6 +36,9 @@ class UserController(
     private val checkNicknameUseCase: CheckNicknameUseCase,
     private val completeOnboardingUseCase: CompleteOnboardingUseCase,
     private val discoverUsersUseCase: DiscoverUsersUseCase,
+    private val getUserProfileUseCase: GetUserProfileUseCase,
+    private val updateProfileUseCase: UpdateProfileUseCase,
+    private val deleteAccountUseCase: DeleteAccountUseCase,
 ) {
     @GetMapping
     fun discoverUsers(
@@ -44,7 +57,7 @@ class UserController(
         )
         val result = discoverUsersUseCase.execute(query)
         return PaginatedResponse(
-            items = result.items.map { UserResponse.from(it.account, it.interests) },
+            items = result.items.map { UserResponse.from(it) },
             nextCursor = result.nextCursor,
             hasMore = result.hasMore,
         )
@@ -53,6 +66,21 @@ class UserController(
     @GetMapping("/me")
     fun getMyProfile(@AuthAccountId accountId: Long): MyProfileResponse {
         val profile = getMyProfileUseCase.execute(accountId)
+        return MyProfileResponse.from(profile)
+    }
+
+    @GetMapping("/{userId}")
+    fun getUserProfile(@PathVariable userId: Long): UserResponse {
+        val profile = getUserProfileUseCase.execute(userId)
+        return UserResponse.from(profile)
+    }
+
+    @PatchMapping("/me")
+    fun updateProfile(
+        @AuthAccountId accountId: Long,
+        @RequestBody request: UpdateProfileRequest,
+    ): MyProfileResponse {
+        val profile = updateProfileUseCase.execute(accountId, request.toCommand())
         return MyProfileResponse.from(profile)
     }
 
@@ -68,6 +96,16 @@ class UserController(
         @RequestBody request: CompleteOnboardingRequest,
     ) {
         completeOnboardingUseCase.execute(accountId, request.toCommand())
+    }
+
+    @DeleteMapping("/me")
+    fun deleteAccount(
+        @AuthAccountId accountId: Long,
+        response: HttpServletResponse,
+    ): ResponseEntity<Unit> {
+        deleteAccountUseCase.execute(accountId)
+        clearRefreshTokenCookie(response)
+        return ResponseEntity.noContent().build()
     }
 }
 
@@ -127,6 +165,22 @@ data class CompleteOnboardingRequest(
         interests = interests,
         bio = bio,
         city = city,
+        profileImageUrl = profileImageUrl,
+    )
+}
+
+data class UpdateProfileRequest(
+    val nickname: String? = null,
+    val bio: String? = null,
+    val city: String? = null,
+    val interests: List<String>? = null,
+    val profileImageUrl: String? = null,
+) {
+    fun toCommand() = UpdateProfileCommand(
+        nickname = nickname,
+        bio = bio,
+        city = city,
+        interests = interests,
         profileImageUrl = profileImageUrl,
     )
 }

@@ -31,7 +31,7 @@ class DiscoverUsersUseCase(
 
         val items = resultAccounts.map { account ->
             val interests = interestsByAccountId[account.id] ?: emptyList()
-            DiscoverUserItem(account, interests)
+            toPublicProfile(account, interests)
         }
 
         return DiscoverUsersResult(items, nextCursor, hasMore)
@@ -42,15 +42,24 @@ class DiscoverUsersUseCase(
         if (accountIds.isEmpty()) return emptyMap()
         return userInterestStore.findByAccountIds(accountIds).groupBy { it.account.id }
     }
+
+    private fun toPublicProfile(account: Account, interests: List<UserInterest>) =
+        UserPublicProfile(
+            userId = account.id,
+            nickname = account.nickname?.value,
+            profileImageUrl = account.profileImageUrl,
+            nationality = account.nation?.name,
+            translateLanguage = account.translateLanguage?.name?.lowercase(),
+            birthYear = account.birthDate?.year,
+            interests = interests.map { it.interestTag.tagKey },
+            bio = account.bio,
+            city = account.city,
+            createdAt = account.createdAt,
+        )
 }
 
-data class DiscoverUserItem(
-    val account: Account,
-    val interests: List<UserInterest>,
-)
-
 data class DiscoverUsersResult(
-    val items: List<DiscoverUserItem>,
+    val items: List<UserPublicProfile>,
     val nextCursor: Long?,
     val hasMore: Boolean,
 )

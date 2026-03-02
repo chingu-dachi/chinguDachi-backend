@@ -4,6 +4,7 @@ import com.chat.chingudachi.domain.common.BusinessException
 import com.chat.chingudachi.domain.common.ErrorCode
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.ResponseEntity
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -65,6 +66,16 @@ class ErrorResponseWrappingAdvice {
         return ResponseEntity
             .status(ErrorCode.RESOURCE_NOT_FOUND.status)
             .body(ApiResponse.error(ErrorCode.RESOURCE_NOT_FOUND))
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException::class)
+    fun handleDataIntegrityViolation(
+        ex: DataIntegrityViolationException,
+    ): ResponseEntity<ApiResponse<Nothing>> {
+        log.warn { "Data integrity violation: ${ex.rootCause?.message}" }
+        return ResponseEntity
+            .status(ErrorCode.CONFLICT.status)
+            .body(ApiResponse.error(ErrorCode.CONFLICT))
     }
 
     @ExceptionHandler(Exception::class)

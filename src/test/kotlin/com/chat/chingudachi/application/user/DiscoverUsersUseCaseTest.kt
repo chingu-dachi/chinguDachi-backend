@@ -65,8 +65,8 @@ class DiscoverUsersUseCaseTest : DescribeSpec() {
                     val result = useCase.execute(query)
 
                     result.items shouldHaveSize 2
-                    result.items[0].account.id shouldBe 1L
-                    result.items[1].account.id shouldBe 2L
+                    result.items[0].userId shouldBe 1L
+                    result.items[1].userId shouldBe 2L
                     result.hasMore shouldBe false
                     result.nextCursor shouldBe null
                 }
@@ -137,7 +137,7 @@ class DiscoverUsersUseCaseTest : DescribeSpec() {
                     val result = useCase.execute(query)
 
                     result.items shouldHaveSize 1
-                    result.items[0].account.nation shouldBe Nation.KR
+                    result.items[0].nationality shouldBe "KR"
                 }
             }
 
@@ -175,9 +175,8 @@ class DiscoverUsersUseCaseTest : DescribeSpec() {
                     val result = useCase.execute(query)
 
                     result.items shouldHaveSize 1
-                    result.items[0].account.id shouldBe 1L
-                    result.items[0].interests shouldHaveSize 1
-                    result.items[0].interests[0].interestTag.tagKey shouldBe "TRAVEL"
+                    result.items[0].userId shouldBe 1L
+                    result.items[0].interests shouldBe listOf("TRAVEL")
                 }
             }
 

@@ -10,6 +10,7 @@ import com.chat.chingudachi.domain.account.TranslateLanguage
 import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.common.BadRequestException
 import com.chat.chingudachi.domain.common.ConflictException
+import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.domain.common.NotFoundException
 import com.chat.chingudachi.domain.interest.InterestTag
 import com.chat.chingudachi.domain.interest.UserInterest
@@ -48,7 +49,7 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
             context("유효한 온보딩 데이터") {
                 it("계정 상태를 ACTIVE로 변경하고 관심사를 저장한다") {
                     val account = AccountFixture.create(id = 1)
-                    every { accountStore.findById(1L) } returns account
+                    every { accountStore.getById(1L) } returns account
                     every { accountStore.existsByNickname(Nickname("테스트닉네임")) } returns false
                     every { interestTagStore.findAllByTagKeys(listOf("TRAVEL", "FOOD")) } returns testTags
 
@@ -66,7 +67,7 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
 
             context("존재하지 않는 계정") {
                 it("NotFoundException을 던진다") {
-                    every { accountStore.findById(999L) } returns null
+                    every { accountStore.getById(999L) } throws NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND)
 
                     shouldThrow<NotFoundException> {
                         useCase.execute(999L, validCommand)
@@ -84,7 +85,7 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
                         nation = Nation.KR,
                         translateLanguage = TranslateLanguage.JA,
                     )
-                    every { accountStore.findById(1L) } returns account
+                    every { accountStore.getById(1L) } returns account
 
                     shouldThrow<ConflictException> {
                         useCase.execute(1L, validCommand)
@@ -95,7 +96,7 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
             context("중복 닉네임") {
                 it("ConflictException을 던진다") {
                     val account = AccountFixture.create(id = 1)
-                    every { accountStore.findById(1L) } returns account
+                    every { accountStore.getById(1L) } returns account
                     every { accountStore.existsByNickname(Nickname("테스트닉네임")) } returns true
 
                     shouldThrow<ConflictException> {
@@ -107,7 +108,7 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
             context("관심사 미선택") {
                 it("BadRequestException을 던진다") {
                     val account = AccountFixture.create(id = 1)
-                    every { accountStore.findById(1L) } returns account
+                    every { accountStore.getById(1L) } returns account
                     every { accountStore.existsByNickname(Nickname("테스트닉네임")) } returns false
 
                     val emptyInterests = validCommand.copy(interests = emptyList())
@@ -121,7 +122,7 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
             context("유효하지 않은 nationality") {
                 it("BadRequestException을 던진다") {
                     val account = AccountFixture.create(id = 1)
-                    every { accountStore.findById(1L) } returns account
+                    every { accountStore.getById(1L) } returns account
 
                     val invalidNationality = validCommand.copy(nationality = "US")
 
@@ -134,7 +135,7 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
             context("유효하지 않은 birthYear") {
                 it("BadRequestException을 던진다") {
                     val account = AccountFixture.create(id = 1)
-                    every { accountStore.findById(1L) } returns account
+                    every { accountStore.getById(1L) } returns account
 
                     val invalidBirthYear = validCommand.copy(birthYear = 2030)
 
@@ -147,7 +148,7 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
             context("존재하지 않는 관심사 태그 키") {
                 it("BadRequestException을 던진다") {
                     val account = AccountFixture.create(id = 1)
-                    every { accountStore.findById(1L) } returns account
+                    every { accountStore.getById(1L) } returns account
                     every { accountStore.existsByNickname(Nickname("테스트닉네임")) } returns false
                     every { interestTagStore.findAllByTagKeys(listOf("TRAVEL", "INVALID")) } returns listOf(testTags[0])
 
