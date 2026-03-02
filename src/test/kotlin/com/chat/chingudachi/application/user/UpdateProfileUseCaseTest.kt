@@ -10,6 +10,7 @@ import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.account.TranslateLanguage
 import com.chat.chingudachi.domain.common.BadRequestException
 import com.chat.chingudachi.domain.common.ConflictException
+import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.domain.common.NotFoundException
 import com.chat.chingudachi.domain.interest.InterestTag
 import com.chat.chingudachi.domain.interest.UserInterest
@@ -52,7 +53,7 @@ class UpdateProfileUseCaseTest : DescribeSpec() {
                     )
                     val command = UpdateProfileCommand(nickname = "새닉네임")
 
-                    every { accountStore.findById(accountId) } returns account
+                    every { accountStore.getById(accountId) } returns account
                     every { accountStore.existsByNickname(Nickname("새닉네임")) } returns false
                     every { userInterestStore.findByAccountId(accountId) } returns emptyList()
 
@@ -75,7 +76,7 @@ class UpdateProfileUseCaseTest : DescribeSpec() {
                     )
                     val command = UpdateProfileCommand(nickname = "중복닉네임")
 
-                    every { accountStore.findById(accountId) } returns account
+                    every { accountStore.getById(accountId) } returns account
                     every { accountStore.existsByNickname(Nickname("중복닉네임")) } returns true
 
                     shouldThrow<ConflictException> {
@@ -96,7 +97,7 @@ class UpdateProfileUseCaseTest : DescribeSpec() {
                     )
                     val command = UpdateProfileCommand(nickname = "기존닉네임")
 
-                    every { accountStore.findById(accountId) } returns account
+                    every { accountStore.getById(accountId) } returns account
                     every { userInterestStore.findByAccountId(accountId) } returns emptyList()
 
                     val result = useCase.execute(accountId, command)
@@ -118,7 +119,7 @@ class UpdateProfileUseCaseTest : DescribeSpec() {
                     )
                     val command = UpdateProfileCommand(interests = listOf("TRAVEL", "FOOD"))
 
-                    every { accountStore.findById(accountId) } returns account
+                    every { accountStore.getById(accountId) } returns account
                     every { interestTagStore.findAllByTagKeys(listOf("TRAVEL", "FOOD")) } returns testTags
                     every { userInterestStore.findByAccountId(accountId) } returns testTags.map {
                         UserInterest(account = account, interestTag = it)
@@ -144,7 +145,7 @@ class UpdateProfileUseCaseTest : DescribeSpec() {
                     )
                     val command = UpdateProfileCommand(interests = emptyList())
 
-                    every { accountStore.findById(accountId) } returns account
+                    every { accountStore.getById(accountId) } returns account
 
                     shouldThrow<BadRequestException> {
                         useCase.execute(accountId, command)
@@ -164,7 +165,7 @@ class UpdateProfileUseCaseTest : DescribeSpec() {
                     )
                     val command = UpdateProfileCommand(interests = listOf("TRAVEL", "INVALID"))
 
-                    every { accountStore.findById(accountId) } returns account
+                    every { accountStore.getById(accountId) } returns account
                     every { interestTagStore.findAllByTagKeys(listOf("TRAVEL", "INVALID")) } returns listOf(testTags[0])
 
                     shouldThrow<BadRequestException> {
@@ -185,7 +186,7 @@ class UpdateProfileUseCaseTest : DescribeSpec() {
                     )
                     val command = UpdateProfileCommand(bio = "새로운 자기소개", city = "서울")
 
-                    every { accountStore.findById(accountId) } returns account
+                    every { accountStore.getById(accountId) } returns account
                     every { userInterestStore.findByAccountId(accountId) } returns emptyList()
 
                     val result = useCase.execute(accountId, command)
@@ -201,7 +202,7 @@ class UpdateProfileUseCaseTest : DescribeSpec() {
                 it("NotFoundException을 던진다") {
                     val command = UpdateProfileCommand(bio = "test")
 
-                    every { accountStore.findById(accountId) } returns null
+                    every { accountStore.getById(accountId) } throws NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND)
 
                     shouldThrow<NotFoundException> {
                         useCase.execute(accountId, command)

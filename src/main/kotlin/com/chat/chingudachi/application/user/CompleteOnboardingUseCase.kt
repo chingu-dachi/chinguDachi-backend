@@ -9,7 +9,6 @@ import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.common.BadRequestException
 import com.chat.chingudachi.domain.common.ConflictException
 import com.chat.chingudachi.domain.common.ErrorCode
-import com.chat.chingudachi.domain.common.NotFoundException
 import com.chat.chingudachi.domain.interest.UserInterest
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
@@ -25,8 +24,7 @@ class CompleteOnboardingUseCase(
 ) {
     @Transactional
     fun execute(accountId: Long, command: CompleteOnboardingCommand) {
-        val account = accountStore.findById(accountId)
-            ?: throw NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND)
+        val account = accountStore.getById(accountId)
 
         if (account.isOnboardingComplete()) {
             throw ConflictException(ErrorCode.ACCOUNT_ALREADY_ONBOARDED)

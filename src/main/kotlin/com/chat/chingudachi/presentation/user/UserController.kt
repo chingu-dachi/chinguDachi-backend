@@ -37,7 +37,7 @@ class UserController(
     @GetMapping("/{userId}")
     fun getUserProfile(@PathVariable userId: Long): UserResponse {
         val profile = getUserProfileUseCase.execute(userId)
-        return UserResponse.from(profile.account, profile.interests)
+        return UserResponse.from(profile)
     }
 
     @PatchMapping("/me")

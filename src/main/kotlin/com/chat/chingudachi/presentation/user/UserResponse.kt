@@ -1,7 +1,6 @@
 package com.chat.chingudachi.presentation.user
 
-import com.chat.chingudachi.domain.account.Account
-import com.chat.chingudachi.domain.interest.UserInterest
+import com.chat.chingudachi.application.user.UserPublicProfile
 import java.time.Instant
 
 data class UserResponse(
@@ -19,19 +18,19 @@ data class UserResponse(
     val createdAt: Instant,
 ) {
     companion object {
-        fun from(account: Account, interests: List<UserInterest>) = UserResponse(
-            userId = account.id.toString(),
-            nickname = account.nickname?.value,
-            profileImageUrl = account.profileImageUrl,
-            nationality = account.nation?.name,
-            translateLanguage = account.translateLanguage?.name?.lowercase(),
-            birthYear = account.birthDate?.year,
-            interests = interests.map { it.interestTag.tagKey },
-            bio = account.bio,
-            city = account.city,
+        fun from(profile: UserPublicProfile) = UserResponse(
+            userId = profile.userId.toString(),
+            nickname = profile.nickname,
+            profileImageUrl = profile.profileImageUrl,
+            nationality = profile.nationality,
+            translateLanguage = profile.translateLanguage,
+            birthYear = profile.birthYear,
+            interests = profile.interests,
+            bio = profile.bio,
+            city = profile.city,
             isOnline = false,
             lastSeenAt = null,
-            createdAt = account.createdAt,
+            createdAt = profile.createdAt,
         )
     }
 }

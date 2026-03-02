@@ -4,8 +4,9 @@ import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.application.user.port.UserInterestStore
 import com.chat.chingudachi.domain.account.AccountStatus
 import com.chat.chingudachi.domain.account.Nation
-import com.chat.chingudachi.domain.account.TranslateLanguage
 import com.chat.chingudachi.domain.account.Nickname
+import com.chat.chingudachi.domain.account.TranslateLanguage
+import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.domain.common.NotFoundException
 import com.chat.chingudachi.domain.interest.InterestTag
 import com.chat.chingudachi.domain.interest.UserInterest
@@ -32,7 +33,7 @@ class GetMyProfileUseCaseTest : DescribeSpec() {
             context("온보딩 미완료 유저") {
                 it("기본 프로필과 빈 관심사를 반환한다") {
                     val account = AccountFixture.create(id = accountId)
-                    every { accountStore.findById(accountId) } returns account
+                    every { accountStore.getById(accountId) } returns account
                     every { userInterestStore.findByAccountId(accountId) } returns emptyList()
 
                     val result = useCase.execute(accountId)
@@ -56,7 +57,7 @@ class GetMyProfileUseCaseTest : DescribeSpec() {
                     val tag = InterestTag(id = 1, tagKey = "TRAVEL", labelKo = "여행", labelJa = "旅行", displayOrder = 1)
                     val interest = UserInterest(account = account, interestTag = tag)
 
-                    every { accountStore.findById(accountId) } returns account
+                    every { accountStore.getById(accountId) } returns account
                     every { userInterestStore.findByAccountId(accountId) } returns listOf(interest)
 
                     val result = useCase.execute(accountId)
@@ -69,7 +70,7 @@ class GetMyProfileUseCaseTest : DescribeSpec() {
 
             context("존재하지 않는 계정") {
                 it("NotFoundException을 던진다") {
-                    every { accountStore.findById(accountId) } returns null
+                    every { accountStore.getById(accountId) } throws NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND)
 
                     shouldThrow<NotFoundException> {
                         useCase.execute(accountId)

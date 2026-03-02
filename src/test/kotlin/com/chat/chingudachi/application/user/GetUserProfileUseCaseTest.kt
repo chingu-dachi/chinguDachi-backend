@@ -6,6 +6,7 @@ import com.chat.chingudachi.domain.account.AccountStatus
 import com.chat.chingudachi.domain.account.Nation
 import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.account.TranslateLanguage
+import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.domain.common.NotFoundException
 import com.chat.chingudachi.domain.interest.InterestTag
 import com.chat.chingudachi.domain.interest.UserInterest
@@ -30,7 +31,7 @@ class GetUserProfileUseCaseTest : DescribeSpec() {
             val userId = 1L
 
             context("ACTIVE 유저") {
-                it("프로필과 관심사를 반환한다") {
+                it("UserPublicProfile을 반환한다") {
                     val account = AccountFixture.create(
                         id = userId,
                         accountStatus = AccountStatus.ACTIVE,
@@ -42,14 +43,17 @@ class GetUserProfileUseCaseTest : DescribeSpec() {
                     val tag = InterestTag(id = 1, tagKey = "TRAVEL", labelKo = "여행", labelJa = "旅行", displayOrder = 1)
                     val interest = UserInterest(account = account, interestTag = tag)
 
-                    every { accountStore.findById(userId) } returns account
+                    every { accountStore.getById(userId) } returns account
                     every { userInterestStore.findByAccountId(userId) } returns listOf(interest)
 
                     val result = useCase.execute(userId)
 
-                    result.account.nickname?.value shouldBe "테스트유저"
-                    result.interests.size shouldBe 1
-                    result.interests[0].interestTag.tagKey shouldBe "TRAVEL"
+                    result.userId shouldBe userId
+                    result.nickname shouldBe "테스트유저"
+                    result.nationality shouldBe "KR"
+                    result.translateLanguage shouldBe "ja"
+                    result.birthYear shouldBe 1995
+                    result.interests shouldBe listOf("TRAVEL")
                 }
             }
 
@@ -59,7 +63,7 @@ class GetUserProfileUseCaseTest : DescribeSpec() {
                         id = userId,
                         accountStatus = AccountStatus.NOT_CONSENT,
                     )
-                    every { accountStore.findById(userId) } returns account
+                    every { accountStore.getById(userId) } returns account
 
                     shouldThrow<NotFoundException> {
                         useCase.execute(userId)
@@ -67,19 +71,27 @@ class GetUserProfileUseCaseTest : DescribeSpec() {
                 }
             }
 
-            context("삭제된 유저") {
+            context("INACTIVE 유저") {
                 it("NotFoundException을 던진다") {
                     val account = AccountFixture.create(
                         id = userId,
-                        accountStatus = AccountStatus.ACTIVE,
-                        nickname = Nickname("삭제유저"),
-                        birthDate = LocalDate.of(1995, 5, 15),
-                        nation = Nation.KR,
-                        translateLanguage = TranslateLanguage.JA,
+                        accountStatus = AccountStatus.INACTIVE,
                     )
-                    account.deletedAt = java.time.Instant.now()
+                    every { accountStore.getById(userId) } returns account
 
-                    every { accountStore.findById(userId) } returns account
+                    shouldThrow<NotFoundException> {
+                        useCase.execute(userId)
+                    }
+                }
+            }
+
+            context("SUSPENDED 유저") {
+                it("NotFoundException을 던진다") {
+                    val account = AccountFixture.create(
+                        id = userId,
+                        accountStatus = AccountStatus.SUSPENDED,
+                    )
+                    every { accountStore.getById(userId) } returns account
 
                     shouldThrow<NotFoundException> {
                         useCase.execute(userId)
@@ -89,7 +101,7 @@ class GetUserProfileUseCaseTest : DescribeSpec() {
 
             context("존재하지 않는 유저") {
                 it("NotFoundException을 던진다") {
-                    every { accountStore.findById(userId) } returns null
+                    every { accountStore.getById(userId) } throws NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND)
 
                     shouldThrow<NotFoundException> {
                         useCase.execute(userId)
