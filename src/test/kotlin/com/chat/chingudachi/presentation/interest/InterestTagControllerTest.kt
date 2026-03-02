@@ -39,11 +39,11 @@ class InterestTagControllerTest(
                     mockMvc.get("/api/interest-tags")
                         .andExpect {
                             status { isOk() }
-                            jsonPath("$.data.length()") { value(3) }
-                            jsonPath("$.data[0].tagKey") { value("TRAVEL") }
-                            jsonPath("$.data[0].displayOrder") { value(1) }
-                            jsonPath("$.data[1].tagKey") { value("FOOD") }
-                            jsonPath("$.data[2].tagKey") { value("MUSIC") }
+                            jsonPath("$.length()") { value(3) }
+                            jsonPath("$[0].tagKey") { value("TRAVEL") }
+                            jsonPath("$[0].displayOrder") { value(1) }
+                            jsonPath("$[1].tagKey") { value("FOOD") }
+                            jsonPath("$[2].tagKey") { value("MUSIC") }
                             header { string("Cache-Control", "max-age=3600, public") }
                         }
                 }
@@ -54,8 +54,8 @@ class InterestTagControllerTest(
                     mockMvc.get("/api/interest-tags")
                         .andExpect {
                             status { isOk() }
-                            jsonPath("$.data") { isArray() }
-                            jsonPath("$.data.length()") { value(0) }
+                            jsonPath("$") { isArray() }
+                            jsonPath("$.length()") { value(0) }
                         }
                 }
             }
