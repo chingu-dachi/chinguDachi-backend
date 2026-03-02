@@ -3,8 +3,6 @@ package com.chat.chingudachi.application.user
 import com.chat.chingudachi.application.auth.port.AuthTokenStore
 import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.application.user.port.UserInterestStore
-import com.chat.chingudachi.domain.common.ErrorCode
-import com.chat.chingudachi.domain.common.NotFoundException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -19,8 +17,7 @@ class DeleteAccountUseCase(
 ) {
     @Transactional
     fun execute(accountId: Long) {
-        val account = accountStore.findById(accountId)
-            ?: throw NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND)
+        val account = accountStore.getById(accountId)
         account.softDelete()
         accountStore.save(account)
         userInterestStore.deleteByAccountId(accountId)

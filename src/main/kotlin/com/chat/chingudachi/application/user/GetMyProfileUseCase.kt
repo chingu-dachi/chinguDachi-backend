@@ -3,8 +3,6 @@ package com.chat.chingudachi.application.user
 import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.application.user.port.UserInterestStore
 import com.chat.chingudachi.domain.account.Account
-import com.chat.chingudachi.domain.common.ErrorCode
-import com.chat.chingudachi.domain.common.NotFoundException
 import com.chat.chingudachi.domain.interest.UserInterest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -16,8 +14,7 @@ class GetMyProfileUseCase(
 ) {
     @Transactional(readOnly = true)
     fun execute(accountId: Long): MyProfile {
-        val account = accountStore.findById(accountId)
-            ?: throw NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND)
+        val account = accountStore.getById(accountId)
         val interests = userInterestStore.findByAccountId(accountId)
         return MyProfile(account, interests)
     }

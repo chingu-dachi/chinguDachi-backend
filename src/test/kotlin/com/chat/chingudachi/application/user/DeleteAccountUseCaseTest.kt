@@ -6,6 +6,7 @@ import com.chat.chingudachi.application.user.port.UserInterestStore
 import com.chat.chingudachi.domain.account.AccountStatus
 import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.common.ConflictException
+import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.domain.common.NotFoundException
 import com.chat.chingudachi.fixture.AccountFixture
 import io.kotest.assertions.throwables.shouldThrow
@@ -36,7 +37,7 @@ class DeleteAccountUseCaseTest : DescribeSpec() {
                         accountStatus = AccountStatus.ACTIVE,
                         nickname = Nickname("테스트유저"),
                     )
-                    every { accountStore.findById(accountId) } returns account
+                    every { accountStore.getById(accountId) } returns account
                     every { accountStore.save(account) } returns account
                     every { authTokenStore.deleteByAccountId(accountId) } returns Unit
                     every { userInterestStore.deleteByAccountId(accountId) } returns Unit
@@ -55,7 +56,7 @@ class DeleteAccountUseCaseTest : DescribeSpec() {
             context("존재하지 않는 계정") {
                 it("NotFoundException을 던진다") {
                     val accountId = 999L
-                    every { accountStore.findById(accountId) } returns null
+                    every { accountStore.getById(accountId) } throws NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND)
 
                     shouldThrow<NotFoundException> {
                         useCase.execute(accountId)
@@ -71,7 +72,7 @@ class DeleteAccountUseCaseTest : DescribeSpec() {
                         accountStatus = AccountStatus.INACTIVE,
                     )
                     account.deletedAt = Instant.now()
-                    every { accountStore.findById(accountId) } returns account
+                    every { accountStore.getById(accountId) } returns account
 
                     shouldThrow<ConflictException> {
                         useCase.execute(accountId)

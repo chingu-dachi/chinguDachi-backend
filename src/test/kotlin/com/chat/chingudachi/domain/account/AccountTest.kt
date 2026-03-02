@@ -47,6 +47,38 @@ class AccountTest : DescribeSpec() {
             }
         }
 
+        describe("isActive") {
+            it("ACTIVE 상태이면 true를 반환한다") {
+                val account = AccountFixture.create(accountStatus = AccountStatus.ACTIVE)
+
+                account.isActive() shouldBe true
+            }
+
+            it("INACTIVE 상태이면 false를 반환한다") {
+                val account = AccountFixture.create(accountStatus = AccountStatus.INACTIVE)
+
+                account.isActive() shouldBe false
+            }
+
+            it("SUSPENDED 상태이면 false를 반환한다") {
+                val account = AccountFixture.create(accountStatus = AccountStatus.SUSPENDED)
+
+                account.isActive() shouldBe false
+            }
+
+            it("NOT_CONSENT 상태이면 false를 반환한다") {
+                val account = AccountFixture.create(accountStatus = AccountStatus.NOT_CONSENT)
+
+                account.isActive() shouldBe false
+            }
+
+            it("NOT_ENOUGH_DETAIL 상태이면 false를 반환한다") {
+                val account = AccountFixture.create(accountStatus = AccountStatus.NOT_ENOUGH_DETAIL)
+
+                account.isActive() shouldBe false
+            }
+        }
+
         describe("completeOnboarding") {
             it("상태를 ACTIVE로 변경하고 프로필 필드를 설정한다") {
                 val account = AccountFixture.create()
@@ -64,6 +96,56 @@ class AccountTest : DescribeSpec() {
                 account.bio shouldBe "자기소개"
                 account.city shouldBe "서울"
                 account.isOnboardingComplete() shouldBe true
+            }
+        }
+
+        describe("updateProfile") {
+            it("전달된 필드만 업데이트한다") {
+                val account = AccountFixture.create(
+                    accountStatus = AccountStatus.ACTIVE,
+                    nickname = Nickname("기존닉네임"),
+                )
+
+                account.updateProfile(bio = "새 자기소개", city = "도쿄")
+
+                account.bio shouldBe "새 자기소개"
+                account.city shouldBe "도쿄"
+                account.nickname shouldBe Nickname("기존닉네임")
+                account.profileImageUrl shouldBe null
+            }
+
+            it("null 필드는 기존 값을 유지한다") {
+                val account = AccountFixture.create(
+                    accountStatus = AccountStatus.ACTIVE,
+                    nickname = Nickname("기존닉네임"),
+                )
+                account.bio = "기존 소개"
+                account.city = "서울"
+
+                account.updateProfile(nickname = Nickname("새닉네임"))
+
+                account.nickname shouldBe Nickname("새닉네임")
+                account.bio shouldBe "기존 소개"
+                account.city shouldBe "서울"
+            }
+
+            it("모든 필드를 한 번에 업데이트할 수 있다") {
+                val account = AccountFixture.create(
+                    accountStatus = AccountStatus.ACTIVE,
+                    nickname = Nickname("기존닉네임"),
+                )
+
+                account.updateProfile(
+                    nickname = Nickname("새닉네임"),
+                    bio = "새 소개",
+                    city = "오사카",
+                    profileImageUrl = "https://example.com/img.jpg",
+                )
+
+                account.nickname shouldBe Nickname("새닉네임")
+                account.bio shouldBe "새 소개"
+                account.city shouldBe "오사카"
+                account.profileImageUrl shouldBe "https://example.com/img.jpg"
             }
         }
 
