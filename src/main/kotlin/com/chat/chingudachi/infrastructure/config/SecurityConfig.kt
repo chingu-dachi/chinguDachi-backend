@@ -37,7 +37,8 @@ class SecurityConfig(
                 sessionCreationPolicy = SessionCreationPolicy.STATELESS
             }
             authorizeHttpRequests {
-                authorize("/api/auth/**", permitAll)
+                authorize(HttpMethod.POST, "/api/auth/google", permitAll)
+                authorize(HttpMethod.POST, "/api/auth/refresh", permitAll)
                 authorize(HttpMethod.GET, "/api/interest-tags", permitAll)
                 authorize(HttpMethod.GET, "/api/users/check-nickname", permitAll)
                 authorize("/error", permitAll)

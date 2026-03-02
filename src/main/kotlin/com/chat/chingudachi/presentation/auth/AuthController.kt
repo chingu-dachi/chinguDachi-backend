@@ -1,13 +1,17 @@
 package com.chat.chingudachi.presentation.auth
 
 import com.chat.chingudachi.application.auth.AuthenticateUseCase
+import com.chat.chingudachi.application.auth.LogoutUseCase
 import com.chat.chingudachi.application.auth.RefreshTokenUseCase
 import com.chat.chingudachi.application.auth.port.TokenProvider
 import com.chat.chingudachi.application.auth.command.AuthenticateCommand
 import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.domain.common.UnauthorizedException
+import com.chat.chingudachi.presentation.common.AuthAccountId
+import com.chat.chingudachi.presentation.common.addRefreshTokenCookie
+import com.chat.chingudachi.presentation.common.clearRefreshTokenCookie
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.http.ResponseCookie
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CookieValue
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/auth")
 class AuthController(
     private val authenticateUseCase: AuthenticateUseCase,
+    private val logoutUseCase: LogoutUseCase,
     private val refreshTokenUseCase: RefreshTokenUseCase,
     private val tokenProvider: TokenProvider,
 ) {
@@ -27,11 +32,21 @@ class AuthController(
         response: HttpServletResponse,
     ): LoginResponse {
         val result = authenticateUseCase.authenticate(AuthenticateCommand(request.code, request.redirectUri))
-        addRefreshTokenCookie(response, result.refreshToken)
+        addRefreshTokenCookie(response, result.refreshToken, tokenProvider.refreshTokenExpiry)
         return LoginResponse(
             accessToken = result.accessToken,
             onboardingRequired = result.onboardingRequired,
         )
+    }
+
+    @PostMapping("/logout")
+    fun logout(
+        @AuthAccountId accountId: Long,
+        response: HttpServletResponse,
+    ): ResponseEntity<Unit> {
+        logoutUseCase.execute(accountId)
+        clearRefreshTokenCookie(response)
+        return ResponseEntity.noContent().build()
     }
 
     @PostMapping("/refresh")
@@ -43,22 +58,11 @@ class AuthController(
             throw UnauthorizedException(ErrorCode.AUTH_REFRESH_TOKEN_INVALID)
         }
         val result = refreshTokenUseCase.refresh(refreshToken)
-        addRefreshTokenCookie(response, result.refreshToken)
+        addRefreshTokenCookie(response, result.refreshToken, tokenProvider.refreshTokenExpiry)
         return LoginResponse(
             accessToken = result.accessToken,
             onboardingRequired = result.onboardingRequired,
         )
-    }
-
-    private fun addRefreshTokenCookie(response: HttpServletResponse, refreshToken: String) {
-        val cookie = ResponseCookie.from("refreshToken", refreshToken)
-            .httpOnly(true)
-            .secure(true)
-            .sameSite("Lax")
-            .path("/api/auth/refresh")
-            .maxAge(tokenProvider.refreshTokenExpiry)
-            .build()
-        response.addHeader("Set-Cookie", cookie.toString())
     }
 }
 

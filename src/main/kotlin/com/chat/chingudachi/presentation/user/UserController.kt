@@ -2,6 +2,7 @@ package com.chat.chingudachi.presentation.user
 
 import com.chat.chingudachi.application.user.CheckNicknameUseCase
 import com.chat.chingudachi.application.user.CompleteOnboardingUseCase
+import com.chat.chingudachi.application.user.DeleteAccountUseCase
 import com.chat.chingudachi.application.user.GetMyProfileUseCase
 import com.chat.chingudachi.application.user.GetUserProfileUseCase
 import com.chat.chingudachi.application.user.MyProfile
@@ -9,6 +10,10 @@ import com.chat.chingudachi.application.user.UpdateProfileUseCase
 import com.chat.chingudachi.application.user.command.CompleteOnboardingCommand
 import com.chat.chingudachi.application.user.command.UpdateProfileCommand
 import com.chat.chingudachi.presentation.common.AuthAccountId
+import com.chat.chingudachi.presentation.common.clearRefreshTokenCookie
+import jakarta.servlet.http.HttpServletResponse
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -27,6 +32,7 @@ class UserController(
     private val completeOnboardingUseCase: CompleteOnboardingUseCase,
     private val getUserProfileUseCase: GetUserProfileUseCase,
     private val updateProfileUseCase: UpdateProfileUseCase,
+    private val deleteAccountUseCase: DeleteAccountUseCase,
 ) {
     @GetMapping("/me")
     fun getMyProfile(@AuthAccountId accountId: Long): MyProfileResponse {
@@ -61,6 +67,16 @@ class UserController(
         @RequestBody request: CompleteOnboardingRequest,
     ) {
         completeOnboardingUseCase.execute(accountId, request.toCommand())
+    }
+
+    @DeleteMapping("/me")
+    fun deleteAccount(
+        @AuthAccountId accountId: Long,
+        response: HttpServletResponse,
+    ): ResponseEntity<Unit> {
+        deleteAccountUseCase.execute(accountId)
+        clearRefreshTokenCookie(response)
+        return ResponseEntity.noContent().build()
     }
 }
 

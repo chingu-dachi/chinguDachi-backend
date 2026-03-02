@@ -1,8 +1,12 @@
 package com.chat.chingudachi.domain.account
 
+import com.chat.chingudachi.domain.common.ConflictException
 import com.chat.chingudachi.fixture.AccountFixture
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import java.time.Instant
 import java.time.LocalDate
 
 class AccountTest : DescribeSpec() {
@@ -142,6 +146,40 @@ class AccountTest : DescribeSpec() {
                 account.bio shouldBe "새 소개"
                 account.city shouldBe "오사카"
                 account.profileImageUrl shouldBe "https://example.com/img.jpg"
+            }
+        }
+
+        describe("softDelete") {
+            it("deletedAt을 설정하고 상태를 INACTIVE로 변경한다") {
+                val account = AccountFixture.create(
+                    accountStatus = AccountStatus.ACTIVE,
+                    nickname = Nickname("테스트유저"),
+                )
+
+                account.softDelete()
+
+                account.deletedAt shouldNotBe null
+                account.accountStatus shouldBe AccountStatus.INACTIVE
+            }
+
+            it("닉네임을 null로 설정한다") {
+                val account = AccountFixture.create(
+                    accountStatus = AccountStatus.ACTIVE,
+                    nickname = Nickname("테스트유저"),
+                )
+
+                account.softDelete()
+
+                account.nickname shouldBe null
+            }
+
+            it("이미 삭제된 계정이면 ConflictException을 던진다") {
+                val account = AccountFixture.create(accountStatus = AccountStatus.INACTIVE)
+                account.deletedAt = Instant.now()
+
+                shouldThrow<ConflictException> {
+                    account.softDelete()
+                }
             }
         }
     }

@@ -1,6 +1,8 @@
 package com.chat.chingudachi.domain.account
 
 import com.chat.chingudachi.domain.common.BaseTimeEntity
+import com.chat.chingudachi.domain.common.ConflictException
+import com.chat.chingudachi.domain.common.ErrorCode
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -77,6 +79,15 @@ class Account(
         bio?.let { this.bio = it }
         city?.let { this.city = it }
         profileImageUrl?.let { this.profileImageUrl = it }
+    }
+
+    fun softDelete() {
+        if (deletedAt != null) {
+            throw ConflictException(ErrorCode.ACCOUNT_ALREADY_DELETED)
+        }
+        deletedAt = Instant.now()
+        accountStatus = AccountStatus.INACTIVE
+        nickname = null
     }
 }
 
