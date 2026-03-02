@@ -8,8 +8,9 @@ import com.chat.chingudachi.application.auth.command.AuthenticateCommand
 import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.domain.common.UnauthorizedException
 import com.chat.chingudachi.presentation.common.AuthAccountId
+import com.chat.chingudachi.presentation.common.addRefreshTokenCookie
+import com.chat.chingudachi.presentation.common.clearRefreshTokenCookie
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CookieValue
 import org.springframework.web.bind.annotation.PostMapping
@@ -31,7 +32,7 @@ class AuthController(
         response: HttpServletResponse,
     ): LoginResponse {
         val result = authenticateUseCase.authenticate(AuthenticateCommand(request.code, request.redirectUri))
-        addRefreshTokenCookie(response, result.refreshToken)
+        addRefreshTokenCookie(response, result.refreshToken, tokenProvider.refreshTokenExpiry)
         return LoginResponse(
             accessToken = result.accessToken,
             onboardingRequired = result.onboardingRequired,
@@ -57,33 +58,11 @@ class AuthController(
             throw UnauthorizedException(ErrorCode.AUTH_REFRESH_TOKEN_INVALID)
         }
         val result = refreshTokenUseCase.refresh(refreshToken)
-        addRefreshTokenCookie(response, result.refreshToken)
+        addRefreshTokenCookie(response, result.refreshToken, tokenProvider.refreshTokenExpiry)
         return LoginResponse(
             accessToken = result.accessToken,
             onboardingRequired = result.onboardingRequired,
         )
-    }
-
-    private fun addRefreshTokenCookie(response: HttpServletResponse, refreshToken: String) {
-        val cookie = ResponseCookie.from("refreshToken", refreshToken)
-            .httpOnly(true)
-            .secure(true)
-            .sameSite("Lax")
-            .path("/api/auth/refresh")
-            .maxAge(tokenProvider.refreshTokenExpiry)
-            .build()
-        response.addHeader("Set-Cookie", cookie.toString())
-    }
-
-    private fun clearRefreshTokenCookie(response: HttpServletResponse) {
-        val cookie = ResponseCookie.from("refreshToken", "")
-            .httpOnly(true)
-            .secure(true)
-            .sameSite("Lax")
-            .path("/api/auth/refresh")
-            .maxAge(0)
-            .build()
-        response.addHeader("Set-Cookie", cookie.toString())
     }
 }
 

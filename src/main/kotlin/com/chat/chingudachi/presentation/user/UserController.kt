@@ -7,8 +7,8 @@ import com.chat.chingudachi.application.user.command.CompleteOnboardingCommand
 import com.chat.chingudachi.application.user.GetMyProfileUseCase
 import com.chat.chingudachi.application.user.MyProfile
 import com.chat.chingudachi.presentation.common.AuthAccountId
+import com.chat.chingudachi.presentation.common.clearRefreshTokenCookie
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -55,17 +55,6 @@ class UserController(
         deleteAccountUseCase.execute(accountId)
         clearRefreshTokenCookie(response)
         return ResponseEntity.noContent().build()
-    }
-
-    private fun clearRefreshTokenCookie(response: HttpServletResponse) {
-        val cookie = ResponseCookie.from("refreshToken", "")
-            .httpOnly(true)
-            .secure(true)
-            .sameSite("Lax")
-            .path("/api/auth/refresh")
-            .maxAge(0)
-            .build()
-        response.addHeader("Set-Cookie", cookie.toString())
     }
 }
 
