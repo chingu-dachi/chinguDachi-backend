@@ -1,7 +1,9 @@
 package com.chat.chingudachi.infrastructure.persistence.chat
 
+import com.chat.chingudachi.application.chat.port.ChatMessageStore
 import com.chat.chingudachi.application.chat.port.ChatRoomStore
 import com.chat.chingudachi.application.chat.port.RoomMemberStore
+import com.chat.chingudachi.domain.chat.ChatMessage
 import com.chat.chingudachi.domain.chat.ChatRoom
 import com.chat.chingudachi.domain.chat.RoomMember
 import org.springframework.data.domain.PageRequest
@@ -44,4 +46,14 @@ class RoomMemberStoreAdapter(
 
     override fun findByRoomIdAndAccountId(roomId: Long, accountId: Long): RoomMember? =
         roomMemberRepository.findByChatRoomIdAndAccountId(roomId, accountId)
+}
+
+@Repository
+class ChatMessageStoreAdapter(
+    private val chatMessageRepository: ChatMessageRepository,
+) : ChatMessageStore {
+    override fun save(message: ChatMessage): ChatMessage = chatMessageRepository.save(message)
+
+    override fun findByRoomId(roomId: Long, cursor: Long?, size: Int): List<ChatMessage> =
+        chatMessageRepository.findByRoomId(roomId, cursor, PageRequest.of(0, size))
 }

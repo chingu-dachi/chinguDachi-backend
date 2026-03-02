@@ -47,4 +47,7 @@ enum class ErrorCode(
     CHAT_ROOM_TARGET_NOT_ACTIVE(HttpStatus.BAD_REQUEST, "Target user is not active"),
     CHAT_NOT_A_MEMBER(HttpStatus.FORBIDDEN, "Not a member of this chat room"),
     CHAT_ROOM_GROUP_NOT_SUPPORTED(HttpStatus.BAD_REQUEST, "Group chat is not supported yet"),
+    CHAT_MESSAGE_EMPTY(HttpStatus.BAD_REQUEST, "Message must not be empty"),
+    CHAT_MESSAGE_TOO_LONG(HttpStatus.BAD_REQUEST, "Message must be 1000 characters or less"),
+    CHAT_ROOM_NOT_ACTIVE(HttpStatus.BAD_REQUEST, "Chat room is not active"),
 }
