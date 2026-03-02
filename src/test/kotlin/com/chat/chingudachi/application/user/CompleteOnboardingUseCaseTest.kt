@@ -6,6 +6,7 @@ import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.application.user.port.UserInterestStore
 import com.chat.chingudachi.domain.account.AccountStatus
 import com.chat.chingudachi.domain.account.Nation
+import com.chat.chingudachi.domain.account.NativeLanguage
 import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.common.BadRequestException
 import com.chat.chingudachi.domain.common.ConflictException
@@ -76,7 +77,14 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
 
             context("이미 온보딩 완료된 계정") {
                 it("ConflictException을 던진다") {
-                    val account = AccountFixture.create(id = 1, accountStatus = AccountStatus.ACTIVE)
+                    val account = AccountFixture.create(
+                        id = 1,
+                        accountStatus = AccountStatus.ACTIVE,
+                        nickname = Nickname("기존닉네임"),
+                        birthDate = LocalDate.of(1995, 5, 15),
+                        nation = Nation.KR,
+                        nativeLanguage = NativeLanguage.KO,
+                    )
                     every { accountStore.findById(1L) } returns account
 
                     shouldThrow<ConflictException> {

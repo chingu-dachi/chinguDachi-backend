@@ -10,6 +10,7 @@ import com.chat.chingudachi.domain.common.UnauthorizedException
 import com.chat.chingudachi.infrastructure.oauth.dto.GoogleTokenResponse
 import com.chat.chingudachi.infrastructure.oauth.dto.GoogleUserInfoResponse
 import org.springframework.http.HttpHeaders
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
@@ -18,7 +19,7 @@ import org.springframework.web.client.RestClientException
 
 @Component
 class GoogleOAuthClient(
-    private val restClient: RestClient,
+    @Qualifier("googleRestClient") private val restClient: RestClient,
     private val properties: GoogleOAuthProperties,
 ) : OAuthClient {
     override fun authenticate(code: String, redirectUri: String?): OAuthUserInfo {

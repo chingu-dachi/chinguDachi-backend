@@ -52,16 +52,16 @@ class MdcLoggingFilterTest : DescribeSpec() {
                     capturedUri shouldBe "/api/accounts"
                 }
 
-                it("MDC에 userId를 anonymous로 설정한다") {
+                it("MDC에 accountId를 0으로 초기화한다") {
                     val request = MockHttpServletRequest("GET", "/api/test")
                     val response = MockHttpServletResponse()
-                    var capturedUserId: String? = null
+                    var capturedAccountId: String? = null
 
                     filter.doFilter(request, response, capturingChain {
-                        capturedUserId = MDC.get(MdcLoggingFilter.USER_ID)
+                        capturedAccountId = MDC.get(MdcLoggingFilter.ACCOUNT_ID)
                     })
 
-                    capturedUserId shouldBe "anonymous"
+                    capturedAccountId shouldBe "0"
                 }
             }
 
@@ -138,7 +138,7 @@ class MdcLoggingFilterTest : DescribeSpec() {
                     MDC.get(MdcLoggingFilter.METHOD).shouldBeNull()
                     MDC.get(MdcLoggingFilter.URI).shouldBeNull()
                     MDC.get(MdcLoggingFilter.CLIENT_IP).shouldBeNull()
-                    MDC.get(MdcLoggingFilter.USER_ID).shouldBeNull()
+                    MDC.get(MdcLoggingFilter.ACCOUNT_ID).shouldBeNull()
                 }
 
                 it("예외 발생 시에도 MDC를 클리어한다") {
