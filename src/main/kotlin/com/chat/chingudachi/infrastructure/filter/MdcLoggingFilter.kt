@@ -18,7 +18,7 @@ class MdcLoggingFilter : OncePerRequestFilter() {
         const val METHOD = "method"
         const val URI = "uri"
         const val CLIENT_IP = "clientIp"
-        const val USER_ID = "userId"
+        const val ACCOUNT_ID = "accountId"
         const val USER_AGENT = "userAgent"
         const val ORIGIN = "origin"
 
@@ -46,8 +46,6 @@ class MdcLoggingFilter : OncePerRequestFilter() {
         MDC.put(METHOD, request.method)
         MDC.put(URI, request.requestURI)
         MDC.put(CLIENT_IP, resolveClientIp(request))
-        // TODO: Auth 구현 시 SecurityContextHolder에서 userId 추출로 교체
-        MDC.put(USER_ID, "anonymous")
         MDC.put(USER_AGENT, request.getHeader("User-Agent") ?: "")
         MDC.put(ORIGIN, request.getHeader("Origin") ?: "")
     }

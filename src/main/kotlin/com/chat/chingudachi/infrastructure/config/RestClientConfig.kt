@@ -8,8 +8,8 @@ import java.time.Duration
 
 @Configuration
 class RestClientConfig {
-    @Bean
-    fun restClient(): RestClient {
+    @Bean("googleRestClient")
+    fun googleRestClient(): RestClient {
         val factory = SimpleClientHttpRequestFactory()
         factory.setConnectTimeout(Duration.ofSeconds(5))
         factory.setReadTimeout(Duration.ofSeconds(10))

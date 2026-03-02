@@ -3,8 +3,8 @@ package com.chat.chingudachi.infrastructure.config
 import com.chat.chingudachi.application.auth.port.TokenProvider
 import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.infrastructure.security.JwtAuthenticationFilter
-import com.chat.chingudachi.presentation.common.ApiResponse
 import jakarta.servlet.http.HttpServletResponse
+import java.time.Instant
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -51,9 +51,17 @@ class SecurityConfig(
 
     private fun authenticationEntryPoint() =
         org.springframework.security.web.AuthenticationEntryPoint { _, response, _ ->
+            val errorCode = ErrorCode.UNAUTHORIZED
+            val errorBody = mapOf(
+                "code" to errorCode.name,
+                "data" to null,
+                "message" to errorCode.message,
+                "isSuccess" to false,
+                "timestamp" to Instant.now(),
+            )
             response.status = HttpServletResponse.SC_UNAUTHORIZED
             response.contentType = MediaType.APPLICATION_JSON_VALUE
-            objectMapper.writeValue(response.outputStream, ApiResponse.error(ErrorCode.UNAUTHORIZED))
+            objectMapper.writeValue(response.outputStream, errorBody)
         }
 }
 

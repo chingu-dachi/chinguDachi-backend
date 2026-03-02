@@ -5,9 +5,10 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.slf4j.MDC
+import com.chat.chingudachi.infrastructure.filter.MdcLoggingFilter
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import org.slf4j.MDC
 import org.springframework.web.filter.OncePerRequestFilter
 
 private val log = KotlinLogging.logger {}
@@ -21,23 +22,19 @@ class JwtAuthenticationFilter(
         response: HttpServletResponse,
         filterChain: FilterChain,
     ) {
-        try {
-            extractToken(request)?.let { token ->
-                if (tokenProvider.validateToken(token)) {
-                    val accountId = tokenProvider.parseAccountId(token)
-                    val authentication = UsernamePasswordAuthenticationToken.authenticated(
-                        accountId, null, emptyList(),
-                    )
-                    SecurityContextHolder.getContext().authentication = authentication
-                    MDC.put("userId", accountId.toString())
-                } else {
-                    log.debug { "JWT validation failed for request: ${request.requestURI}" }
-                }
+        extractToken(request)?.let { token ->
+            if (tokenProvider.validateToken(token)) {
+                val accountId = tokenProvider.parseAccountId(token)
+                val authentication = UsernamePasswordAuthenticationToken.authenticated(
+                    accountId, null, emptyList(),
+                )
+                SecurityContextHolder.getContext().authentication = authentication
+                MDC.put(MdcLoggingFilter.ACCOUNT_ID, accountId.toString())
+            } else {
+                log.debug { "JWT validation failed for request: ${request.requestURI}" }
             }
-            filterChain.doFilter(request, response)
-        } finally {
-            MDC.remove("userId")
         }
+        filterChain.doFilter(request, response)
     }
 
     private fun extractToken(request: HttpServletRequest): String? {

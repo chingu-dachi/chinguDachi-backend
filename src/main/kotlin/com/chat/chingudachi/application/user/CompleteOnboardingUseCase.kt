@@ -4,7 +4,6 @@ import com.chat.chingudachi.application.interest.port.InterestTagStore
 import com.chat.chingudachi.application.user.command.CompleteOnboardingCommand
 import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.application.user.port.UserInterestStore
-import com.chat.chingudachi.domain.account.AccountStatus
 import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.common.BadRequestException
 import com.chat.chingudachi.domain.common.ConflictException
@@ -28,7 +27,7 @@ class CompleteOnboardingUseCase(
         val account = accountStore.findById(accountId)
             ?: throw NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND)
 
-        if (account.accountStatus != AccountStatus.NOT_CONSENT) {
+        if (account.isOnboardingComplete()) {
             throw ConflictException(ErrorCode.ACCOUNT_ALREADY_ONBOARDED)
         }
 

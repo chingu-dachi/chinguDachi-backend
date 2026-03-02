@@ -20,6 +20,7 @@ class JwtAuthenticationFilterTest : DescribeSpec() {
     init {
         afterEach {
             SecurityContextHolder.clearContext()
+            MDC.clear()
             clearMocks(tokenProvider)
         }
 
@@ -40,7 +41,7 @@ class JwtAuthenticationFilterTest : DescribeSpec() {
                     auth.isAuthenticated shouldBe true
                 }
 
-                it("필터 완료 후 MDC userId가 정리된다") {
+                it("인증 성공 시 MDC에 accountId를 설정한다") {
                     val request = MockHttpServletRequest("GET", "/api/users/me")
                     request.addHeader("Authorization", "Bearer valid-token")
                     val response = MockHttpServletResponse()
@@ -50,7 +51,7 @@ class JwtAuthenticationFilterTest : DescribeSpec() {
 
                     filter.doFilter(request, response, MockFilterChain())
 
-                    MDC.get("userId").shouldBeNull()
+                    MDC.get("accountId") shouldBe "42"
                 }
             }
 
