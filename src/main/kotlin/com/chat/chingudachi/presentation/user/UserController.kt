@@ -2,10 +2,14 @@ package com.chat.chingudachi.presentation.user
 
 import com.chat.chingudachi.application.user.CheckNicknameUseCase
 import com.chat.chingudachi.application.user.CompleteOnboardingUseCase
+import com.chat.chingudachi.application.user.DiscoverUsersUseCase
 import com.chat.chingudachi.application.user.command.CompleteOnboardingCommand
 import com.chat.chingudachi.application.user.GetMyProfileUseCase
 import com.chat.chingudachi.application.user.MyProfile
+import com.chat.chingudachi.application.user.query.DiscoverUsersQuery
+import com.chat.chingudachi.domain.account.Nation
 import com.chat.chingudachi.presentation.common.AuthAccountId
+import com.chat.chingudachi.presentation.common.PaginatedResponse
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -20,7 +24,31 @@ class UserController(
     private val getMyProfileUseCase: GetMyProfileUseCase,
     private val checkNicknameUseCase: CheckNicknameUseCase,
     private val completeOnboardingUseCase: CompleteOnboardingUseCase,
+    private val discoverUsersUseCase: DiscoverUsersUseCase,
 ) {
+    @GetMapping
+    fun discoverUsers(
+        @AuthAccountId accountId: Long,
+        @RequestParam(required = false) nationality: String?,
+        @RequestParam(required = false) interests: List<String>?,
+        @RequestParam(required = false) cursor: String?,
+        @RequestParam(defaultValue = "20") size: Int,
+    ): PaginatedResponse<UserResponse> {
+        val query = DiscoverUsersQuery(
+            currentUserId = accountId,
+            nationality = nationality?.let { Nation.valueOf(it) },
+            interests = interests,
+            cursor = cursor?.toLongOrNull(),
+            size = size.coerceIn(1, 50),
+        )
+        val result = discoverUsersUseCase.execute(query)
+        return PaginatedResponse(
+            items = result.items.map { UserResponse.from(it.account, it.interests) },
+            nextCursor = result.nextCursor?.toString(),
+            hasMore = result.hasMore,
+        )
+    }
+
     @GetMapping("/me")
     fun getMyProfile(@AuthAccountId accountId: Long): MyProfileResponse {
         val profile = getMyProfileUseCase.execute(accountId)

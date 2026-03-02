@@ -11,6 +11,9 @@ class UserInterestStoreAdapter(
     override fun findByAccountId(accountId: Long): List<UserInterest> =
         userInterestRepository.findByAccountId(accountId)
 
+    override fun findByAccountIds(accountIds: List<Long>): List<UserInterest> =
+        userInterestRepository.findByAccountIdIn(accountIds)
+
     override fun saveAll(userInterests: List<UserInterest>): List<UserInterest> =
         userInterestRepository.saveAll(userInterests)
 
