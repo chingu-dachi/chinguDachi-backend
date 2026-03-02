@@ -2,12 +2,16 @@ package com.chat.chingudachi.presentation.chat
 
 import com.chat.chingudachi.application.chat.CreateChatRoomUseCase
 import com.chat.chingudachi.application.chat.GetChatRoomsUseCase
+import com.chat.chingudachi.application.chat.GetMessagesUseCase
 import com.chat.chingudachi.application.chat.result.ChatParticipant
 import com.chat.chingudachi.application.chat.result.ChatRoomResult
+import com.chat.chingudachi.application.chat.result.MessageItem
+import com.chat.chingudachi.application.chat.result.MessagesResult
 import com.chat.chingudachi.presentation.common.AuthAccountId
 import com.chat.chingudachi.presentation.common.PaginatedResponse
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -21,6 +25,7 @@ import java.time.Instant
 class ChatRoomController(
     private val createChatRoomUseCase: CreateChatRoomUseCase,
     private val getChatRoomsUseCase: GetChatRoomsUseCase,
+    private val getMessagesUseCase: GetMessagesUseCase,
 ) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -40,6 +45,20 @@ class ChatRoomController(
         val result = getChatRoomsUseCase.execute(accountId, cursor)
         return PaginatedResponse(
             items = result.items.map { ChatRoomResponse.from(it) },
+            nextCursor = result.nextCursor,
+            hasMore = result.hasMore,
+        )
+    }
+
+    @GetMapping("/{roomId}/messages")
+    fun getMessages(
+        @AuthAccountId accountId: Long,
+        @PathVariable roomId: Long,
+        @RequestParam(required = false) cursor: Long?,
+    ): PaginatedResponse<MessageResponse> {
+        val result = getMessagesUseCase.execute(accountId, roomId, cursor)
+        return PaginatedResponse(
+            items = result.items.map { MessageResponse.from(it) },
             nextCursor = result.nextCursor,
             hasMore = result.hasMore,
         )
@@ -82,6 +101,24 @@ data class ParticipantResponse(
             profileImageUrl = participant.profileImageUrl,
             nationality = participant.nationality,
             unreadCount = participant.unreadCount,
+        )
+    }
+}
+
+data class MessageResponse(
+    val messageId: String,
+    val senderId: String,
+    val content: String,
+    val messageStatus: String,
+    val createdAt: Instant,
+) {
+    companion object {
+        fun from(item: MessageItem) = MessageResponse(
+            messageId = item.messageId.toString(),
+            senderId = item.senderId.toString(),
+            content = item.content,
+            messageStatus = item.messageStatus,
+            createdAt = item.createdAt,
         )
     }
 }
