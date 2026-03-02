@@ -5,7 +5,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
-import java.time.Instant
 
 interface RoomMemberRepository : JpaRepository<RoomMember, Long> {
     @Query(
@@ -15,30 +14,17 @@ interface RoomMemberRepository : JpaRepository<RoomMember, Long> {
         WHERE rm.accountId = :accountId
         AND rm.memberStatus = 'JOINED'
         AND cr.roomStatus = 'ACTIVE'
-        ORDER BY cr.lastMessageAt DESC NULLS LAST
+        AND (:cursor IS NULL OR cr.id < :cursor)
+        ORDER BY cr.id DESC
         """,
     )
     fun findByAccountId(
         @Param("accountId") accountId: Long,
+        @Param("cursor") cursor: Long?,
         pageable: Pageable,
     ): List<RoomMember>
 
-    @Query(
-        """
-        SELECT rm FROM RoomMember rm
-        JOIN FETCH rm.chatRoom cr
-        WHERE rm.accountId = :accountId
-        AND rm.memberStatus = 'JOINED'
-        AND cr.roomStatus = 'ACTIVE'
-        AND cr.lastMessageAt < :cursor
-        ORDER BY cr.lastMessageAt DESC NULLS LAST
-        """,
-    )
-    fun findByAccountIdWithCursor(
-        @Param("accountId") accountId: Long,
-        @Param("cursor") cursor: Instant,
-        pageable: Pageable,
-    ): List<RoomMember>
+    fun findByChatRoomIdIn(chatRoomIds: List<Long>): List<RoomMember>
 
     fun findByChatRoomId(chatRoomId: Long): List<RoomMember>
 

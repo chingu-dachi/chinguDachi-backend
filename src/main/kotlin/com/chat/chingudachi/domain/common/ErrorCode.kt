@@ -46,4 +46,5 @@ enum class ErrorCode(
     CHAT_ROOM_SELF_CHAT(HttpStatus.BAD_REQUEST, "Cannot create chat room with yourself"),
     CHAT_ROOM_TARGET_NOT_ACTIVE(HttpStatus.BAD_REQUEST, "Target user is not active"),
     CHAT_NOT_A_MEMBER(HttpStatus.FORBIDDEN, "Not a member of this chat room"),
+    CHAT_ROOM_GROUP_NOT_SUPPORTED(HttpStatus.BAD_REQUEST, "Group chat is not supported yet"),
 }

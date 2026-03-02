@@ -20,6 +20,6 @@ data class ChatParticipant(
 
 data class ChatRoomsResult(
     val items: List<ChatRoomResult>,
-    val nextCursor: Instant?,
+    val nextCursor: Long?,
     val hasMore: Boolean,
 )

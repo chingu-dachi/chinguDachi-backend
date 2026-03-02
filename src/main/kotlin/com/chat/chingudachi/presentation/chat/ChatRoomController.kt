@@ -4,7 +4,6 @@ import com.chat.chingudachi.application.chat.CreateChatRoomUseCase
 import com.chat.chingudachi.application.chat.GetChatRoomsUseCase
 import com.chat.chingudachi.application.chat.result.ChatParticipant
 import com.chat.chingudachi.application.chat.result.ChatRoomResult
-import com.chat.chingudachi.application.common.PaginationConstants
 import com.chat.chingudachi.presentation.common.AuthAccountId
 import com.chat.chingudachi.presentation.common.PaginatedResponse
 import org.springframework.http.HttpStatus
@@ -29,28 +28,26 @@ class ChatRoomController(
         @AuthAccountId accountId: Long,
         @RequestBody request: CreateChatRoomRequest,
     ): ChatRoomResponse {
-        val result = createChatRoomUseCase.execute(accountId, request.targetUserId)
+        val result = createChatRoomUseCase.execute(accountId, request.memberIds)
         return ChatRoomResponse.from(result)
     }
 
     @GetMapping
     fun getChatRooms(
         @AuthAccountId accountId: Long,
-        @RequestParam(required = false) cursor: Instant?,
-        @RequestParam(defaultValue = "20") size: Int,
+        @RequestParam(required = false) cursor: Long?,
     ): PaginatedResponse<ChatRoomResponse> {
-        val validSize = size.coerceIn(1, PaginationConstants.MAX_SIZE)
-        val result = getChatRoomsUseCase.execute(accountId, cursor, validSize)
+        val result = getChatRoomsUseCase.execute(accountId, cursor)
         return PaginatedResponse(
             items = result.items.map { ChatRoomResponse.from(it) },
-            nextCursor = result.nextCursor?.toEpochMilli(),
+            nextCursor = result.nextCursor,
             hasMore = result.hasMore,
         )
     }
 }
 
 data class CreateChatRoomRequest(
-    val targetUserId: Long,
+    val memberIds: List<Long>,
 )
 
 data class ChatRoomResponse(

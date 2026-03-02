@@ -16,19 +16,19 @@ GET /api/chat-rooms
 ### Query Parameters
 | 파라미터 | 타입 | 필수 | 기본값 | 설명 |
 |----------|------|------|--------|------|
-| cursor | Instant (epoch millis) | N | null (첫 페이지) | lastMessageAt 기반 커서 |
-| size | Int | N | 20 | 페이지 크기 (1~50) |
+| cursor | Long | N | null (첫 페이지) | chatRoom.id 기반 커서 |
 
 ### 요청 예시
 ```
-GET /api/chat-rooms?size=20
-GET /api/chat-rooms?cursor=1709366400000&size=10
+GET /api/chat-rooms
+GET /api/chat-rooms?cursor=42
 ```
 
 ## 동작
 - 내가 JOINED 상태인 ACTIVE 채팅방만 반환
-- `lastMessageAt DESC NULLS LAST` 정렬 (최신 메시지 순)
-- 커서 페이지네이션: `size + 1` 조회 → `hasMore` 판단
+- chatRoom.id DESC 정렬 (PK index 활용)
+- 커서 페이지네이션: 내부 고정 size 20, `size + 1` 조회 → `hasMore` 판단
+- N+1 해결: 배치 IN 쿼리 (3쿼리로 처리)
 
 ## 응답
 
@@ -61,7 +61,7 @@ GET /api/chat-rooms?cursor=1709366400000&size=10
         "createdAt": "2026-03-01T10:00:00Z"
       }
     ],
-    "nextCursor": 1709366400000,
+    "nextCursor": 42,
     "hasMore": false
   },
   "message": "success",
@@ -78,9 +78,18 @@ GET /api/chat-rooms?cursor=1709366400000&size=10
 
 ## 의사결정
 
-### 커서 타입: Instant → epoch millis
-- `nextCursor`는 Long (epoch millis)으로 반환
-- PostgreSQL `NULLS LAST` 지원으로 lastMessageAt이 null인 방은 마지막에 정렬
+### 커서 타입: chatRoom.id (Long)
+- PK index 활용으로 Instant 대비 성능 개선
+- `(:cursor IS NULL OR cr.id < :cursor)` 패턴으로 쿼리 1개로 통합
+- Long 타입은 PostgreSQL nullable 파라미터 타입 추론 이슈 없음
 
-### JPQL 쿼리 분리
-- cursor null/non-null에 따라 별도 쿼리 — PostgreSQL이 nullable Instant 파라미터 타입 추론 불가 이슈 회피
+### size 파라미터 제거
+- 내부 상수 20 고정 (PaginationConstants.DEFAULT_SIZE)
+- 클라이언트가 size를 제어할 필요 없음
+
+### N+1 쿼리 해결
+- 배치 IN 쿼리 패턴 (3쿼리)
+- 쿼리 1: 내 RoomMember + ChatRoom (JOIN FETCH, 커서 페이징)
+- 쿼리 2: RoomMember WHERE chat_room_id IN (:roomIds)
+- 쿼리 3: Account WHERE id IN (:accountIds)
+- 상세: [chat-room-query-optimization.md](../chat-room-query-optimization.md)

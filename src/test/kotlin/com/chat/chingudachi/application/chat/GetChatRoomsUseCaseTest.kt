@@ -34,7 +34,7 @@ class GetChatRoomsUseCaseTest : DescribeSpec() {
                 it("빈 리스트와 hasMore=false를 반환한다") {
                     every { roomMemberStore.findByAccountId(myId, null, 21) } returns emptyList()
 
-                    val result = useCase.execute(myId, null, 20)
+                    val result = useCase.execute(myId, null)
 
                     result.items.shouldBeEmpty()
                     result.hasMore shouldBe false
@@ -64,11 +64,10 @@ class GetChatRoomsUseCaseTest : DescribeSpec() {
                     )
 
                     every { roomMemberStore.findByAccountId(myId, null, 21) } returns listOf(myMember)
-                    every { roomMemberStore.findByRoomId(10L) } returns listOf(myMember, otherMember)
-                    every { accountStore.getById(myId) } returns me
-                    every { accountStore.getById(otherId) } returns other
+                    every { roomMemberStore.findByRoomIds(listOf(10L)) } returns listOf(myMember, otherMember)
+                    every { accountStore.findByIds(listOf(myId, otherId)) } returns listOf(me, other)
 
-                    val result = useCase.execute(myId, null, 20)
+                    val result = useCase.execute(myId, null)
 
                     result.items shouldHaveSize 1
                     result.items[0].roomId shouldBe 10L
@@ -78,15 +77,15 @@ class GetChatRoomsUseCaseTest : DescribeSpec() {
             }
 
             context("커서 페이지네이션") {
-                it("hasMore가 올바르게 설정된다") {
+                it("21개 반환 시 hasMore=true, 20개만 결과에 포함") {
                     val now = Instant.now()
-                    val rooms = (1..3).map { i ->
+                    val rooms = (1..21).map { i ->
                         ChatRoomFixture.create(
-                            id = i.toLong(),
+                            id = (22 - i).toLong(),
                             lastMessageAt = now.minusSeconds(i.toLong()),
                         )
                     }
-                    val members = rooms.map { room ->
+                    val myMembers = rooms.map { room ->
                         RoomMemberFixture.create(chatRoom = room, accountId = myId)
                     }
                     val me = AccountFixture.create(
@@ -97,19 +96,20 @@ class GetChatRoomsUseCaseTest : DescribeSpec() {
                         translateLanguage = TranslateLanguage.JA,
                     )
 
-                    every { roomMemberStore.findByAccountId(myId, null, 3) } returns members
-                    rooms.forEach { room ->
-                        every { roomMemberStore.findByRoomId(room.id) } returns listOf(
-                            RoomMemberFixture.create(chatRoom = room, accountId = myId),
-                        )
+                    val resultRoomIds = rooms.dropLast(1).map { it.id }
+                    val resultRoomMembers = rooms.dropLast(1).map { room ->
+                        RoomMemberFixture.create(chatRoom = room, accountId = myId)
                     }
-                    every { accountStore.getById(myId) } returns me
 
-                    val result = useCase.execute(myId, null, 2)
+                    every { roomMemberStore.findByAccountId(myId, null, 21) } returns myMembers
+                    every { roomMemberStore.findByRoomIds(resultRoomIds) } returns resultRoomMembers
+                    every { accountStore.findByIds(listOf(myId)) } returns listOf(me)
 
-                    result.items shouldHaveSize 2
+                    val result = useCase.execute(myId, null)
+
+                    result.items shouldHaveSize 20
                     result.hasMore shouldBe true
-                    result.nextCursor shouldBe rooms[1].lastMessageAt
+                    result.nextCursor shouldBe resultRoomIds.last()
                 }
             }
         }

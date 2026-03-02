@@ -2,6 +2,7 @@ package com.chat.chingudachi.fixture
 
 import com.chat.chingudachi.domain.chat.ChatRoom
 import com.chat.chingudachi.domain.chat.RoomStatus
+import com.chat.chingudachi.domain.chat.RoomType
 import java.time.Instant
 
 object ChatRoomFixture {
@@ -9,14 +10,18 @@ object ChatRoomFixture {
         id: Long = 1L,
         roomName: String = "테스트, ユーザー",
         roomOwnerId: Long = 1L,
+        roomType: RoomType = RoomType.DIRECT,
         roomStatus: RoomStatus = RoomStatus.ACTIVE,
+        directPairKey: String? = null,
         lastMessageAt: Instant? = null,
     ): ChatRoom =
         ChatRoom(
             id = id,
             roomName = roomName,
             roomOwnerId = roomOwnerId,
+            roomType = roomType,
             roomStatus = roomStatus,
+            directPairKey = directPairKey,
             lastMessageAt = lastMessageAt,
         )
 }

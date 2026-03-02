@@ -9,19 +9,12 @@ interface ChatRoomRepository : JpaRepository<ChatRoom, Long> {
     @Query(
         """
         SELECT cr FROM ChatRoom cr
-        WHERE cr.id IN (
-            SELECT rm1.chatRoom.id FROM RoomMember rm1
-            WHERE rm1.accountId = :accountId1 AND rm1.memberStatus = 'JOINED'
-        )
-        AND cr.id IN (
-            SELECT rm2.chatRoom.id FROM RoomMember rm2
-            WHERE rm2.accountId = :accountId2 AND rm2.memberStatus = 'JOINED'
-        )
+        WHERE cr.roomType = 'DIRECT'
         AND cr.roomStatus = 'ACTIVE'
+        AND cr.directPairKey = :directPairKey
         """,
     )
-    fun findByMembers(
-        @Param("accountId1") accountId1: Long,
-        @Param("accountId2") accountId2: Long,
+    fun findDirectRoom(
+        @Param("directPairKey") directPairKey: String,
     ): ChatRoom?
 }

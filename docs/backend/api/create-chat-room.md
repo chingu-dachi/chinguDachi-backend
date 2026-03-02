@@ -17,21 +17,23 @@ POST /api/chat-rooms
 ### Body
 | 필드 | 타입 | 필수 | 설명 |
 |------|------|------|------|
-| targetUserId | Long | Y | 채팅 대상 유저 ID |
+| memberIds | List\<Long\> | Y | 채팅 대상 유저 ID 목록 (현재 1:1만 지원, 1개만 허용) |
 
 ### 요청 예시
 ```json
 {
-  "targetUserId": 42
+  "memberIds": [42]
 }
 ```
 
 ## 동작
+- memberIds.size != 1 → 400 (CHAT_ROOM_GROUP_NOT_SUPPORTED) — 그룹챗 미지원
 - 자기 자신에게 생성 시도 → 400 (CHAT_ROOM_SELF_CHAT)
 - 대상 유저가 ACTIVE가 아닌 경우 → 400 (CHAT_ROOM_TARGET_NOT_ACTIVE)
 - 이미 두 유저 간 ACTIVE 채팅방 존재 시 → 기존 방 반환 (멱등)
 - 없으면 새 채팅방 + RoomMember 2명 생성
 - roomName: "나닉네임, 상대닉네임" 형식
+- 동시 요청 시 DB unique constraint(directPairKey)로 중복 방지 → 기존 방 반환
 
 ## 응답
 
@@ -71,6 +73,7 @@ POST /api/chat-rooms
 
 | 상태 | 에러 코드 | 설명 |
 |------|-----------|------|
+| 400 | CHAT_ROOM_GROUP_NOT_SUPPORTED | 그룹챗 시도 (memberIds 2개 이상) |
 | 400 | CHAT_ROOM_SELF_CHAT | 자기 자신에게 채팅방 생성 |
 | 400 | CHAT_ROOM_TARGET_NOT_ACTIVE | 대상 유저가 비활성 상태 |
 | 401 | UNAUTHORIZED | JWT 없음 또는 유효하지 않음 |
@@ -78,9 +81,21 @@ POST /api/chat-rooms
 
 ## 의사결정
 
+### memberIds 리스트 방식
+- 그룹챗 확장 대비: targetUserId → memberIds 변경
+- 현재는 1:1만 허용 (size != 1 → 에러)
+
 ### 멱등성
 - 같은 두 유저 간 중복 생성 요청 시 기존 방을 반환
-- JPQL 서브쿼리로 양쪽 모두 JOINED 상태인 ACTIVE 방 검색
+- directPairKey (정렬된 ID 쌍, 예: "1:42") 기반 조회
+
+### 레이스 컨디션 방어
+- directPairKey에 Partial Unique Index (ACTIVE 방에만)
+- DataIntegrityViolationException 발생 시 재조회 → 기존 방 반환
+
+### roomType
+- DIRECT: 1:1 채팅 (directPairKey 사용)
+- GROUP: 그룹 채팅 (Phase 2+, directPairKey NULL)
 
 ### ID 타입
 - 프론트엔드 계약: ID는 string — `Long.toString()` 변환

@@ -69,7 +69,7 @@ class ChatRoomControllerTest(
                     mockMvc.post("/api/chat-rooms") {
                         header("Authorization", "Bearer $myToken")
                         contentType = MediaType.APPLICATION_JSON
-                        content = """{"targetUserId":${targetAccount.id}}"""
+                        content = """{"memberIds":[${targetAccount.id}]}"""
                     }.andExpect {
                         status { isCreated() }
                         jsonPath("$.data.roomId") { isNotEmpty() }
@@ -87,7 +87,7 @@ class ChatRoomControllerTest(
                     mockMvc.post("/api/chat-rooms") {
                         header("Authorization", "Bearer $myToken")
                         contentType = MediaType.APPLICATION_JSON
-                        content = """{"targetUserId":${myAccount.id}}"""
+                        content = """{"memberIds":[${myAccount.id}]}"""
                     }.andExpect {
                         status { isBadRequest() }
                         jsonPath("$.code") { value("CHAT_ROOM_SELF_CHAT") }
@@ -115,14 +115,14 @@ class ChatRoomControllerTest(
                     mockMvc.post("/api/chat-rooms") {
                         header("Authorization", "Bearer $myToken")
                         contentType = MediaType.APPLICATION_JSON
-                        content = """{"targetUserId":${targetAccount.id}}"""
+                        content = """{"memberIds":[${targetAccount.id}]}"""
                     }.andExpect { status { isCreated() } }
 
                     // 두 번째 시도 — 기존 방 반환
                     mockMvc.post("/api/chat-rooms") {
                         header("Authorization", "Bearer $myToken")
                         contentType = MediaType.APPLICATION_JSON
-                        content = """{"targetUserId":${targetAccount.id}}"""
+                        content = """{"memberIds":[${targetAccount.id}]}"""
                     }.andExpect {
                         status { isCreated() }
                         jsonPath("$.data.participants.length()") { value(2) }
@@ -137,7 +137,7 @@ class ChatRoomControllerTest(
                 it("401을 반환한다") {
                     mockMvc.post("/api/chat-rooms") {
                         contentType = MediaType.APPLICATION_JSON
-                        content = """{"targetUserId":999}"""
+                        content = """{"memberIds":[999]}"""
                     }.andExpect {
                         status { isUnauthorized() }
                     }
@@ -182,7 +182,7 @@ class ChatRoomControllerTest(
                     mockMvc.post("/api/chat-rooms") {
                         header("Authorization", "Bearer $token")
                         contentType = MediaType.APPLICATION_JSON
-                        content = """{"targetUserId":${target.id}}"""
+                        content = """{"memberIds":[${target.id}]}"""
                     }.andExpect { status { isCreated() } }
 
                     mockMvc.get("/api/chat-rooms") {

@@ -7,7 +7,6 @@ import com.chat.chingudachi.domain.chat.RoomMember
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Repository
-import java.time.Instant
 
 @Repository
 class ChatRoomStoreAdapter(
@@ -17,8 +16,10 @@ class ChatRoomStoreAdapter(
 
     override fun findById(id: Long): ChatRoom? = chatRoomRepository.findByIdOrNull(id)
 
-    override fun findByMembers(accountId1: Long, accountId2: Long): ChatRoom? =
-        chatRoomRepository.findByMembers(accountId1, accountId2)
+    override fun findDirectRoom(accountId1: Long, accountId2: Long): ChatRoom? =
+        chatRoomRepository.findDirectRoom(
+            directPairKey = ChatRoom.buildPairKey(accountId1, accountId2),
+        )
 }
 
 @Repository
@@ -30,17 +31,16 @@ class RoomMemberStoreAdapter(
     override fun saveAll(roomMembers: List<RoomMember>): List<RoomMember> =
         roomMemberRepository.saveAll(roomMembers)
 
-    override fun findByAccountId(accountId: Long, cursor: Instant?, size: Int): List<RoomMember> {
-        val pageable = PageRequest.of(0, size)
-        return if (cursor != null) {
-            roomMemberRepository.findByAccountIdWithCursor(accountId, cursor, pageable)
-        } else {
-            roomMemberRepository.findByAccountId(accountId, pageable)
-        }
-    }
+    override fun findByAccountId(accountId: Long, cursor: Long?, size: Int): List<RoomMember> =
+        roomMemberRepository.findByAccountId(accountId, cursor, PageRequest.of(0, size))
 
     override fun findByRoomId(roomId: Long): List<RoomMember> =
         roomMemberRepository.findByChatRoomId(roomId)
+
+    override fun findByRoomIds(roomIds: List<Long>): List<RoomMember> {
+        if (roomIds.isEmpty()) return emptyList()
+        return roomMemberRepository.findByChatRoomIdIn(roomIds)
+    }
 
     override fun findByRoomIdAndAccountId(roomId: Long, accountId: Long): RoomMember? =
         roomMemberRepository.findByChatRoomIdAndAccountId(roomId, accountId)
