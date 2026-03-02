@@ -6,11 +6,13 @@ import com.chat.chingudachi.application.auth.port.AuthTokenStore
 import com.chat.chingudachi.domain.account.Account
 import com.chat.chingudachi.domain.account.AccountCredential
 import com.chat.chingudachi.domain.account.CredentialType
+import com.chat.chingudachi.domain.account.Nation
 import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.auth.AuthToken
 import com.chat.chingudachi.infrastructure.persistence.account.AccountCredentialRepository
 import com.chat.chingudachi.infrastructure.persistence.account.AccountRepository
 import com.chat.chingudachi.infrastructure.persistence.auth.AuthTokenRepository
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Repository
 
@@ -21,6 +23,32 @@ class AccountStoreAdapter(
     override fun save(account: Account): Account = accountRepository.save(account)
     override fun findById(id: Long): Account? = accountRepository.findByIdOrNull(id)
     override fun existsByNickname(nickname: Nickname): Boolean = accountRepository.existsByNickname(nickname)
+
+    override fun findDiscoverableUsers(
+        excludeAccountId: Long,
+        nationality: Nation?,
+        interests: List<String>?,
+        cursor: Long?,
+        size: Int,
+    ): List<Account> {
+        val pageable = PageRequest.of(0, size)
+        return if (interests.isNullOrEmpty()) {
+            accountRepository.findDiscoverableUsers(
+                excludeAccountId = excludeAccountId,
+                nationality = nationality,
+                cursor = cursor,
+                pageable = pageable,
+            )
+        } else {
+            accountRepository.findDiscoverableUsersByInterests(
+                excludeAccountId = excludeAccountId,
+                nationality = nationality,
+                interests = interests,
+                cursor = cursor,
+                pageable = pageable,
+            )
+        }
+    }
 }
 
 @Repository

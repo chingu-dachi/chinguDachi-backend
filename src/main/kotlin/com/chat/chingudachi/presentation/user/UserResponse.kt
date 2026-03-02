@@ -13,8 +13,6 @@ data class UserResponse(
     val interests: List<String>,
     val bio: String?,
     val city: String?,
-    val isOnline: Boolean,
-    val lastSeenAt: Instant?,
     val createdAt: Instant,
 ) {
     companion object {
@@ -28,8 +26,6 @@ data class UserResponse(
             interests = profile.interests,
             bio = profile.bio,
             city = profile.city,
-            isOnline = false,
-            lastSeenAt = null,
             createdAt = profile.createdAt,
         )
     }

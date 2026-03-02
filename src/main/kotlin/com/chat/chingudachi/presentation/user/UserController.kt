@@ -1,15 +1,20 @@
 package com.chat.chingudachi.presentation.user
 
+import com.chat.chingudachi.application.common.PaginationConstants
 import com.chat.chingudachi.application.user.CheckNicknameUseCase
 import com.chat.chingudachi.application.user.CompleteOnboardingUseCase
 import com.chat.chingudachi.application.user.DeleteAccountUseCase
+import com.chat.chingudachi.application.user.DiscoverUsersUseCase
 import com.chat.chingudachi.application.user.GetMyProfileUseCase
 import com.chat.chingudachi.application.user.GetUserProfileUseCase
 import com.chat.chingudachi.application.user.MyProfile
 import com.chat.chingudachi.application.user.UpdateProfileUseCase
 import com.chat.chingudachi.application.user.command.CompleteOnboardingCommand
 import com.chat.chingudachi.application.user.command.UpdateProfileCommand
+import com.chat.chingudachi.application.user.query.DiscoverUsersQuery
+import com.chat.chingudachi.domain.account.Nation
 import com.chat.chingudachi.presentation.common.AuthAccountId
+import com.chat.chingudachi.presentation.common.PaginatedResponse
 import com.chat.chingudachi.presentation.common.clearRefreshTokenCookie
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.ResponseEntity
@@ -30,10 +35,34 @@ class UserController(
     private val getMyProfileUseCase: GetMyProfileUseCase,
     private val checkNicknameUseCase: CheckNicknameUseCase,
     private val completeOnboardingUseCase: CompleteOnboardingUseCase,
+    private val discoverUsersUseCase: DiscoverUsersUseCase,
     private val getUserProfileUseCase: GetUserProfileUseCase,
     private val updateProfileUseCase: UpdateProfileUseCase,
     private val deleteAccountUseCase: DeleteAccountUseCase,
 ) {
+    @GetMapping
+    fun discoverUsers(
+        @AuthAccountId accountId: Long,
+        @RequestParam(required = false) nationality: Nation?,
+        @RequestParam(required = false) interests: List<String>?,
+        @RequestParam(required = false) cursor: Long?,
+        @RequestParam(defaultValue = "20") size: Int,
+    ): PaginatedResponse<UserResponse> {
+        val query = DiscoverUsersQuery(
+            currentUserId = accountId,
+            nationality = nationality,
+            interests = interests,
+            cursor = cursor,
+            size = size.coerceIn(1, PaginationConstants.MAX_SIZE),
+        )
+        val result = discoverUsersUseCase.execute(query)
+        return PaginatedResponse(
+            items = result.items.map { UserResponse.from(it) },
+            nextCursor = result.nextCursor,
+            hasMore = result.hasMore,
+        )
+    }
+
     @GetMapping("/me")
     fun getMyProfile(@AuthAccountId accountId: Long): MyProfileResponse {
         val profile = getMyProfileUseCase.execute(accountId)
