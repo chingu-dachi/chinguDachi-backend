@@ -4,7 +4,7 @@ import com.chat.chingudachi.domain.account.Account
 import com.chat.chingudachi.domain.account.AccountStatus
 import com.chat.chingudachi.domain.account.AccountType
 import com.chat.chingudachi.domain.account.Nation
-import com.chat.chingudachi.domain.account.NativeLanguage
+import com.chat.chingudachi.domain.account.TranslateLanguage
 import com.chat.chingudachi.domain.account.Nickname
 import java.time.LocalDate
 
@@ -17,7 +17,7 @@ object AccountFixture {
         nickname: Nickname? = null,
         birthDate: LocalDate? = null,
         nation: Nation? = null,
-        nativeLanguage: NativeLanguage? = null,
+        translateLanguage: TranslateLanguage? = null,
     ): Account =
         Account(
             id = id,
@@ -27,6 +27,6 @@ object AccountFixture {
             nickname = nickname,
             birthDate = birthDate,
             nation = nation,
-            nativeLanguage = nativeLanguage,
+            translateLanguage = translateLanguage,
         )
 }

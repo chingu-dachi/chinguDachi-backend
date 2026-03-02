@@ -4,7 +4,7 @@ import com.chat.chingudachi.application.auth.port.AuthTokenStore
 import com.chat.chingudachi.application.auth.port.TokenProvider
 import com.chat.chingudachi.domain.account.AccountStatus
 import com.chat.chingudachi.domain.account.Nation
-import com.chat.chingudachi.domain.account.NativeLanguage
+import com.chat.chingudachi.domain.account.TranslateLanguage
 import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.domain.common.UnauthorizedException
@@ -76,7 +76,7 @@ class RefreshTokenUseCaseTest : DescribeSpec() {
                         nickname = Nickname("테스트유저"),
                         birthDate = LocalDate.of(1995, 5, 15),
                         nation = Nation.KR,
-                        nativeLanguage = NativeLanguage.KO,
+                        translateLanguage = TranslateLanguage.JA,
                     )
                     val authToken = AuthTokenFixture.create(
                         account = completedAccount,

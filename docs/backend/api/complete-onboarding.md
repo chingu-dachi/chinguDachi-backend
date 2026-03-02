@@ -33,7 +33,7 @@ PUT /api/users/profile
 ```
 
 ## 비즈니스 규칙
-- `nativeLanguage`는 `nation`에서 자동 파생 (KR → KO, JP → JA)
+- `translateLanguage`는 `nation`에서 자동 파생 (KR → JA, JP → KO)
 - 기존 관심사를 전체 삭제 후 새로 저장 (replace 전략)
 - 온보딩 완료 시 accountStatus: NOT_CONSENT → ACTIVE
 
