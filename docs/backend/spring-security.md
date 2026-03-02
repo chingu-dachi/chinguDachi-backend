@@ -23,10 +23,17 @@ SecurityContext를 설정하지 않고 필터 체인을 계속 진행. Spring Se
 
 ## SecurityConfig 경로 규칙
 
-| 경로 | 권한 | 설명 |
-|------|------|------|
-| `/api/auth/**` | permitAll | 로그인, 리프레시 |
-| 그 외 모든 경로 | authenticated | JWT 인증 필요 |
+| 경로 | 메서드 | 권한 | 설명 |
+|------|--------|------|------|
+| `/api/auth/google` | POST | permitAll | Google OAuth 로그인 |
+| `/api/auth/refresh` | POST | permitAll | 토큰 갱신 |
+| `/api/interest-tags` | GET | permitAll | 관심사 태그 목록 |
+| `/api/users/check-nickname` | GET | permitAll | 닉네임 중복 확인 |
+| `/error` | ALL | permitAll | Spring 에러 페이지 |
+| 그 외 모든 경로 | ALL | authenticated | JWT 인증 필요 |
+
+> **변경 이력 (BE-21)**: 기존 `/api/auth/**` 와일드카드를 `POST /api/auth/google`, `POST /api/auth/refresh`로 분리.
+> `POST /api/auth/logout`은 인증 필수 (누구의 토큰을 폐기할지 알아야 하므로).
 
 ## SecurityContextUtil
 

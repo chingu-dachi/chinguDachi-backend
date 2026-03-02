@@ -1,5 +1,8 @@
 # 프로필 이미지 업로드
 
+> **현재 상태: Stub** — S3 연동 전까지 검증만 수행하고 `"DEFAULT"` URL을 반환합니다.
+> 실제 파일 저장은 S3 연동 시 구현 예정.
+
 ## 엔드포인트
 POST /api/uploads/profile-image
 
@@ -21,16 +24,16 @@ POST /api/uploads/profile-image
 
 ### 제약 조건
 - **파일 크기**: 최대 5MB
-- **허용 포맷**: JPEG, PNG, WebP
+- **허용 포맷**: JPEG, PNG, WebP (`image/jpeg`, `image/png`, `image/webp`)
 
 ## 응답
 
-### 성공 (200 OK)
+### 성공 (200 OK) — Stub
 ```json
 {
   "code": null,
   "data": {
-    "imageUrl": "http://localhost:8080/uploads/profile-images/550e8400-e29b-41d4-a716-446655440000.jpg"
+    "imageUrl": "DEFAULT"
   },
   "message": "success",
   "isSuccess": true,
@@ -48,10 +51,12 @@ POST /api/uploads/profile-image
 
 ## 구현 상세
 
-### 저장 방식
-- 로컬: `uploads/profile-images/` 디렉토리에 UUID 파일명으로 저장
-- 파일 서빙: `GET /uploads/profile-images/{filename}` (인증 불필요)
+### 현재 동작 (Stub)
+- 파일 크기, 포맷 검증만 수행
+- 검증 통과 시 `"DEFAULT"` 문자열 반환 (실제 저장 없음)
+- `FileStore.saveProfileImage()`는 호출하지 않음
 
 ### 아키텍처
-- `FileStore` 포트 → `LocalFileStoreAdapter` (로컬)
-- 추후 S3 등 클라우드 스토리지로 교체 시 어댑터만 변경
+- `FileStore` 포트 인터페이스 → `LocalFileStoreAdapter` 구현체 존재
+- S3 연동 시 `UploadProfileImageUseCase`에서 `fileStore.saveProfileImage()` 호출로 교체
+- 리사이즈 (400x400) 등 이미지 처리도 S3 연동 시 함께 구현 예정
