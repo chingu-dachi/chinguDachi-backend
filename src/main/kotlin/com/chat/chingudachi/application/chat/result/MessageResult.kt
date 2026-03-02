@@ -1,5 +1,6 @@
 package com.chat.chingudachi.application.chat.result
 
+import com.chat.chingudachi.domain.chat.MessageStatus
 import java.time.Instant
 
 data class SendMessageResult(
@@ -20,6 +21,6 @@ data class MessageItem(
     val messageId: Long,
     val senderId: Long,
     val content: String,
-    val messageStatus: String,
+    val messageStatus: MessageStatus,
     val createdAt: Instant,
 )

@@ -8,7 +8,9 @@ data class TypingPayload(val roomId: Long)
 data class ReadPayload(val roomId: Long)
 
 // Server -> Client events
-data class ChatEvent(val type: ChatEventType, val data: Any)
+sealed interface ChatEventData
+
+data class ChatEvent(val type: ChatEventType, val data: ChatEventData)
 
 enum class ChatEventType {
     MESSAGE,
@@ -24,10 +26,13 @@ data class MessageEventData(
     val content: String,
     val status: String,
     val createdAt: Instant,
-)
+) : ChatEventData
 
-data class TypingEventData(val userId: Long)
-data class ReadEventData(val userId: Long, val readAt: Instant)
+data class TypingEventData(val userId: Long) : ChatEventData
+data class ReadEventData(val userId: Long, val readAt: Instant) : ChatEventData
 
 // ACK (sender confirmation)
 data class MessageAck(val messageId: Long, val status: String)
+
+// Error event (sent to /user/queue/errors)
+data class ChatErrorEvent(val code: String, val message: String)

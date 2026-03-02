@@ -31,7 +31,10 @@ class SendMessageUseCase(
             throw ForbiddenException(ErrorCode.CHAT_NOT_A_MEMBER)
         }
 
-        if (content.isBlank() || content.length > ChatMessage.MAX_CONTENT_LENGTH) {
+        if (content.isBlank()) {
+            throw BadRequestException(ErrorCode.CHAT_MESSAGE_EMPTY)
+        }
+        if (content.length > ChatMessage.MAX_CONTENT_LENGTH) {
             throw BadRequestException(ErrorCode.CHAT_MESSAGE_TOO_LONG)
         }
 

@@ -7,6 +7,7 @@ import com.chat.chingudachi.application.chat.result.ChatParticipant
 import com.chat.chingudachi.application.chat.result.ChatRoomResult
 import com.chat.chingudachi.application.chat.result.MessageItem
 import com.chat.chingudachi.application.chat.result.MessagesResult
+import com.chat.chingudachi.domain.chat.MessageStatus
 import com.chat.chingudachi.presentation.common.AuthAccountId
 import com.chat.chingudachi.presentation.common.PaginatedResponse
 import org.springframework.http.HttpStatus
@@ -109,7 +110,7 @@ data class MessageResponse(
     val messageId: String,
     val senderId: String,
     val content: String,
-    val messageStatus: String,
+    val messageStatus: MessageStatus,
     val createdAt: Instant,
 ) {
     companion object {

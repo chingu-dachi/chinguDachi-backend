@@ -85,7 +85,7 @@ class SendMessageUseCaseTest : DescribeSpec() {
             }
 
             context("빈 메시지 전송 시도") {
-                it("CHAT_MESSAGE_TOO_LONG 예외를 던진다") {
+                it("CHAT_MESSAGE_EMPTY 예외를 던진다") {
                     val room = ChatRoomFixture.create(id = roomId)
                     val member = RoomMemberFixture.create(chatRoom = room, accountId = myId)
                     every { chatRoomStore.getById(roomId) } returns room
@@ -94,7 +94,7 @@ class SendMessageUseCaseTest : DescribeSpec() {
                     val exception = shouldThrow<BadRequestException> {
                         useCase.execute(myId, roomId, "   ")
                     }
-                    exception.errorCode shouldBe ErrorCode.CHAT_MESSAGE_TOO_LONG
+                    exception.errorCode shouldBe ErrorCode.CHAT_MESSAGE_EMPTY
                 }
             }
 

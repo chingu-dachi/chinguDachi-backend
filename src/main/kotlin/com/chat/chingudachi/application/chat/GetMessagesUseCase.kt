@@ -38,7 +38,7 @@ class GetMessagesUseCase(
                 messageId = msg.id,
                 senderId = msg.senderId,
                 content = msg.content,
-                messageStatus = msg.messageStatus.name,
+                messageStatus = msg.messageStatus,
                 createdAt = msg.createdAt,
             )
         }
