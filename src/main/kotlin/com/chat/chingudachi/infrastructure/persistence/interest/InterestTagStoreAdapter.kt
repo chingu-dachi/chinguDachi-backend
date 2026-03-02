@@ -11,6 +11,9 @@ class InterestTagStoreAdapter(
     override fun findAllByIds(ids: List<Long>): List<InterestTag> =
         interestTagRepository.findAllById(ids)
 
+    override fun findAllByTagKeys(tagKeys: List<String>): List<InterestTag> =
+        interestTagRepository.findAllByTagKeyIn(tagKeys)
+
     override fun findAllOrderByDisplayOrder(): List<InterestTag> =
         interestTagRepository.findAllByOrderByDisplayOrderAsc()
 }

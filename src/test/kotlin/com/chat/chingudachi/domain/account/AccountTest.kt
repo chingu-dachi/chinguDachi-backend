@@ -47,16 +47,18 @@ class AccountTest : DescribeSpec() {
             it("상태를 ACTIVE로 변경하고 프로필 필드를 설정한다") {
                 val account = AccountFixture.create()
                 val nickname = Nickname("테스트유저")
-                val birthDate = LocalDate.of(2000, 1, 1)
+                val birthYear = 2000
                 val nation = Nation.KR
 
-                account.completeOnboarding(nickname, birthDate, nation)
+                account.completeOnboarding(nickname, birthYear, nation, "자기소개", "서울", null)
 
                 account.accountStatus shouldBe AccountStatus.ACTIVE
                 account.nickname shouldBe nickname
-                account.birthDate shouldBe birthDate
+                account.birthDate shouldBe LocalDate.of(2000, 1, 1)
                 account.nation shouldBe nation
                 account.translateLanguage shouldBe TranslateLanguage.JA
+                account.bio shouldBe "자기소개"
+                account.city shouldBe "서울"
                 account.isOnboardingComplete() shouldBe true
             }
         }

@@ -1,7 +1,6 @@
 package com.chat.chingudachi.presentation.user
 
 import com.chat.chingudachi.application.auth.port.OAuthClient
-import com.chat.chingudachi.domain.account.Nation
 import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.auth.OAuthProvider
 import com.chat.chingudachi.domain.auth.OAuthUserInfo
@@ -26,7 +25,6 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.put
-import java.time.LocalDate
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -69,15 +67,15 @@ class OnboardingIntegrationTest(
 
     private fun onboardingRequest(
         nickname: String = "테스트유저",
-        birthDate: LocalDate = LocalDate.of(2000, 1, 1),
-        nation: Nation = Nation.KR,
-        interestTagIds: List<Long> = emptyList(),
+        birthYear: Int = 2000,
+        nationality: String = "KR",
+        interests: List<String> = emptyList(),
     ): String = objectMapper.writeValueAsString(
         CompleteOnboardingRequest(
             nickname = nickname,
-            birthDate = birthDate,
-            nation = nation,
-            interestTagIds = interestTagIds,
+            birthYear = birthYear,
+            nationality = nationality,
+            interests = interests,
         ),
     )
 
@@ -91,18 +89,18 @@ class OnboardingIntegrationTest(
             interestTagRepository.deleteAll()
         }
 
-        describe("PUT /api/users/profile") {
+        describe("PUT /api/users/me") {
             context("유효한 온보딩 데이터") {
                 it("계정 상태를 ACTIVE로 변경한다") {
                     val token = loginAndGetToken()
-                    val tags = seedInterestTags()
+                    seedInterestTags()
 
-                    mockMvc.put("/api/users/profile") {
+                    mockMvc.put("/api/users/me") {
                         header("Authorization", "Bearer $token")
                         contentType = MediaType.APPLICATION_JSON
                         content = onboardingRequest(
                             nickname = "테스트유저",
-                            interestTagIds = listOf(tags[0].id, tags[1].id),
+                            interests = listOf("TRAVEL", "FOOD"),
                         )
                     }.andExpect {
                         status { isOk() }
@@ -112,10 +110,10 @@ class OnboardingIntegrationTest(
                         header("Authorization", "Bearer $token")
                     }.andExpect {
                         status { isOk() }
-                        jsonPath("$.data.accountStatus") { value("ACTIVE") }
+                        jsonPath("$.data.onboardingRequired") { value(false) }
                         jsonPath("$.data.nickname") { value("테스트유저") }
-                        jsonPath("$.data.nation") { value("KR") }
-                        jsonPath("$.data.translateLanguage") { value("JA") }
+                        jsonPath("$.data.nationality") { value("KR") }
+                        jsonPath("$.data.translateLanguage") { value("ja") }
                         jsonPath("$.data.interests") { isArray() }
                     }
                 }
@@ -124,25 +122,25 @@ class OnboardingIntegrationTest(
             context("이미 온보딩 완료된 계정이면") {
                 it("409를 반환한다") {
                     val token = loginAndGetToken()
-                    val tags = seedInterestTags()
+                    seedInterestTags()
 
-                    mockMvc.put("/api/users/profile") {
+                    mockMvc.put("/api/users/me") {
                         header("Authorization", "Bearer $token")
                         contentType = MediaType.APPLICATION_JSON
                         content = onboardingRequest(
                             nickname = "첫번째닉",
-                            interestTagIds = listOf(tags[0].id),
+                            interests = listOf("TRAVEL"),
                         )
                     }.andExpect {
                         status { isOk() }
                     }
 
-                    mockMvc.put("/api/users/profile") {
+                    mockMvc.put("/api/users/me") {
                         header("Authorization", "Bearer $token")
                         contentType = MediaType.APPLICATION_JSON
                         content = onboardingRequest(
                             nickname = "두번째닉",
-                            interestTagIds = listOf(tags[1].id),
+                            interests = listOf("FOOD"),
                         )
                     }.andExpect {
                         status { isConflict() }
@@ -153,15 +151,15 @@ class OnboardingIntegrationTest(
             context("닉네임이 중복되면") {
                 it("409를 반환한다") {
                     val token = loginAndGetToken()
-                    val tags = seedInterestTags()
+                    seedInterestTags()
                     accountRepository.save(AccountFixture.create(id = 0, nickname = Nickname("중복닉네임")))
 
-                    mockMvc.put("/api/users/profile") {
+                    mockMvc.put("/api/users/me") {
                         header("Authorization", "Bearer $token")
                         contentType = MediaType.APPLICATION_JSON
                         content = onboardingRequest(
                             nickname = "중복닉네임",
-                            interestTagIds = listOf(tags[0].id),
+                            interests = listOf("TRAVEL"),
                         )
                     }.andExpect {
                         status { isConflict() }
@@ -173,24 +171,24 @@ class OnboardingIntegrationTest(
                 it("400을 반환한다") {
                     val token = loginAndGetToken()
 
-                    mockMvc.put("/api/users/profile") {
+                    mockMvc.put("/api/users/me") {
                         header("Authorization", "Bearer $token")
                         contentType = MediaType.APPLICATION_JSON
-                        content = onboardingRequest(interestTagIds = emptyList())
+                        content = onboardingRequest(interests = emptyList())
                     }.andExpect {
                         status { isBadRequest() }
                     }
                 }
             }
 
-            context("존재하지 않는 관심사 태그 ID") {
+            context("존재하지 않는 관심사 태그 키") {
                 it("400을 반환한다") {
                     val token = loginAndGetToken()
 
-                    mockMvc.put("/api/users/profile") {
+                    mockMvc.put("/api/users/me") {
                         header("Authorization", "Bearer $token")
                         contentType = MediaType.APPLICATION_JSON
-                        content = onboardingRequest(interestTagIds = listOf(9999L))
+                        content = onboardingRequest(interests = listOf("INVALID_TAG"))
                     }.andExpect {
                         status { isBadRequest() }
                     }
@@ -199,9 +197,9 @@ class OnboardingIntegrationTest(
 
             context("인증 없이 요청하면") {
                 it("401을 반환한다") {
-                    mockMvc.put("/api/users/profile") {
+                    mockMvc.put("/api/users/me") {
                         contentType = MediaType.APPLICATION_JSON
-                        content = onboardingRequest(interestTagIds = listOf(1L))
+                        content = onboardingRequest(interests = listOf("TRAVEL"))
                     }.andExpect {
                         status { isUnauthorized() }
                     }
