@@ -32,9 +32,10 @@ class CompleteOnboardingUseCase(
             throw ConflictException(ErrorCode.ACCOUNT_ALREADY_ONBOARDED)
         }
 
-        val nation = try {
-            Nation.valueOf(command.nationality)
-        } catch (_: IllegalArgumentException) {
+        val nation = Nation.entries.find { it.name == command.nationality }
+            ?: throw BadRequestException(ErrorCode.INVALID_INPUT)
+
+        if (command.birthYear < 1900 || command.birthYear > java.time.Year.now().value) {
             throw BadRequestException(ErrorCode.INVALID_INPUT)
         }
 
@@ -55,7 +56,14 @@ class CompleteOnboardingUseCase(
             throw BadRequestException(ErrorCode.INTEREST_TAG_NOT_FOUND)
         }
 
-        account.completeOnboarding(nickname, command.birthYear, nation, command.bio, command.city, command.profileImageUrl)
+        account.completeOnboarding(
+            nickname = nickname,
+            birthYear = command.birthYear,
+            nation = nation,
+            bio = command.bio,
+            city = command.city,
+            profileImageUrl = command.profileImageUrl,
+        )
         accountStore.save(account)
 
         userInterestStore.deleteByAccountId(accountId)

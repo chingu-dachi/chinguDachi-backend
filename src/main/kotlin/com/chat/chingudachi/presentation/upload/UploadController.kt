@@ -1,6 +1,7 @@
 package com.chat.chingudachi.presentation.upload
 
 import com.chat.chingudachi.application.upload.UploadProfileImageUseCase
+import com.chat.chingudachi.application.upload.port.FileData
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -15,7 +16,12 @@ class UploadController(
 ) {
     @PostMapping("/profile-image", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun uploadProfileImage(@RequestPart file: MultipartFile): UploadResponse {
-        val imageUrl = uploadProfileImageUseCase.execute(file)
+        val fileData = FileData(
+            inputStream = file.inputStream,
+            contentType = file.contentType ?: "",
+            size = file.size,
+        )
+        val imageUrl = uploadProfileImageUseCase.execute(fileData)
         return UploadResponse(imageUrl)
     }
 }

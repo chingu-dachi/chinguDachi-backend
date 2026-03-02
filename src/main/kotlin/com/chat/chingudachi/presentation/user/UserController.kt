@@ -70,8 +70,8 @@ data class MyProfileResponse(
             profileImageUrl = profile.account.profileImageUrl,
             bio = profile.account.bio,
             onboardingRequired = !profile.account.isOnboardingComplete(),
-            isOnline = false,
-            lastSeenAt = null,
+            isOnline = false, // TODO: 온라인 상태 구현 시 교체
+            lastSeenAt = null, // TODO: 온라인 상태 구현 시 교체
             createdAt = profile.account.createdAt,
             interests = profile.interests.map { it.interestTag.tagKey },
         )

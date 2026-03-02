@@ -1,10 +1,10 @@
 package com.chat.chingudachi.application.upload
 
+import com.chat.chingudachi.application.upload.port.FileData
 import com.chat.chingudachi.application.upload.port.FileStore
 import com.chat.chingudachi.domain.common.BadRequestException
 import com.chat.chingudachi.domain.common.ErrorCode
 import org.springframework.stereotype.Service
-import org.springframework.web.multipart.MultipartFile
 
 @Service
 class UploadProfileImageUseCase(
@@ -15,7 +15,7 @@ class UploadProfileImageUseCase(
         private val ALLOWED_CONTENT_TYPES = setOf("image/jpeg", "image/png", "image/webp")
     }
 
-    fun execute(file: MultipartFile): String {
+    fun execute(file: FileData): String {
         if (file.size > MAX_FILE_SIZE) {
             throw BadRequestException(ErrorCode.UPLOAD_FILE_TOO_LARGE)
         }

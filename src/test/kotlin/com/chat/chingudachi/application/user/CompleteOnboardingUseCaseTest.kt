@@ -118,6 +118,32 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
                 }
             }
 
+            context("유효하지 않은 nationality") {
+                it("BadRequestException을 던진다") {
+                    val account = AccountFixture.create(id = 1)
+                    every { accountStore.findById(1L) } returns account
+
+                    val invalidNationality = validCommand.copy(nationality = "US")
+
+                    shouldThrow<BadRequestException> {
+                        useCase.execute(1L, invalidNationality)
+                    }
+                }
+            }
+
+            context("유효하지 않은 birthYear") {
+                it("BadRequestException을 던진다") {
+                    val account = AccountFixture.create(id = 1)
+                    every { accountStore.findById(1L) } returns account
+
+                    val invalidBirthYear = validCommand.copy(birthYear = 2030)
+
+                    shouldThrow<BadRequestException> {
+                        useCase.execute(1L, invalidBirthYear)
+                    }
+                }
+            }
+
             context("존재하지 않는 관심사 태그 키") {
                 it("BadRequestException을 던진다") {
                     val account = AccountFixture.create(id = 1)
