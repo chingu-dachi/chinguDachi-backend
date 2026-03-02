@@ -4,7 +4,7 @@ import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.application.user.port.UserInterestStore
 import com.chat.chingudachi.domain.account.AccountStatus
 import com.chat.chingudachi.domain.account.Nation
-import com.chat.chingudachi.domain.account.NativeLanguage
+import com.chat.chingudachi.domain.account.TranslateLanguage
 import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.common.NotFoundException
 import com.chat.chingudachi.domain.interest.InterestTag
@@ -51,7 +51,7 @@ class GetMyProfileUseCaseTest : DescribeSpec() {
                         nickname = Nickname("테스트유저"),
                         birthDate = LocalDate.of(1995, 5, 15),
                         nation = Nation.KR,
-                        nativeLanguage = NativeLanguage.KO,
+                        translateLanguage = TranslateLanguage.JA,
                     )
                     val tag = InterestTag(id = 1, tagKey = "TRAVEL", labelKo = "여행", labelJa = "旅行", displayOrder = 1)
                     val interest = UserInterest(account = account, interestTag = tag)

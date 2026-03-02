@@ -6,7 +6,7 @@ import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.application.user.port.UserInterestStore
 import com.chat.chingudachi.domain.account.AccountStatus
 import com.chat.chingudachi.domain.account.Nation
-import com.chat.chingudachi.domain.account.NativeLanguage
+import com.chat.chingudachi.domain.account.TranslateLanguage
 import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.common.BadRequestException
 import com.chat.chingudachi.domain.common.ConflictException
@@ -58,7 +58,7 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
                     account.accountStatus shouldBe AccountStatus.ACTIVE
                     account.nickname shouldBe Nickname("테스트닉네임")
                     account.nation shouldBe Nation.KR
-                    account.nativeLanguage shouldBe com.chat.chingudachi.domain.account.NativeLanguage.KO
+                    account.translateLanguage shouldBe TranslateLanguage.JA
                     verify { accountStore.save(account) }
                     verify { userInterestStore.deleteByAccountId(1L) }
                     verify { userInterestStore.saveAll(match<List<UserInterest>> { it.size == 2 }) }
@@ -83,7 +83,7 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
                         nickname = Nickname("기존닉네임"),
                         birthDate = LocalDate.of(1995, 5, 15),
                         nation = Nation.KR,
-                        nativeLanguage = NativeLanguage.KO,
+                        translateLanguage = TranslateLanguage.JA,
                     )
                     every { accountStore.findById(1L) } returns account
 

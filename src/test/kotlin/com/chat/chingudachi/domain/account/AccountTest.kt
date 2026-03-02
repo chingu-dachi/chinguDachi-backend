@@ -56,7 +56,7 @@ class AccountTest : DescribeSpec() {
                 account.nickname shouldBe nickname
                 account.birthDate shouldBe birthDate
                 account.nation shouldBe nation
-                account.nativeLanguage shouldBe NativeLanguage.KO
+                account.translateLanguage shouldBe TranslateLanguage.JA
                 account.isOnboardingComplete() shouldBe true
             }
         }

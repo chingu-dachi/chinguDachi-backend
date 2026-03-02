@@ -115,7 +115,7 @@ class OnboardingIntegrationTest(
                         jsonPath("$.data.accountStatus") { value("ACTIVE") }
                         jsonPath("$.data.nickname") { value("테스트유저") }
                         jsonPath("$.data.nation") { value("KR") }
-                        jsonPath("$.data.nativeLanguage") { value("KO") }
+                        jsonPath("$.data.translateLanguage") { value("JA") }
                         jsonPath("$.data.interests") { isArray() }
                     }
                 }
