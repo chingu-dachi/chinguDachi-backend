@@ -23,19 +23,20 @@ GET /api/users/me
 {
   "code": null,
   "data": {
-    "id": 1,
+    "userId": "1",
     "email": "user@example.com",
     "nickname": "테스트유저",
-    "birthDate": "1995-05-15",
-    "nation": "KR",
-    "translateLanguage": "JA",
+    "birthYear": 1995,
+    "nationality": "KR",
+    "translateLanguage": "ja",
     "city": "Seoul",
     "profileImageUrl": null,
     "bio": null,
-    "accountStatus": "ACTIVE",
-    "interests": [
-      { "tagKey": "TRAVEL", "labelKo": "여행", "labelJa": "旅行" }
-    ]
+    "onboardingRequired": false,
+    "isOnline": false,
+    "lastSeenAt": null,
+    "createdAt": "2026-03-01T14:30:00Z",
+    "interests": ["TRAVEL", "FOOD"]
   },
   "message": "success",
   "isSuccess": true,
@@ -47,20 +48,35 @@ GET /api/users/me
 ```json
 {
   "data": {
-    "id": 1,
+    "userId": "1",
     "email": "user@example.com",
     "nickname": null,
-    "birthDate": null,
-    "nation": null,
+    "birthYear": null,
+    "nationality": null,
     "translateLanguage": null,
     "city": null,
     "profileImageUrl": null,
     "bio": null,
-    "accountStatus": "NOT_CONSENT",
+    "onboardingRequired": true,
+    "isOnline": false,
+    "lastSeenAt": null,
+    "createdAt": "2026-03-01T14:00:00Z",
     "interests": []
   }
 }
 ```
+
+### 필드 변경 이력 (BE-29)
+
+| 이전 | 이후 | 설명 |
+|------|------|------|
+| id (Long) | userId (String) | 문자열로 변환 |
+| birthDate (LocalDate) | birthYear (Int?) | 연도만 노출 |
+| nation | nationality | 필드명 변경 |
+| translateLanguage "JA" | translateLanguage "ja" | 소문자 |
+| accountStatus | onboardingRequired (Boolean) | 의미 명확화 |
+| interests: [{tagKey, labelKo, labelJa}] | interests: [String] | tagKey만 |
+| - | isOnline, lastSeenAt, createdAt | 신규 추가 |
 
 ### 에러 케이스
 
