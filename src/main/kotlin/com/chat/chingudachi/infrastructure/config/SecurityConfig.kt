@@ -40,7 +40,6 @@ class SecurityConfig(
                 authorize("/api/auth/**", permitAll)
                 authorize(HttpMethod.GET, "/api/interest-tags", permitAll)
                 authorize(HttpMethod.GET, "/api/users/check-nickname", permitAll)
-                authorize(HttpMethod.GET, "/uploads/**", permitAll)
                 authorize("/error", permitAll)
                 authorize(anyRequest, authenticated)
             }
