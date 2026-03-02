@@ -52,7 +52,7 @@ class MdcLoggingFilterTest : DescribeSpec() {
                     capturedUri shouldBe "/api/accounts"
                 }
 
-                it("인증 전에는 MDC에 accountId를 설정하지 않는다") {
+                it("MDC에 accountId를 0으로 초기화한다") {
                     val request = MockHttpServletRequest("GET", "/api/test")
                     val response = MockHttpServletResponse()
                     var capturedAccountId: String? = null
@@ -61,7 +61,7 @@ class MdcLoggingFilterTest : DescribeSpec() {
                         capturedAccountId = MDC.get(MdcLoggingFilter.ACCOUNT_ID)
                     })
 
-                    capturedAccountId.shouldBeNull()
+                    capturedAccountId shouldBe "0"
                 }
             }
 

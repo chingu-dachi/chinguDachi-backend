@@ -45,11 +45,7 @@ class Account(
     @Column(name = "deleted_at")
     var deletedAt: Instant? = null,
 ) : BaseTimeEntity() {
-    fun isOnboardingComplete(): Boolean =
-        nickname != null &&
-            birthDate != null &&
-            nation != null &&
-            nativeLanguage != null
+    fun isOnboardingComplete(): Boolean = accountStatus.isOnboarded
 
     fun completeOnboarding(nickname: Nickname, birthDate: LocalDate, nation: Nation) {
         this.nickname = nickname
@@ -80,7 +76,10 @@ enum class AccountStatus {
     NOT_ENOUGH_DETAIL,
     ACTIVE,
     INACTIVE,
-    SUSPENDED,
+    SUSPENDED, ;
+
+    val isOnboarded: Boolean
+        get() = this != NOT_CONSENT && this != NOT_ENOUGH_DETAIL
 }
 
 enum class Nation {

@@ -46,6 +46,7 @@ class MdcLoggingFilter : OncePerRequestFilter() {
         MDC.put(METHOD, request.method)
         MDC.put(URI, request.requestURI)
         MDC.put(CLIENT_IP, resolveClientIp(request))
+        MDC.put(ACCOUNT_ID, "0")
         MDC.put(USER_AGENT, request.getHeader("User-Agent") ?: "")
         MDC.put(ORIGIN, request.getHeader("Origin") ?: "")
     }
