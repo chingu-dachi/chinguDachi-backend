@@ -24,6 +24,11 @@ class AccountStoreAdapter(
     override fun findById(id: Long): Account? = accountRepository.findByIdOrNull(id)
     override fun existsByNickname(nickname: Nickname): Boolean = accountRepository.existsByNickname(nickname)
 
+    override fun findByIds(ids: List<Long>): List<Account> {
+        if (ids.isEmpty()) return emptyList()
+        return accountRepository.findAllById(ids)
+    }
+
     override fun findDiscoverableUsers(
         excludeAccountId: Long,
         nationality: Nation?,

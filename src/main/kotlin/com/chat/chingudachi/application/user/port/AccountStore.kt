@@ -18,6 +18,8 @@ interface AccountStore {
         size: Int,
     ): List<Account>
 
+    fun findByIds(ids: List<Long>): List<Account>
+
     fun getById(id: Long): Account =
         findById(id) ?: throw NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND)
 }

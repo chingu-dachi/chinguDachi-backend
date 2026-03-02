@@ -40,4 +40,11 @@ enum class ErrorCode(
     AUTH_OAUTH_REDIRECT_URI_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "Redirect URI is not allowed"),
     AUTH_OAUTH_CODE_INVALID(HttpStatus.UNAUTHORIZED, "Invalid OAuth authorization code"),
     AUTH_OAUTH_PROVIDER_ERROR(HttpStatus.BAD_GATEWAY, "OAuth provider communication failed"),
+
+    // Chat
+    CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "Chat room not found"),
+    CHAT_ROOM_SELF_CHAT(HttpStatus.BAD_REQUEST, "Cannot create chat room with yourself"),
+    CHAT_ROOM_TARGET_NOT_ACTIVE(HttpStatus.BAD_REQUEST, "Target user is not active"),
+    CHAT_NOT_A_MEMBER(HttpStatus.FORBIDDEN, "Not a member of this chat room"),
+    CHAT_ROOM_GROUP_NOT_SUPPORTED(HttpStatus.BAD_REQUEST, "Group chat is not supported yet"),
 }
