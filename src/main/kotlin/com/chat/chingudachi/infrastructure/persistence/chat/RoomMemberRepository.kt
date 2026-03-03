@@ -3,10 +3,26 @@ package com.chat.chingudachi.infrastructure.persistence.chat
 import com.chat.chingudachi.domain.chat.RoomMember
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 
 interface RoomMemberRepository : JpaRepository<RoomMember, Long> {
+    @Modifying
+    @Query(
+        """
+        UPDATE RoomMember rm
+        SET rm.unreadCount = rm.unreadCount + 1
+        WHERE rm.chatRoom.id = :roomId
+        AND rm.accountId != :excludeAccountId
+        AND rm.memberStatus = 'JOINED'
+        """,
+    )
+    fun incrementUnreadForOtherMembers(
+        @Param("roomId") roomId: Long,
+        @Param("excludeAccountId") excludeAccountId: Long,
+    )
+
     @Query(
         """
         SELECT rm FROM RoomMember rm
