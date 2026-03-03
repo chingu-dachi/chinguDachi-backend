@@ -31,7 +31,7 @@ data class InterestTagResponse(
 ) {
     companion object {
         fun from(tag: InterestTag) = InterestTagResponse(
-            id = tag.tagKey,
+            id = tag.tagKey.lowercase(),
             ko = tag.labelKo,
             ja = tag.labelJa,
         )
