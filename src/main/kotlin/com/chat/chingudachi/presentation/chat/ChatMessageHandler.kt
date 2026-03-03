@@ -29,13 +29,13 @@ class ChatMessageHandler(
         val accountId = principal.name.toLong()
         val result = sendMessageUseCase.execute(accountId, payload.roomId, payload.text)
 
-        val event = ChatEvent(
-            type = ChatEventType.MESSAGE,
-            data = MessageEventData(
-                messageId = result.messageId,
-                roomId = result.chatRoomId,
-                senderId = result.senderId,
-                content = result.content,
+        val event = NewMessageEvent(
+            message = MessageEventPayload(
+                messageId = result.messageId.toString(),
+                roomId = result.chatRoomId.toString(),
+                senderId = result.senderId.toString(),
+                originalText = result.content,
+                translatedText = result.translatedContent,
                 status = "SENT",
                 translatedContent = result.translatedContent,
                 translationStatus = result.translationStatus.name,
@@ -49,7 +49,7 @@ class ChatMessageHandler(
         sendToUser(
             principal.name,
             "/queue/chat.ack",
-            MessageAck(messageId = result.messageId, status = "SENT"),
+            MessageAck(messageId = result.messageId.toString(), status = "saved"),
             "messageId=${result.messageId}",
         )
         log.debug { "Message sent: roomId=${payload.roomId}, senderId=$accountId, messageId=${result.messageId}" }
@@ -59,10 +59,7 @@ class ChatMessageHandler(
     fun handleTypingStart(payload: TypingPayload, principal: Principal) {
         val accountId = principal.name.toLong()
         roomMemberStore.getJoinedMember(payload.roomId, accountId)
-        val event = ChatEvent(
-            type = ChatEventType.TYPING_START,
-            data = TypingEventData(userId = accountId),
-        )
+        val event = TypingEvent(type = "TYPING_START", userId = accountId.toString())
         broadcast("/topic/chat/${payload.roomId}", event, "roomId=${payload.roomId}, type=TYPING_START")
     }
 
@@ -70,10 +67,7 @@ class ChatMessageHandler(
     fun handleTypingStop(payload: TypingPayload, principal: Principal) {
         val accountId = principal.name.toLong()
         roomMemberStore.getJoinedMember(payload.roomId, accountId)
-        val event = ChatEvent(
-            type = ChatEventType.TYPING_STOP,
-            data = TypingEventData(userId = accountId),
-        )
+        val event = TypingEvent(type = "TYPING_STOP", userId = accountId.toString())
         broadcast("/topic/chat/${payload.roomId}", event, "roomId=${payload.roomId}, type=TYPING_STOP")
     }
 
@@ -81,10 +75,7 @@ class ChatMessageHandler(
     fun handleRead(payload: ReadPayload, principal: Principal) {
         val accountId = principal.name.toLong()
         readMessagesUseCase.execute(accountId, payload.roomId)
-        val event = ChatEvent(
-            type = ChatEventType.READ,
-            data = ReadEventData(userId = accountId, readAt = Instant.now()),
-        )
+        val event = ReadEvent(data = ReadEventPayload(userId = accountId.toString(), readAt = Instant.now()))
         broadcast("/topic/chat/${payload.roomId}", event, "roomId=${payload.roomId}, type=READ")
         log.debug { "Messages read: roomId=${payload.roomId}, accountId=$accountId" }
     }
@@ -103,7 +94,7 @@ class ChatMessageHandler(
         return ChatErrorEvent(code = ErrorCode.INTERNAL_ERROR.name, message = ErrorCode.INTERNAL_ERROR.message)
     }
 
-    private fun broadcast(destination: String, event: ChatEvent, context: String) {
+    private fun broadcast(destination: String, event: Any, context: String) {
         try {
             messagingTemplate.convertAndSend(destination, event)
         } catch (e: Exception) {

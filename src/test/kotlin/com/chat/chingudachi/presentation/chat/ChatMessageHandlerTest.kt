@@ -61,7 +61,7 @@ class ChatMessageHandlerTest : DescribeSpec() {
 
                     handler.handleSend(payload, principal)
 
-                    verify { messagingTemplate.convertAndSend("/topic/chat/10", any<ChatEvent>()) }
+                    verify { messagingTemplate.convertAndSend("/topic/chat/10", any<NewMessageEvent>()) }
                     verify { messagingTemplate.convertAndSendToUser("1", "/queue/chat.ack", any<MessageAck>()) }
                 }
             }
@@ -78,7 +78,7 @@ class ChatMessageHandlerTest : DescribeSpec() {
 
                     handler.handleTypingStart(payload, principal)
 
-                    verify { messagingTemplate.convertAndSend("/topic/chat/10", any<ChatEvent>()) }
+                    verify { messagingTemplate.convertAndSend("/topic/chat/10", any<TypingEvent>()) }
                 }
             }
 
@@ -105,7 +105,7 @@ class ChatMessageHandlerTest : DescribeSpec() {
 
                     handler.handleTypingStop(payload, principal)
 
-                    verify { messagingTemplate.convertAndSend("/topic/chat/10", any<ChatEvent>()) }
+                    verify { messagingTemplate.convertAndSend("/topic/chat/10", any<TypingEvent>()) }
                 }
             }
         }
@@ -120,7 +120,7 @@ class ChatMessageHandlerTest : DescribeSpec() {
                     handler.handleRead(payload, principal)
 
                     verify { readMessagesUseCase.execute(1L, 10L) }
-                    verify { messagingTemplate.convertAndSend("/topic/chat/10", any<ChatEvent>()) }
+                    verify { messagingTemplate.convertAndSend("/topic/chat/10", any<ReadEvent>()) }
                 }
             }
         }
