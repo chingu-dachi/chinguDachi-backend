@@ -76,10 +76,10 @@ class OpenAiTranslationClientTest : DescribeSpec() {
                 }
             }
 
-            context("3회 retry 모두 실패 시") {
+            context("2회 retry 모두 실패 시") {
                 it("TRANSLATION_RETRY_EXHAUSTED 예외를 던진다") {
-                    // All 3 retries fail
-                    repeat(3) {
+                    // All 2 retries fail (MAX_RETRIES = 2)
+                    repeat(2) {
                         mockServer.expect(requestTo(properties.apiUrl))
                             .andExpect(method(HttpMethod.POST))
                             .andRespond(withServerError())
