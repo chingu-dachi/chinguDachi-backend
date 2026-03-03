@@ -37,7 +37,6 @@ class WebSocketConfig(
         registry.setErrorHandler(stompErrorHandler)
         registry.addEndpoint("/ws")
             .setAllowedOrigins(*corsProperties.allowedOrigins.toTypedArray())
-            .withSockJS()
     }
 
     override fun configureClientInboundChannel(registration: ChannelRegistration) {
