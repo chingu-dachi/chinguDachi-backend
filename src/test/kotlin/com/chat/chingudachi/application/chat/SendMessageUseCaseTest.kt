@@ -107,7 +107,7 @@ class SendMessageUseCaseTest : DescribeSpec() {
                 it("메시지를 저장하고 결과를 반환한다") {
                     val room = ChatRoomFixture.create(id = roomId)
                     val myMember = RoomMemberFixture.create(id = 1L, chatRoom = room, accountId = myId)
-                    val savedMessage = ChatMessageFixture.create(id = 100L, chatRoomId = roomId, senderId = myId, content = "hello")
+                    val savedMessage = ChatMessageFixture.create(id = 100L, chatRoomId = roomId, senderId = myId, originalContent = "hello")
                     val account = AccountFixture.create(id = myId, translateLanguage = null)
 
                     every { chatRoomStore.getById(roomId) } returns room
@@ -122,7 +122,7 @@ class SendMessageUseCaseTest : DescribeSpec() {
                     result.messageId shouldBe 100L
                     result.chatRoomId shouldBe roomId
                     result.senderId shouldBe myId
-                    result.content shouldBe "hello"
+                    result.originalContent shouldBe "hello"
                     room.lastMessageAt shouldBe result.createdAt.let { room.lastMessageAt }
                 }
 

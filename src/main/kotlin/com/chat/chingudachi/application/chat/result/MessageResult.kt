@@ -8,11 +8,11 @@ data class SendMessageResult(
     val messageId: Long,
     val chatRoomId: Long,
     val senderId: Long,
-    val content: String,
+    val originalContent: String,
     val translatedContent: String?,
     val translationStatus: TranslationStatus,
-    val sourceLanguage: String?,
-    val targetLanguage: String?,
+    val originalLanguage: String?,
+    val translatedLanguage: String?,
     val createdAt: Instant,
 )
 
@@ -25,11 +25,11 @@ data class MessagesResult(
 data class MessageItem(
     val messageId: Long,
     val senderId: Long,
-    val content: String,
+    val originalContent: String,
     val messageStatus: MessageStatus,
     val translatedContent: String?,
     val translationStatus: TranslationStatus,
-    val sourceLanguage: String?,
-    val targetLanguage: String?,
+    val originalLanguage: String?,
+    val translatedLanguage: String?,
     val createdAt: Instant,
 )

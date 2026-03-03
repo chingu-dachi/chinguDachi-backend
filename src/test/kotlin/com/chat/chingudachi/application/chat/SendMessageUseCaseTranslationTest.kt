@@ -59,8 +59,8 @@ class SendMessageUseCaseTranslationTest : DescribeSpec() {
 
                     result.translationStatus shouldBe TranslationStatus.DONE
                     result.translatedContent shouldBe "こんにちは"
-                    result.sourceLanguage shouldBe "kr"
-                    result.targetLanguage shouldBe "ja"
+                    result.originalLanguage shouldBe "kr"
+                    result.translatedLanguage shouldBe "ja"
                     verify(exactly = 1) { translationPort.translate("안녕하세요", "kr", "ja") }
                 }
             }
@@ -88,7 +88,7 @@ class SendMessageUseCaseTranslationTest : DescribeSpec() {
 
                     result.translationStatus shouldBe TranslationStatus.FAILED
                     result.translatedContent shouldBe null
-                    result.content shouldBe "안녕하세요"
+                    result.originalContent shouldBe "안녕하세요"
                     verify(exactly = 1) { chatMessageStore.save(any()) }
                 }
             }
@@ -111,8 +111,8 @@ class SendMessageUseCaseTranslationTest : DescribeSpec() {
 
                     result.translationStatus shouldBe TranslationStatus.NONE
                     result.translatedContent shouldBe null
-                    result.sourceLanguage shouldBe null
-                    result.targetLanguage shouldBe null
+                    result.originalLanguage shouldBe null
+                    result.translatedLanguage shouldBe null
                     verify(exactly = 0) { translationPort.translate(any(), any(), any()) }
                 }
             }
@@ -140,8 +140,8 @@ class SendMessageUseCaseTranslationTest : DescribeSpec() {
 
                     result.translationStatus shouldBe TranslationStatus.DONE
                     result.translatedContent shouldBe "안녕하세요"
-                    result.sourceLanguage shouldBe "jp"
-                    result.targetLanguage shouldBe "ko"
+                    result.originalLanguage shouldBe "jp"
+                    result.translatedLanguage shouldBe "ko"
                 }
             }
         }
