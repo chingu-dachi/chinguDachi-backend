@@ -11,6 +11,7 @@ interface RoomMemberStore {
     fun findByRoomId(roomId: Long): List<RoomMember>
     fun findByRoomIds(roomIds: List<Long>): List<RoomMember>
     fun findByRoomIdAndAccountId(roomId: Long, accountId: Long): RoomMember?
+    fun incrementUnreadForOtherMembers(roomId: Long, excludeAccountId: Long)
 }
 
 fun RoomMemberStore.getJoinedMember(roomId: Long, accountId: Long): RoomMember {

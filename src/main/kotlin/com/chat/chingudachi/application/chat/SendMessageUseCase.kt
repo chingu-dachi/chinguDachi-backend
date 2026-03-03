@@ -66,9 +66,7 @@ class SendMessageUseCase(
         val now = Instant.now()
         room.updateLastMessageAt(now)
 
-        val otherMembers = roomMemberStore.findByRoomId(roomId)
-            .filter { it.accountId != accountId && it.isJoined() }
-        otherMembers.forEach { it.incrementUnread() }
+        roomMemberStore.incrementUnreadForOtherMembers(roomId, accountId)
 
         return SendMessageResult(
             messageId = saved.id,
