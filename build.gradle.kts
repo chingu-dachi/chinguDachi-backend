@@ -31,6 +31,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 
     // JWT
@@ -56,6 +57,9 @@ dependencies {
 
     // Embedded PostgreSQL
     testImplementation("io.zonky.test:embedded-database-spring-test:2.7.1")
+
+    // Structured Logging
+    implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 }
 
 kotlin {

@@ -22,8 +22,21 @@
         <logger name="io.zonky" level="WARN"/>
     </springProfile>
 
-    <!-- default (prod 등): 풀 타임스탬프 + INFO -->
-    <springProfile name="!local">
+    <!-- prod 프로필: JSON 구조화 로깅 -->
+    <springProfile name="prod">
+        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeMdcKeyName>requestId</includeMdcKeyName>
+                <includeMdcKeyName>accountId</includeMdcKeyName>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
+        </root>
+    </springProfile>
+
+    <!-- default (그 외 프로필): human-readable -->
+    <springProfile name="!local &amp; !prod">
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
                 <pattern>
@@ -31,7 +44,6 @@
                 </pattern>
             </encoder>
         </appender>
-
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
         </root>

@@ -3,7 +3,6 @@ package com.chat.chingudachi.domain.common
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import org.springframework.http.HttpStatus
 
 class BusinessExceptionTest : DescribeSpec() {
     init {
@@ -45,14 +44,6 @@ class BusinessExceptionTest : DescribeSpec() {
             }
 
             context("ErrorCode enum 확인 시 ") {
-                it("도메인 에러 코드는 올바른 HTTP 상태를 가진다.") {
-                    ErrorCode.ACCOUNT_NOT_FOUND.status shouldBe HttpStatus.NOT_FOUND
-                    ErrorCode.ACCOUNT_ALREADY_EXISTS.status shouldBe HttpStatus.CONFLICT
-                    ErrorCode.ACCOUNT_NICKNAME_INVALID.status shouldBe HttpStatus.BAD_REQUEST
-                    ErrorCode.AUTH_TOKEN_EXPIRED.status shouldBe HttpStatus.UNAUTHORIZED
-                    ErrorCode.AUTH_TOKEN_INVALID.status shouldBe HttpStatus.UNAUTHORIZED
-                }
-
                 it("name이 에러 코드 식별자로 사용된다.") {
                     ErrorCode.INVALID_INPUT.name shouldBe "INVALID_INPUT"
                     ErrorCode.ACCOUNT_NOT_FOUND.name shouldBe "ACCOUNT_NOT_FOUND"

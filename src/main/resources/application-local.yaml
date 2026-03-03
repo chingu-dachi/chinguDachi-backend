@@ -40,3 +40,12 @@ oauth:
     redirect-uri: "http://localhost:3000/auth/callback"
     allowed-redirect-uris:
       - "https://auth.expo.io/@won123457/chingu-dachi"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
