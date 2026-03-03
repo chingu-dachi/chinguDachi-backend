@@ -3,27 +3,21 @@ package com.chat.chingudachi.application.chat
 import com.chat.chingudachi.application.chat.port.ChatMessageStore
 import com.chat.chingudachi.application.chat.port.ChatRoomStore
 import com.chat.chingudachi.application.chat.port.RoomMemberStore
-import com.chat.chingudachi.application.chat.port.TranslationPort
 import com.chat.chingudachi.application.chat.port.getJoinedMember
 import com.chat.chingudachi.application.chat.result.SendMessageResult
-import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.domain.chat.ChatMessage
 import com.chat.chingudachi.domain.common.BadRequestException
 import com.chat.chingudachi.domain.common.ErrorCode
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
-
-private val log = KotlinLogging.logger {}
 
 @Service
 class SendMessageUseCase(
     private val chatRoomStore: ChatRoomStore,
     private val roomMemberStore: RoomMemberStore,
     private val chatMessageStore: ChatMessageStore,
-    private val translationPort: TranslationPort,
-    private val accountStore: AccountStore,
+    private val messageTranslationService: MessageTranslationService,
 ) {
     @Transactional
     fun execute(accountId: Long, roomId: Long, content: String): SendMessageResult {
@@ -43,24 +37,7 @@ class SendMessageUseCase(
 
         val message = ChatMessage.create(chatRoomId = roomId, senderId = accountId, originalContent = content)
 
-        val sender = accountStore.getById(accountId)
-        val targetLanguage = sender.translateLanguage
-
-        val nationName = sender.nation?.name?.lowercase()
-        if (targetLanguage != null && nationName != null) {
-            message.originalLanguage = nationName
-            try {
-                val translated = translationPort.translate(
-                    text = content,
-                    sourceLanguage = nationName,
-                    targetLanguage = targetLanguage.name.lowercase(),
-                )
-                message.applyTranslation(translated, targetLanguage)
-            } catch (e: Exception) {
-                log.error(e) { "Translation failed for message in room $roomId" }
-                message.markTranslationFailed()
-            }
-        }
+        messageTranslationService.translateMessage(message)
 
         val saved = chatMessageStore.save(message)
 
@@ -74,6 +51,7 @@ class SendMessageUseCase(
             chatRoomId = roomId,
             senderId = accountId,
             originalContent = saved.originalContent,
+            messageStatus = saved.messageStatus,
             translatedContent = saved.translatedContent,
             translationStatus = saved.translationStatus,
             originalLanguage = saved.originalLanguage,
