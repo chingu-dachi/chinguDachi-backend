@@ -7,8 +7,6 @@ import com.chat.chingudachi.application.chat.result.ChatParticipant
 import com.chat.chingudachi.application.chat.result.ChatRoomResult
 import com.chat.chingudachi.application.chat.result.MessageItem
 import com.chat.chingudachi.application.chat.result.MessagesResult
-import com.chat.chingudachi.domain.chat.MessageStatus
-import com.chat.chingudachi.domain.chat.TranslationStatus
 import com.chat.chingudachi.presentation.common.AuthAccountId
 import com.chat.chingudachi.presentation.common.PaginatedResponse
 import org.springframework.http.HttpStatus
@@ -60,7 +58,7 @@ class ChatRoomController(
     ): PaginatedResponse<MessageResponse> {
         val result = getMessagesUseCase.execute(accountId, roomId, cursor)
         return PaginatedResponse(
-            items = result.items.map { MessageResponse.from(it) },
+            items = result.items.map { MessageResponse.from(it, roomId) },
             nextCursor = result.nextCursor,
             hasMore = result.hasMore,
         )
@@ -109,25 +107,21 @@ data class ParticipantResponse(
 
 data class MessageResponse(
     val messageId: String,
+    val roomId: String,
     val senderId: String,
-    val content: String,
-    val messageStatus: MessageStatus,
-    val translatedContent: String?,
-    val translationStatus: TranslationStatus,
-    val sourceLanguage: String?,
-    val targetLanguage: String?,
+    val originalText: String,
+    val translatedText: String?,
+    val status: String,
     val createdAt: Instant,
 ) {
     companion object {
-        fun from(item: MessageItem) = MessageResponse(
+        fun from(item: MessageItem, roomId: Long) = MessageResponse(
             messageId = item.messageId.toString(),
+            roomId = roomId.toString(),
             senderId = item.senderId.toString(),
-            content = item.content,
-            messageStatus = item.messageStatus,
-            translatedContent = item.translatedContent,
-            translationStatus = item.translationStatus,
-            sourceLanguage = item.sourceLanguage,
-            targetLanguage = item.targetLanguage,
+            originalText = item.content,
+            translatedText = item.translatedContent,
+            status = item.messageStatus.name,
             createdAt = item.createdAt,
         )
     }
