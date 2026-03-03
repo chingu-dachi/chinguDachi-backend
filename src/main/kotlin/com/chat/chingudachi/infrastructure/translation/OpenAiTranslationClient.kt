@@ -33,7 +33,7 @@ class OpenAiTranslationClient(
     override fun translate(text: String, sourceLanguage: String, targetLanguage: String): String {
         for (attempt in 1..MAX_RETRIES) {
             try {
-                return callApi(text)
+                return callApi(text, sourceLanguage, targetLanguage)
             } catch (e: RestClientException) {
                 log.warn { "Translation attempt $attempt/$MAX_RETRIES failed: ${e.message}" }
             }
@@ -41,12 +41,12 @@ class OpenAiTranslationClient(
         throw InternalServerException(ErrorCode.TRANSLATION_RETRY_EXHAUSTED)
     }
 
-    private fun callApi(text: String): String {
+    private fun callApi(text: String, sourceLanguage: String, targetLanguage: String): String {
         val request = OpenAiChatRequest(
             model = properties.model,
             messages = listOf(
                 OpenAiMessage(role = "system", content = SYSTEM_PROMPT),
-                OpenAiMessage(role = "user", content = text),
+                OpenAiMessage(role = "user", content = "[$sourceLanguage → $targetLanguage] $text"),
             ),
         )
 
