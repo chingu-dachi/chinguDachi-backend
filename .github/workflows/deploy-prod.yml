@@ -1,0 +1,49 @@
+name: Deploy Backend (Prod)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to deploy (e.g. v1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+      - run: ./gradlew test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Prod EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.PROD_EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /app/chingudachi-backend
+            git fetch --tags
+            git checkout ${{ github.event.inputs.tag }}
+            # Generate nginx conf from template
+            if [ -f nginx/conf.d/default.conf.template ]; then
+              DOMAIN=$(grep '^DOMAIN=' .env.prod | cut -d'=' -f2)
+              sed "s|DOMAIN_PLACEHOLDER|${DOMAIN}|g" \
+                nginx/conf.d/default.conf.template \
+                > nginx/conf.d/default.conf
+            fi
+            docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+            sleep 30
+            curl -f http://localhost:8080/actuator/health || exit 1
+            echo "Prod deployment successful! Tag: ${{ github.event.inputs.tag }}"
