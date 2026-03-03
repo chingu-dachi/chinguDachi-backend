@@ -49,5 +49,5 @@ enum class ErrorCode(val message: String) {
     // Translation
     TRANSLATION_API_ERROR("Translation API communication failed"),
     TRANSLATION_TIMEOUT("Translation API timed out"),
-    TRANSLATION_ALL_MODELS_FAILED("All translation models failed"),
+    TRANSLATION_RETRY_EXHAUSTED("Translation failed after all retries"),
 }

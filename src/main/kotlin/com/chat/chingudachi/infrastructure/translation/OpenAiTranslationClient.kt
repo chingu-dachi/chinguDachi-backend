@@ -22,6 +22,7 @@ class OpenAiTranslationClient(
 ) : TranslationPort {
 
     companion object {
+        private const val MAX_RETRIES = 3
         private const val SYSTEM_PROMPT = """당신은 한국어↔일본어 채팅 번역가입니다.
 자연스러운 구어체로 번역하세요.
 존댓말/반말은 원문의 어조를 유지하세요.
@@ -29,28 +30,20 @@ class OpenAiTranslationClient(
 번역문만 출력하세요. 설명이나 부가 텍스트를 추가하지 마세요."""
     }
 
-    private val fallbackModels: List<String> by lazy {
-        listOf(
-            properties.model,
-            "gpt-4o-mini",
-            "gpt-4.1-nano",
-        )
-    }
-
     override fun translate(text: String, sourceLanguage: String, targetLanguage: String): String {
-        for (model in fallbackModels) {
+        for (attempt in 1..MAX_RETRIES) {
             try {
-                return callApi(model, text)
+                return callApi(text)
             } catch (e: RestClientException) {
-                log.warn { "Translation failed with $model: ${e.message}" }
+                log.warn { "Translation attempt $attempt/$MAX_RETRIES failed: ${e.message}" }
             }
         }
-        throw InternalServerException(ErrorCode.TRANSLATION_ALL_MODELS_FAILED)
+        throw InternalServerException(ErrorCode.TRANSLATION_RETRY_EXHAUSTED)
     }
 
-    private fun callApi(model: String, text: String): String {
+    private fun callApi(text: String): String {
         val request = OpenAiChatRequest(
-            model = model,
+            model = properties.model,
             messages = listOf(
                 OpenAiMessage(role = "system", content = SYSTEM_PROMPT),
                 OpenAiMessage(role = "user", content = text),
