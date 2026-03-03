@@ -36,6 +36,7 @@ class AuthController(
         return LoginResponse(
             accessToken = result.accessToken,
             onboardingRequired = result.onboardingRequired,
+            consentRequired = result.consentRequired,
         )
     }
 
@@ -62,6 +63,7 @@ class AuthController(
         return LoginResponse(
             accessToken = result.accessToken,
             onboardingRequired = result.onboardingRequired,
+            consentRequired = result.consentRequired,
         )
     }
 }
@@ -74,4 +76,5 @@ data class GoogleLoginRequest(
 data class LoginResponse(
     val accessToken: String,
     val onboardingRequired: Boolean,
+    val consentRequired: Boolean,
 )

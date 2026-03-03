@@ -28,6 +28,12 @@ class AccountTermsAgreement(
     @Column(name = "is_privacy_policy_agree", nullable = false)
     val isPrivacyPolicyAgree: Boolean,
 
+    @Column(name = "is_cross_border_data_agree", nullable = false)
+    val isCrossBorderDataAgree: Boolean,
+
     @Column(name = "is_marketing_agree", nullable = false)
     var isMarketingAgree: Boolean,
-) : BaseTimeEntity()
+) : BaseTimeEntity() {
+    fun hasRequiredConsent(): Boolean =
+        isTermsOfServiceAgree && isPrivacyPolicyAgree && isCrossBorderDataAgree
+}

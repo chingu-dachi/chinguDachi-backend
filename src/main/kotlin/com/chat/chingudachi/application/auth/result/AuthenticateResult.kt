@@ -4,4 +4,5 @@ data class AuthenticateResult(
     val accessToken: String,
     val refreshToken: String,
     val onboardingRequired: Boolean,
+    val consentRequired: Boolean,
 )

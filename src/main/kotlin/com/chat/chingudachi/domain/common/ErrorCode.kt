@@ -19,6 +19,11 @@ enum class ErrorCode(val message: String) {
     ACCOUNT_ALREADY_ONBOARDED("Onboarding is already completed"),
     ACCOUNT_ALREADY_DELETED("Account is already deleted"),
 
+    // Consent
+    CONSENT_NOT_FOUND("Terms consent not found"),
+    CONSENT_ALREADY_EXISTS("Terms consent already exists"),
+    CONSENT_REQUIRED_FIELDS_MISSING("Required consent fields are missing"),
+
     // Upload
     UPLOAD_FILE_TOO_LARGE("File size must be 5MB or less"),
     UPLOAD_INVALID_FORMAT("Only JPEG, PNG, WebP formats are allowed"),
