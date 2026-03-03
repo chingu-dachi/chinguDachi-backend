@@ -22,7 +22,7 @@ class OpenAiTranslationClient(
 ) : TranslationPort {
 
     companion object {
-        private const val MAX_RETRIES = 3
+        private const val MAX_RETRIES = 2
         private const val SYSTEM_PROMPT = """당신은 한국어↔일본어 채팅 번역가입니다.
 자연스러운 구어체로 번역하세요.
 존댓말/반말은 원문의 어조를 유지하세요.

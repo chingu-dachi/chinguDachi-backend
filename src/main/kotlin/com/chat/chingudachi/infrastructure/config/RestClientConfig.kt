@@ -26,8 +26,8 @@ class RestClientConfig {
     @Bean("openaiRestClient")
     fun openaiRestClient(): RestClient {
         val factory = SimpleClientHttpRequestFactory()
-        factory.setConnectTimeout(Duration.ofSeconds(3))
-        factory.setReadTimeout(Duration.ofSeconds(10))
+        factory.setConnectTimeout(Duration.ofSeconds(2))
+        factory.setReadTimeout(Duration.ofSeconds(6))
         return RestClient.builder()
             .requestFactory(factory)
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
