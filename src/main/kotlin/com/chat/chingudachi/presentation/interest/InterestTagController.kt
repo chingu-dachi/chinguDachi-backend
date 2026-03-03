@@ -25,19 +25,15 @@ class InterestTagController(
 }
 
 data class InterestTagResponse(
-    val id: Long,
-    val tagKey: String,
-    val labelKo: String,
-    val labelJa: String,
-    val displayOrder: Int,
+    val id: String,
+    val ko: String,
+    val ja: String,
 ) {
     companion object {
         fun from(tag: InterestTag) = InterestTagResponse(
-            id = tag.id,
-            tagKey = tag.tagKey,
-            labelKo = tag.labelKo,
-            labelJa = tag.labelJa,
-            displayOrder = tag.displayOrder,
+            id = tag.tagKey.lowercase(),
+            ko = tag.labelKo,
+            ja = tag.labelJa,
         )
     }
 }

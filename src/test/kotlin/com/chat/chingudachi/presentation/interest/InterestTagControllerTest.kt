@@ -40,10 +40,11 @@ class InterestTagControllerTest(
                         .andExpect {
                             status { isOk() }
                             jsonPath("$.length()") { value(3) }
-                            jsonPath("$[0].tagKey") { value("TRAVEL") }
-                            jsonPath("$[0].displayOrder") { value(1) }
-                            jsonPath("$[1].tagKey") { value("FOOD") }
-                            jsonPath("$[2].tagKey") { value("MUSIC") }
+                            jsonPath("$[0].id") { value("travel") }
+                            jsonPath("$[0].ko") { value("여행") }
+                            jsonPath("$[0].ja") { value("旅行") }
+                            jsonPath("$[1].id") { value("food") }
+                            jsonPath("$[2].id") { value("music") }
                             header { string("Cache-Control", "max-age=3600, public") }
                         }
                 }
