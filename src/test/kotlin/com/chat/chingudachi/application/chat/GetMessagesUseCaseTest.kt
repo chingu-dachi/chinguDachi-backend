@@ -65,7 +65,7 @@ class GetMessagesUseCaseTest : DescribeSpec() {
                     val room = ChatRoomFixture.create(id = roomId)
                     val member = RoomMemberFixture.create(chatRoom = room, accountId = myId)
                     val messages = (1..5).map { i ->
-                        ChatMessageFixture.create(id = i.toLong(), chatRoomId = roomId, senderId = myId, content = "msg $i")
+                        ChatMessageFixture.create(id = i.toLong(), chatRoomId = roomId, senderId = myId, originalContent = "msg $i")
                     }
                     every { chatRoomStore.getById(roomId) } returns room
                     every { roomMemberStore.findByRoomIdAndAccountId(roomId, myId) } returns member
@@ -84,7 +84,7 @@ class GetMessagesUseCaseTest : DescribeSpec() {
                     val room = ChatRoomFixture.create(id = roomId)
                     val member = RoomMemberFixture.create(chatRoom = room, accountId = myId)
                     val messages = (1..PaginationConstants.DEFAULT_SIZE + 1).map { i ->
-                        ChatMessageFixture.create(id = i.toLong(), chatRoomId = roomId, senderId = myId, content = "msg $i")
+                        ChatMessageFixture.create(id = i.toLong(), chatRoomId = roomId, senderId = myId, originalContent = "msg $i")
                     }
                     every { chatRoomStore.getById(roomId) } returns room
                     every { roomMemberStore.findByRoomIdAndAccountId(roomId, myId) } returns member

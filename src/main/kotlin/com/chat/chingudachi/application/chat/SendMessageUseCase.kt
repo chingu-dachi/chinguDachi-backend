@@ -41,17 +41,18 @@ class SendMessageUseCase(
             throw BadRequestException(ErrorCode.CHAT_MESSAGE_TOO_LONG)
         }
 
-        val message = ChatMessage.create(chatRoomId = roomId, senderId = accountId, content = content)
+        val message = ChatMessage.create(chatRoomId = roomId, senderId = accountId, originalContent = content)
 
         val sender = accountStore.getById(accountId)
         val targetLanguage = sender.translateLanguage
 
-        if (targetLanguage != null) {
-            message.sourceLanguage = sender.nation!!.name.lowercase()
+        val nationName = sender.nation?.name?.lowercase()
+        if (targetLanguage != null && nationName != null) {
+            message.originalLanguage = nationName
             try {
                 val translated = translationPort.translate(
                     text = content,
-                    sourceLanguage = sender.nation!!.name.lowercase(),
+                    sourceLanguage = nationName,
                     targetLanguage = targetLanguage.name.lowercase(),
                 )
                 message.applyTranslation(translated, targetLanguage)
@@ -72,11 +73,11 @@ class SendMessageUseCase(
             messageId = saved.id,
             chatRoomId = roomId,
             senderId = accountId,
-            content = saved.content,
+            originalContent = saved.originalContent,
             translatedContent = saved.translatedContent,
             translationStatus = saved.translationStatus,
-            sourceLanguage = saved.sourceLanguage,
-            targetLanguage = saved.targetLanguage,
+            originalLanguage = saved.originalLanguage,
+            translatedLanguage = saved.translatedLanguage,
             createdAt = saved.createdAt,
         )
     }

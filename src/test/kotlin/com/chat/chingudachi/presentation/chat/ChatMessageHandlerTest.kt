@@ -50,11 +50,11 @@ class ChatMessageHandlerTest : DescribeSpec() {
                         messageId = 100L,
                         chatRoomId = 10L,
                         senderId = 1L,
-                        content = "hello",
+                        originalContent = "hello",
                         translatedContent = null,
                         translationStatus = TranslationStatus.NONE,
-                        sourceLanguage = null,
-                        targetLanguage = null,
+                        originalLanguage = null,
+                        translatedLanguage = null,
                         createdAt = now,
                     )
                     every { sendMessageUseCase.execute(1L, 10L, "hello") } returns result

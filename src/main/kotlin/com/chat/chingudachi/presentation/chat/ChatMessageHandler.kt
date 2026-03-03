@@ -30,17 +30,16 @@ class ChatMessageHandler(
         val result = sendMessageUseCase.execute(accountId, payload.roomId, payload.text)
 
         val event = NewMessageEvent(
-            message = MessageEventPayload(
+            data = MessageEventPayload(
                 messageId = result.messageId.toString(),
                 roomId = result.chatRoomId.toString(),
                 senderId = result.senderId.toString(),
-                originalText = result.content,
-                translatedText = result.translatedContent,
-                status = "SENT",
+                originalContent = result.originalContent,
                 translatedContent = result.translatedContent,
+                status = "SENT",
                 translationStatus = result.translationStatus.name,
-                sourceLanguage = result.sourceLanguage,
-                targetLanguage = result.targetLanguage,
+                originalLanguage = result.originalLanguage,
+                translatedLanguage = result.translatedLanguage,
                 createdAt = result.createdAt,
             ),
         )
@@ -59,7 +58,7 @@ class ChatMessageHandler(
     fun handleTypingStart(payload: TypingPayload, principal: Principal) {
         val accountId = principal.name.toLong()
         roomMemberStore.getJoinedMember(payload.roomId, accountId)
-        val event = TypingEvent(type = "TYPING_START", userId = accountId.toString())
+        val event = TypingEvent(type = "TYPING_START", data = TypingEventPayload(userId = accountId.toString()))
         broadcast("/topic/chat/${payload.roomId}", event, "roomId=${payload.roomId}, type=TYPING_START")
     }
 
@@ -67,7 +66,7 @@ class ChatMessageHandler(
     fun handleTypingStop(payload: TypingPayload, principal: Principal) {
         val accountId = principal.name.toLong()
         roomMemberStore.getJoinedMember(payload.roomId, accountId)
-        val event = TypingEvent(type = "TYPING_STOP", userId = accountId.toString())
+        val event = TypingEvent(type = "TYPING_STOP", data = TypingEventPayload(userId = accountId.toString()))
         broadcast("/topic/chat/${payload.roomId}", event, "roomId=${payload.roomId}, type=TYPING_STOP")
     }
 

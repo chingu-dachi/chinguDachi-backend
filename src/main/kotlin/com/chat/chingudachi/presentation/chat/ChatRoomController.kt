@@ -112,9 +112,12 @@ data class MessageResponse(
     val messageId: String,
     val roomId: String,
     val senderId: String,
-    val originalText: String,
-    val translatedText: String?,
+    val originalContent: String,
+    val translatedContent: String?,
     val status: String,
+    val translationStatus: String,
+    val originalLanguage: String?,
+    val translatedLanguage: String?,
     val createdAt: Instant,
 ) {
     companion object {
@@ -122,9 +125,12 @@ data class MessageResponse(
             messageId = item.messageId.toString(),
             roomId = roomId.toString(),
             senderId = item.senderId.toString(),
-            originalText = item.content,
-            translatedText = item.translatedContent,
+            originalContent = item.originalContent,
+            translatedContent = item.translatedContent,
             status = item.messageStatus.name,
+            translationStatus = item.translationStatus.name,
+            originalLanguage = item.originalLanguage,
+            translatedLanguage = item.translatedLanguage,
             createdAt = item.createdAt,
         )
     }

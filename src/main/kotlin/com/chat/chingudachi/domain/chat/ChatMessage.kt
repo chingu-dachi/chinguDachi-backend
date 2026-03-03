@@ -21,8 +21,8 @@ class ChatMessage(
     val chatRoomId: Long,
     @Column(name = "sender_id", nullable = false)
     val senderId: Long,
-    @Column(name = "content", nullable = false, length = MAX_CONTENT_LENGTH)
-    val content: String,
+    @Column(name = "original_content", nullable = false, length = MAX_CONTENT_LENGTH)
+    val originalContent: String,
     @Enumerated(EnumType.STRING)
     @Column(name = "message_status", nullable = false, length = 10)
     var messageStatus: MessageStatus = MessageStatus.SENT,
@@ -31,16 +31,16 @@ class ChatMessage(
     @Enumerated(EnumType.STRING)
     @Column(name = "translation_status", nullable = false, length = 10)
     var translationStatus: TranslationStatus = TranslationStatus.NONE,
-    @Column(name = "source_language", length = 2)
-    var sourceLanguage: String? = null,
-    @Column(name = "target_language", length = 2)
-    var targetLanguage: String? = null,
+    @Column(name = "original_language", length = 2)
+    var originalLanguage: String? = null,
+    @Column(name = "translated_language", length = 2)
+    var translatedLanguage: String? = null,
 ) : BaseTimeEntity() {
 
     fun applyTranslation(translated: String, targetLang: TranslateLanguage) {
         this.translatedContent = translated
         this.translationStatus = TranslationStatus.DONE
-        this.targetLanguage = targetLang.name.lowercase()
+        this.translatedLanguage = targetLang.name.lowercase()
     }
 
     fun markTranslationFailed() {
@@ -50,11 +50,11 @@ class ChatMessage(
     companion object {
         const val MAX_CONTENT_LENGTH = 1000
 
-        fun create(chatRoomId: Long, senderId: Long, content: String): ChatMessage {
-            require(content.isNotBlank() && content.length <= MAX_CONTENT_LENGTH) {
+        fun create(chatRoomId: Long, senderId: Long, originalContent: String): ChatMessage {
+            require(originalContent.isNotBlank() && originalContent.length <= MAX_CONTENT_LENGTH) {
                 "Domain invariant violation: content must be non-blank and <= $MAX_CONTENT_LENGTH chars"
             }
-            return ChatMessage(chatRoomId = chatRoomId, senderId = senderId, content = content)
+            return ChatMessage(chatRoomId = chatRoomId, senderId = senderId, originalContent = originalContent)
         }
     }
 }

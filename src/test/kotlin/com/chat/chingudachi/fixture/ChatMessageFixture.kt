@@ -9,22 +9,22 @@ object ChatMessageFixture {
         id: Long = 1L,
         chatRoomId: Long = 1L,
         senderId: Long = 1L,
-        content: String = "Hello!",
+        originalContent: String = "Hello!",
         messageStatus: MessageStatus = MessageStatus.SENT,
         translatedContent: String? = null,
         translationStatus: TranslationStatus = TranslationStatus.NONE,
-        sourceLanguage: String? = null,
-        targetLanguage: String? = null,
+        originalLanguage: String? = null,
+        translatedLanguage: String? = null,
     ): ChatMessage =
         ChatMessage(
             id = id,
             chatRoomId = chatRoomId,
             senderId = senderId,
-            content = content,
+            originalContent = originalContent,
             messageStatus = messageStatus,
             translatedContent = translatedContent,
             translationStatus = translationStatus,
-            sourceLanguage = sourceLanguage,
-            targetLanguage = targetLanguage,
+            originalLanguage = originalLanguage,
+            translatedLanguage = translatedLanguage,
         )
 }
