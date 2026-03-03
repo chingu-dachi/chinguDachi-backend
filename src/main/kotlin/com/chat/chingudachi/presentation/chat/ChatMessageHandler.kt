@@ -30,17 +30,14 @@ class ChatMessageHandler(
         val result = sendMessageUseCase.execute(accountId, payload.roomId, payload.text)
 
         val event = ChatEvent(
-            type = ChatEventType.MESSAGE,
+            type = ChatEventType.NEW_MESSAGE,
             data = MessageEventData(
                 messageId = result.messageId,
                 roomId = result.chatRoomId,
                 senderId = result.senderId,
-                content = result.content,
+                originalText = result.content,
+                translatedText = result.translatedContent,
                 status = "SENT",
-                translatedContent = result.translatedContent,
-                translationStatus = result.translationStatus.name,
-                sourceLanguage = result.sourceLanguage,
-                targetLanguage = result.targetLanguage,
                 createdAt = result.createdAt,
             ),
         )
@@ -49,7 +46,7 @@ class ChatMessageHandler(
         sendToUser(
             principal.name,
             "/queue/chat.ack",
-            MessageAck(messageId = result.messageId, status = "SENT"),
+            MessageAck(messageId = result.messageId, status = "saved"),
             "messageId=${result.messageId}",
         )
         log.debug { "Message sent: roomId=${payload.roomId}, senderId=$accountId, messageId=${result.messageId}" }

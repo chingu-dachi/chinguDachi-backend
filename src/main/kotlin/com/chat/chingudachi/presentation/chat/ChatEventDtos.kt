@@ -13,7 +13,7 @@ sealed interface ChatEventData
 data class ChatEvent(val type: ChatEventType, val data: ChatEventData)
 
 enum class ChatEventType {
-    MESSAGE,
+    NEW_MESSAGE,
     TYPING_START,
     TYPING_STOP,
     READ,
@@ -23,12 +23,9 @@ data class MessageEventData(
     val messageId: Long,
     val roomId: Long,
     val senderId: Long,
-    val content: String,
+    val originalText: String,
+    val translatedText: String?,
     val status: String,
-    val translatedContent: String?,
-    val translationStatus: String,
-    val sourceLanguage: String?,
-    val targetLanguage: String?,
     val createdAt: Instant,
 ) : ChatEventData
 
