@@ -48,6 +48,7 @@ enum class ErrorCode(val message: String) {
     CHAT_MESSAGE_NOT_FOUND("Chat message not found"),
     CHAT_MESSAGE_ROOM_MISMATCH("Message does not belong to this chat room"),
     CHAT_TRANSLATION_NOT_FAILED("Translation retry is only available for failed translations"),
+    CHAT_CANNOT_RETRY_OWN_MESSAGE("Cannot retry translation on your own message"),
 
     // Translation
     TRANSLATION_API_ERROR("Translation API communication failed"),

@@ -4,6 +4,7 @@ import com.chat.chingudachi.application.chat.ReadMessagesUseCase
 import com.chat.chingudachi.application.chat.SendMessageUseCase
 import com.chat.chingudachi.application.chat.port.RoomMemberStore
 import com.chat.chingudachi.application.chat.result.SendMessageResult
+import com.chat.chingudachi.domain.chat.MessageStatus
 import com.chat.chingudachi.domain.chat.TranslationStatus
 import com.chat.chingudachi.domain.common.BadRequestException
 import com.chat.chingudachi.domain.common.ErrorCode
@@ -51,6 +52,7 @@ class ChatMessageHandlerTest : DescribeSpec() {
                         chatRoomId = 10L,
                         senderId = 1L,
                         originalContent = "hello",
+                        messageStatus = MessageStatus.SENT,
                         translatedContent = null,
                         translationStatus = TranslationStatus.NONE,
                         originalLanguage = null,

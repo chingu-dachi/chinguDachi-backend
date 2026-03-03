@@ -3,16 +3,13 @@ package com.chat.chingudachi.application.chat
 import com.chat.chingudachi.application.chat.port.ChatMessageStore
 import com.chat.chingudachi.application.chat.port.ChatRoomStore
 import com.chat.chingudachi.application.chat.port.RoomMemberStore
-import com.chat.chingudachi.application.chat.port.TranslationPort
-import com.chat.chingudachi.application.user.port.AccountStore
-import com.chat.chingudachi.domain.account.Nation
 import com.chat.chingudachi.domain.account.TranslateLanguage
+import com.chat.chingudachi.domain.chat.MessageStatus
 import com.chat.chingudachi.domain.chat.TranslationStatus
 import com.chat.chingudachi.domain.common.BadRequestException
 import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.domain.common.ForbiddenException
 import com.chat.chingudachi.domain.common.NotFoundException
-import com.chat.chingudachi.fixture.AccountFixture
 import com.chat.chingudachi.fixture.ChatMessageFixture
 import com.chat.chingudachi.fixture.ChatRoomFixture
 import com.chat.chingudachi.fixture.RoomMemberFixture
@@ -21,21 +18,23 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.clearMocks
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.Runs
 
 class RetryTranslationUseCaseTest : DescribeSpec() {
     private val chatRoomStore = mockk<ChatRoomStore>()
     private val roomMemberStore = mockk<RoomMemberStore>()
     private val chatMessageStore = mockk<ChatMessageStore>()
-    private val translationPort = mockk<TranslationPort>()
-    private val accountStore = mockk<AccountStore>()
-    private val useCase = RetryTranslationUseCase(chatRoomStore, roomMemberStore, chatMessageStore, translationPort, accountStore)
+    private val messageTranslationService = mockk<MessageTranslationService>()
+    private val useCase = RetryTranslationUseCase(chatRoomStore, roomMemberStore, chatMessageStore, messageTranslationService)
 
     init {
-        afterEach { clearMocks(chatRoomStore, roomMemberStore, chatMessageStore, translationPort, accountStore) }
+        afterEach { clearMocks(chatRoomStore, roomMemberStore, chatMessageStore, messageTranslationService) }
 
         describe("execute") {
             val myId = 1L
+            val senderId = 2L
             val roomId = 10L
             val messageId = 100L
 
@@ -85,6 +84,7 @@ class RetryTranslationUseCaseTest : DescribeSpec() {
                     val message = ChatMessageFixture.create(
                         id = messageId,
                         chatRoomId = 999L,
+                        senderId = senderId,
                         translationStatus = TranslationStatus.FAILED,
                     )
                     every { chatRoomStore.getById(roomId) } returns room
@@ -98,6 +98,27 @@ class RetryTranslationUseCaseTest : DescribeSpec() {
                 }
             }
 
+            context("자신이 보낸 메시지에 번역 재시도 시도") {
+                it("CHAT_CANNOT_RETRY_OWN_MESSAGE 예외를 던진다") {
+                    val room = ChatRoomFixture.create(id = roomId)
+                    val member = RoomMemberFixture.create(chatRoom = room, accountId = myId)
+                    val message = ChatMessageFixture.create(
+                        id = messageId,
+                        chatRoomId = roomId,
+                        senderId = myId,
+                        translationStatus = TranslationStatus.FAILED,
+                    )
+                    every { chatRoomStore.getById(roomId) } returns room
+                    every { roomMemberStore.findByRoomIdAndAccountId(roomId, myId) } returns member
+                    every { chatMessageStore.getById(messageId) } returns message
+
+                    val exception = shouldThrow<BadRequestException> {
+                        useCase.execute(myId, roomId, messageId)
+                    }
+                    exception.errorCode shouldBe ErrorCode.CHAT_CANNOT_RETRY_OWN_MESSAGE
+                }
+            }
+
             context("번역이 FAILED 상태가 아닐 때") {
                 it("CHAT_TRANSLATION_NOT_FAILED 예외를 던진다") {
                     val room = ChatRoomFixture.create(id = roomId)
@@ -105,6 +126,7 @@ class RetryTranslationUseCaseTest : DescribeSpec() {
                     val message = ChatMessageFixture.create(
                         id = messageId,
                         chatRoomId = roomId,
+                        senderId = senderId,
                         translationStatus = TranslationStatus.DONE,
                     )
                     every { chatRoomStore.getById(roomId) } returns room
@@ -125,21 +147,18 @@ class RetryTranslationUseCaseTest : DescribeSpec() {
                     val message = ChatMessageFixture.create(
                         id = messageId,
                         chatRoomId = roomId,
-                        senderId = myId,
+                        senderId = senderId,
                         originalContent = "안녕하세요",
                         translationStatus = TranslationStatus.FAILED,
-                    )
-                    val account = AccountFixture.create(
-                        id = myId,
-                        nation = Nation.KR,
-                        translateLanguage = TranslateLanguage.JA,
                     )
 
                     every { chatRoomStore.getById(roomId) } returns room
                     every { roomMemberStore.findByRoomIdAndAccountId(roomId, myId) } returns member
                     every { chatMessageStore.getById(messageId) } returns message
-                    every { accountStore.getById(myId) } returns account
-                    every { translationPort.translate("안녕하세요", "kr", "ja") } returns "こんにちは"
+                    every { messageTranslationService.translateMessage(message) } answers {
+                        firstArg<com.chat.chingudachi.domain.chat.ChatMessage>()
+                            .applyTranslation("こんにちは", TranslateLanguage.JA)
+                    }
                     every { chatMessageStore.save(message) } returns message
 
                     val result = useCase.execute(myId, roomId, messageId)
@@ -147,6 +166,7 @@ class RetryTranslationUseCaseTest : DescribeSpec() {
                     result.messageId shouldBe messageId
                     result.translatedContent shouldBe "こんにちは"
                     result.translationStatus shouldBe TranslationStatus.DONE
+                    result.messageStatus shouldBe MessageStatus.SENT
                 }
             }
 
@@ -157,21 +177,17 @@ class RetryTranslationUseCaseTest : DescribeSpec() {
                     val message = ChatMessageFixture.create(
                         id = messageId,
                         chatRoomId = roomId,
-                        senderId = myId,
+                        senderId = senderId,
                         originalContent = "안녕하세요",
                         translationStatus = TranslationStatus.FAILED,
-                    )
-                    val account = AccountFixture.create(
-                        id = myId,
-                        nation = Nation.KR,
-                        translateLanguage = TranslateLanguage.JA,
                     )
 
                     every { chatRoomStore.getById(roomId) } returns room
                     every { roomMemberStore.findByRoomIdAndAccountId(roomId, myId) } returns member
                     every { chatMessageStore.getById(messageId) } returns message
-                    every { accountStore.getById(myId) } returns account
-                    every { translationPort.translate("안녕하세요", "kr", "ja") } throws RuntimeException("API error")
+                    every { messageTranslationService.translateMessage(message) } answers {
+                        firstArg<com.chat.chingudachi.domain.chat.ChatMessage>().markTranslationFailed()
+                    }
                     every { chatMessageStore.save(message) } returns message
 
                     val result = useCase.execute(myId, roomId, messageId)

@@ -81,7 +81,7 @@ class ChatRoomController(
             senderId = result.senderId.toString(),
             originalContent = result.originalContent,
             translatedContent = result.translatedContent,
-            status = "SENT",
+            status = result.messageStatus.name,
             translationStatus = result.translationStatus.name,
             originalLanguage = result.originalLanguage,
             translatedLanguage = result.translatedLanguage,

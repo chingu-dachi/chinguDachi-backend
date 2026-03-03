@@ -9,6 +9,7 @@ data class SendMessageResult(
     val chatRoomId: Long,
     val senderId: Long,
     val originalContent: String,
+    val messageStatus: MessageStatus,
     val translatedContent: String?,
     val translationStatus: TranslationStatus,
     val originalLanguage: String?,

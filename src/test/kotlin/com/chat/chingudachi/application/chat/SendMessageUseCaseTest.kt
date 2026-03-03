@@ -3,14 +3,11 @@ package com.chat.chingudachi.application.chat
 import com.chat.chingudachi.application.chat.port.ChatMessageStore
 import com.chat.chingudachi.application.chat.port.ChatRoomStore
 import com.chat.chingudachi.application.chat.port.RoomMemberStore
-import com.chat.chingudachi.application.chat.port.TranslationPort
-import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.domain.chat.ChatMessage
 import com.chat.chingudachi.domain.chat.RoomStatus
 import com.chat.chingudachi.domain.common.BadRequestException
 import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.domain.common.ForbiddenException
-import com.chat.chingudachi.fixture.AccountFixture
 import com.chat.chingudachi.fixture.ChatMessageFixture
 import com.chat.chingudachi.fixture.ChatRoomFixture
 import com.chat.chingudachi.fixture.RoomMemberFixture
@@ -19,7 +16,9 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.clearMocks
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.Runs
 import io.mockk.slot
 import io.mockk.verify
 
@@ -27,12 +26,11 @@ class SendMessageUseCaseTest : DescribeSpec() {
     private val chatRoomStore = mockk<ChatRoomStore>()
     private val roomMemberStore = mockk<RoomMemberStore>()
     private val chatMessageStore = mockk<ChatMessageStore>()
-    private val translationPort = mockk<TranslationPort>()
-    private val accountStore = mockk<AccountStore>()
-    private val useCase = SendMessageUseCase(chatRoomStore, roomMemberStore, chatMessageStore, translationPort, accountStore)
+    private val messageTranslationService = mockk<MessageTranslationService>()
+    private val useCase = SendMessageUseCase(chatRoomStore, roomMemberStore, chatMessageStore, messageTranslationService)
 
     init {
-        afterEach { clearMocks(chatRoomStore, roomMemberStore, chatMessageStore, translationPort, accountStore) }
+        afterEach { clearMocks(chatRoomStore, roomMemberStore, chatMessageStore, messageTranslationService) }
 
         describe("execute") {
             val myId = 1L
@@ -108,11 +106,10 @@ class SendMessageUseCaseTest : DescribeSpec() {
                     val room = ChatRoomFixture.create(id = roomId)
                     val myMember = RoomMemberFixture.create(id = 1L, chatRoom = room, accountId = myId)
                     val savedMessage = ChatMessageFixture.create(id = 100L, chatRoomId = roomId, senderId = myId, originalContent = "hello")
-                    val account = AccountFixture.create(id = myId, translateLanguage = null)
 
                     every { chatRoomStore.getById(roomId) } returns room
                     every { roomMemberStore.findByRoomIdAndAccountId(roomId, myId) } returns myMember
-                    every { accountStore.getById(myId) } returns account
+                    every { messageTranslationService.translateMessage(any()) } just Runs
                     val messageSlot = slot<ChatMessage>()
                     every { chatMessageStore.save(capture(messageSlot)) } returns savedMessage
                     every { roomMemberStore.incrementUnreadForOtherMembers(roomId, myId) } returns Unit
@@ -130,11 +127,10 @@ class SendMessageUseCaseTest : DescribeSpec() {
                     val room = ChatRoomFixture.create(id = roomId)
                     val myMember = RoomMemberFixture.create(id = 1L, chatRoom = room, accountId = myId)
                     val savedMessage = ChatMessageFixture.create(id = 100L, chatRoomId = roomId, senderId = myId)
-                    val account = AccountFixture.create(id = myId, translateLanguage = null)
 
                     every { chatRoomStore.getById(roomId) } returns room
                     every { roomMemberStore.findByRoomIdAndAccountId(roomId, myId) } returns myMember
-                    every { accountStore.getById(myId) } returns account
+                    every { messageTranslationService.translateMessage(any()) } just Runs
                     every { chatMessageStore.save(any()) } returns savedMessage
                     every { roomMemberStore.incrementUnreadForOtherMembers(roomId, myId) } returns Unit
 
