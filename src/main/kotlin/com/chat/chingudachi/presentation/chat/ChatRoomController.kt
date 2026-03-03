@@ -8,6 +8,8 @@ import com.chat.chingudachi.application.chat.result.ChatRoomResult
 import com.chat.chingudachi.application.chat.result.MessageItem
 import com.chat.chingudachi.application.chat.result.MessagesResult
 import com.chat.chingudachi.presentation.common.AuthAccountId
+import jakarta.validation.Valid
+import jakarta.validation.constraints.NotEmpty
 import com.chat.chingudachi.presentation.common.PaginatedResponse
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
@@ -31,7 +33,7 @@ class ChatRoomController(
     @ResponseStatus(HttpStatus.CREATED)
     fun createChatRoom(
         @AuthAccountId accountId: Long,
-        @RequestBody request: CreateChatRoomRequest,
+        @Valid @RequestBody request: CreateChatRoomRequest,
     ): ChatRoomResponse {
         val result = createChatRoomUseCase.execute(accountId, request.memberIds)
         return ChatRoomResponse.from(result)
@@ -66,6 +68,7 @@ class ChatRoomController(
 }
 
 data class CreateChatRoomRequest(
+    @field:NotEmpty
     val memberIds: List<Long>,
 )
 

@@ -17,6 +17,11 @@ import com.chat.chingudachi.presentation.common.AuthAccountId
 import com.chat.chingudachi.presentation.common.PaginatedResponse
 import com.chat.chingudachi.presentation.common.clearRefreshTokenCookie
 import jakarta.servlet.http.HttpServletResponse
+import jakarta.validation.Valid
+import jakarta.validation.constraints.Min
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.Size
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -78,7 +83,7 @@ class UserController(
     @PatchMapping("/me")
     fun updateProfile(
         @AuthAccountId accountId: Long,
-        @RequestBody request: UpdateProfileRequest,
+        @Valid @RequestBody request: UpdateProfileRequest,
     ): MyProfileResponse {
         val profile = updateProfileUseCase.execute(accountId, request.toCommand())
         return MyProfileResponse.from(profile)
@@ -93,7 +98,7 @@ class UserController(
     @PutMapping("/me")
     fun completeOnboarding(
         @AuthAccountId accountId: Long,
-        @RequestBody request: CompleteOnboardingRequest,
+        @Valid @RequestBody request: CompleteOnboardingRequest,
     ) {
         completeOnboardingUseCase.execute(accountId, request.toCommand())
     }
@@ -150,11 +155,18 @@ data class NicknameCheckResponse(
 )
 
 data class CompleteOnboardingRequest(
+    @field:NotBlank
+    @field:Size(min = 2, max = 20)
     val nickname: String,
+    @field:Min(1900)
     val birthYear: Int,
+    @field:NotBlank
     val nationality: String,
+    @field:NotEmpty
     val interests: List<String>,
+    @field:Size(max = 200)
     val bio: String? = null,
+    @field:Size(max = 50)
     val city: String? = null,
     val profileImageUrl: String? = null,
 ) {
@@ -170,8 +182,11 @@ data class CompleteOnboardingRequest(
 }
 
 data class UpdateProfileRequest(
+    @field:Size(min = 2, max = 20)
     val nickname: String? = null,
+    @field:Size(max = 200)
     val bio: String? = null,
+    @field:Size(max = 50)
     val city: String? = null,
     val interests: List<String>? = null,
     val profileImageUrl: String? = null,
