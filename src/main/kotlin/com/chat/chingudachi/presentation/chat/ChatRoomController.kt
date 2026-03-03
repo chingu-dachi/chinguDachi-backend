@@ -3,6 +3,7 @@ package com.chat.chingudachi.presentation.chat
 import com.chat.chingudachi.application.chat.CreateChatRoomUseCase
 import com.chat.chingudachi.application.chat.GetChatRoomsUseCase
 import com.chat.chingudachi.application.chat.GetMessagesUseCase
+import com.chat.chingudachi.application.chat.RetryTranslationUseCase
 import com.chat.chingudachi.application.chat.result.ChatParticipant
 import com.chat.chingudachi.application.chat.result.ChatRoomResult
 import com.chat.chingudachi.application.chat.result.MessageItem
@@ -28,6 +29,7 @@ class ChatRoomController(
     private val createChatRoomUseCase: CreateChatRoomUseCase,
     private val getChatRoomsUseCase: GetChatRoomsUseCase,
     private val getMessagesUseCase: GetMessagesUseCase,
+    private val retryTranslationUseCase: RetryTranslationUseCase,
 ) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -63,6 +65,27 @@ class ChatRoomController(
             items = result.items.map { MessageResponse.from(it, roomId) },
             nextCursor = result.nextCursor,
             hasMore = result.hasMore,
+        )
+    }
+
+    @PostMapping("/{roomId}/messages/{messageId}/retry-translation")
+    fun retryTranslation(
+        @AuthAccountId accountId: Long,
+        @PathVariable roomId: Long,
+        @PathVariable messageId: Long,
+    ): MessageResponse {
+        val result = retryTranslationUseCase.execute(accountId, roomId, messageId)
+        return MessageResponse(
+            messageId = result.messageId.toString(),
+            roomId = result.chatRoomId.toString(),
+            senderId = result.senderId.toString(),
+            originalContent = result.originalContent,
+            translatedContent = result.translatedContent,
+            status = "SENT",
+            translationStatus = result.translationStatus.name,
+            originalLanguage = result.originalLanguage,
+            translatedLanguage = result.translatedLanguage,
+            createdAt = result.createdAt,
         )
     }
 }

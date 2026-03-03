@@ -58,6 +58,8 @@ class ChatMessageStoreAdapter(
 ) : ChatMessageStore {
     override fun save(message: ChatMessage): ChatMessage = chatMessageRepository.save(message)
 
+    override fun findById(id: Long): ChatMessage? = chatMessageRepository.findByIdOrNull(id)
+
     override fun findByRoomId(roomId: Long, cursor: Long?, size: Int): List<ChatMessage> =
         chatMessageRepository.findByRoomId(roomId, cursor, PageRequest.of(0, size))
 }
