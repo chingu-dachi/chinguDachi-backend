@@ -3,11 +3,14 @@ package com.chat.chingudachi.application.chat
 import com.chat.chingudachi.application.chat.port.ChatMessageStore
 import com.chat.chingudachi.application.chat.port.ChatRoomStore
 import com.chat.chingudachi.application.chat.port.RoomMemberStore
+import com.chat.chingudachi.application.chat.port.TranslationPort
+import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.domain.chat.ChatMessage
 import com.chat.chingudachi.domain.chat.RoomStatus
 import com.chat.chingudachi.domain.common.BadRequestException
 import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.domain.common.ForbiddenException
+import com.chat.chingudachi.fixture.AccountFixture
 import com.chat.chingudachi.fixture.ChatMessageFixture
 import com.chat.chingudachi.fixture.ChatRoomFixture
 import com.chat.chingudachi.fixture.RoomMemberFixture
@@ -24,10 +27,12 @@ class SendMessageUseCaseTest : DescribeSpec() {
     private val chatRoomStore = mockk<ChatRoomStore>()
     private val roomMemberStore = mockk<RoomMemberStore>()
     private val chatMessageStore = mockk<ChatMessageStore>()
-    private val useCase = SendMessageUseCase(chatRoomStore, roomMemberStore, chatMessageStore)
+    private val translationPort = mockk<TranslationPort>()
+    private val accountStore = mockk<AccountStore>()
+    private val useCase = SendMessageUseCase(chatRoomStore, roomMemberStore, chatMessageStore, translationPort, accountStore)
 
     init {
-        afterEach { clearMocks(chatRoomStore, roomMemberStore, chatMessageStore) }
+        afterEach { clearMocks(chatRoomStore, roomMemberStore, chatMessageStore, translationPort, accountStore) }
 
         describe("execute") {
             val myId = 1L
@@ -104,9 +109,11 @@ class SendMessageUseCaseTest : DescribeSpec() {
                     val myMember = RoomMemberFixture.create(id = 1L, chatRoom = room, accountId = myId)
                     val otherMember = RoomMemberFixture.create(id = 2L, chatRoom = room, accountId = otherId, unreadCount = 0)
                     val savedMessage = ChatMessageFixture.create(id = 100L, chatRoomId = roomId, senderId = myId, content = "hello")
+                    val account = AccountFixture.create(id = myId, translateLanguage = null)
 
                     every { chatRoomStore.getById(roomId) } returns room
                     every { roomMemberStore.findByRoomIdAndAccountId(roomId, myId) } returns myMember
+                    every { accountStore.getById(myId) } returns account
                     val messageSlot = slot<ChatMessage>()
                     every { chatMessageStore.save(capture(messageSlot)) } returns savedMessage
                     every { roomMemberStore.findByRoomId(roomId) } returns listOf(myMember, otherMember)
@@ -126,9 +133,11 @@ class SendMessageUseCaseTest : DescribeSpec() {
                     val myMember = RoomMemberFixture.create(id = 1L, chatRoom = room, accountId = myId)
                     val otherMember = RoomMemberFixture.create(id = 2L, chatRoom = room, accountId = otherId, unreadCount = 3)
                     val savedMessage = ChatMessageFixture.create(id = 100L, chatRoomId = roomId, senderId = myId)
+                    val account = AccountFixture.create(id = myId, translateLanguage = null)
 
                     every { chatRoomStore.getById(roomId) } returns room
                     every { roomMemberStore.findByRoomIdAndAccountId(roomId, myId) } returns myMember
+                    every { accountStore.getById(myId) } returns account
                     every { chatMessageStore.save(any()) } returns savedMessage
                     every { roomMemberStore.findByRoomId(roomId) } returns listOf(myMember, otherMember)
 

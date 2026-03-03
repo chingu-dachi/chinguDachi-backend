@@ -25,6 +25,10 @@ data class MessageEventData(
     val senderId: Long,
     val content: String,
     val status: String,
+    val translatedContent: String?,
+    val translationStatus: String,
+    val sourceLanguage: String?,
+    val targetLanguage: String?,
     val createdAt: Instant,
 ) : ChatEventData
 

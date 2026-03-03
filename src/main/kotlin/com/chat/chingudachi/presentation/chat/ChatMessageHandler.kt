@@ -37,6 +37,10 @@ class ChatMessageHandler(
                 senderId = result.senderId,
                 content = result.content,
                 status = "SENT",
+                translatedContent = result.translatedContent,
+                translationStatus = result.translationStatus.name,
+                sourceLanguage = result.sourceLanguage,
+                targetLanguage = result.targetLanguage,
                 createdAt = result.createdAt,
             ),
         )

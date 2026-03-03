@@ -3,20 +3,27 @@ package com.chat.chingudachi.application.chat
 import com.chat.chingudachi.application.chat.port.ChatMessageStore
 import com.chat.chingudachi.application.chat.port.ChatRoomStore
 import com.chat.chingudachi.application.chat.port.RoomMemberStore
+import com.chat.chingudachi.application.chat.port.TranslationPort
 import com.chat.chingudachi.application.chat.port.getJoinedMember
 import com.chat.chingudachi.application.chat.result.SendMessageResult
+import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.domain.chat.ChatMessage
 import com.chat.chingudachi.domain.common.BadRequestException
 import com.chat.chingudachi.domain.common.ErrorCode
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
+
+private val log = KotlinLogging.logger {}
 
 @Service
 class SendMessageUseCase(
     private val chatRoomStore: ChatRoomStore,
     private val roomMemberStore: RoomMemberStore,
     private val chatMessageStore: ChatMessageStore,
+    private val translationPort: TranslationPort,
+    private val accountStore: AccountStore,
 ) {
     @Transactional
     fun execute(accountId: Long, roomId: Long, content: String): SendMessageResult {
@@ -34,9 +41,27 @@ class SendMessageUseCase(
             throw BadRequestException(ErrorCode.CHAT_MESSAGE_TOO_LONG)
         }
 
-        val message = chatMessageStore.save(
-            ChatMessage.create(chatRoomId = roomId, senderId = accountId, content = content),
-        )
+        val message = ChatMessage.create(chatRoomId = roomId, senderId = accountId, content = content)
+
+        val sender = accountStore.getById(accountId)
+        val targetLanguage = sender.translateLanguage
+
+        if (targetLanguage != null) {
+            message.sourceLanguage = sender.nation!!.name.lowercase()
+            try {
+                val translated = translationPort.translate(
+                    text = content,
+                    sourceLanguage = sender.nation!!.name.lowercase(),
+                    targetLanguage = targetLanguage.name.lowercase(),
+                )
+                message.applyTranslation(translated, targetLanguage)
+            } catch (e: Exception) {
+                log.error(e) { "Translation failed for message in room $roomId" }
+                message.markTranslationFailed()
+            }
+        }
+
+        val saved = chatMessageStore.save(message)
 
         val now = Instant.now()
         room.updateLastMessageAt(now)
@@ -46,11 +71,15 @@ class SendMessageUseCase(
         otherMembers.forEach { it.incrementUnread() }
 
         return SendMessageResult(
-            messageId = message.id,
+            messageId = saved.id,
             chatRoomId = roomId,
             senderId = accountId,
-            content = message.content,
-            createdAt = message.createdAt,
+            content = saved.content,
+            translatedContent = saved.translatedContent,
+            translationStatus = saved.translationStatus,
+            sourceLanguage = saved.sourceLanguage,
+            targetLanguage = saved.targetLanguage,
+            createdAt = saved.createdAt,
         )
     }
 }

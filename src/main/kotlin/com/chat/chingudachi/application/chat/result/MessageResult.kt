@@ -1,6 +1,7 @@
 package com.chat.chingudachi.application.chat.result
 
 import com.chat.chingudachi.domain.chat.MessageStatus
+import com.chat.chingudachi.domain.chat.TranslationStatus
 import java.time.Instant
 
 data class SendMessageResult(
@@ -8,6 +9,10 @@ data class SendMessageResult(
     val chatRoomId: Long,
     val senderId: Long,
     val content: String,
+    val translatedContent: String?,
+    val translationStatus: TranslationStatus,
+    val sourceLanguage: String?,
+    val targetLanguage: String?,
     val createdAt: Instant,
 )
 
@@ -22,5 +27,9 @@ data class MessageItem(
     val senderId: Long,
     val content: String,
     val messageStatus: MessageStatus,
+    val translatedContent: String?,
+    val translationStatus: TranslationStatus,
+    val sourceLanguage: String?,
+    val targetLanguage: String?,
     val createdAt: Instant,
 )
