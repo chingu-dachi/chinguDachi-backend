@@ -45,4 +45,9 @@ enum class ErrorCode(val message: String) {
     CHAT_MESSAGE_EMPTY("Message must not be empty"),
     CHAT_MESSAGE_TOO_LONG("Message must be 1000 characters or less"),
     CHAT_ROOM_NOT_ACTIVE("Chat room is not active"),
+
+    // Translation
+    TRANSLATION_API_ERROR("Translation API communication failed"),
+    TRANSLATION_TIMEOUT("Translation API timed out"),
+    TRANSLATION_ALL_MODELS_FAILED("All translation models failed"),
 }
