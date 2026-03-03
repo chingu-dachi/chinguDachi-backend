@@ -46,12 +46,13 @@ class SendMessageUseCase(
         val sender = accountStore.getById(accountId)
         val targetLanguage = sender.translateLanguage
 
-        if (targetLanguage != null) {
-            message.originalLanguage = sender.nation!!.name.lowercase()
+        val nationName = sender.nation?.name?.lowercase()
+        if (targetLanguage != null && nationName != null) {
+            message.originalLanguage = nationName
             try {
                 val translated = translationPort.translate(
                     text = content,
-                    sourceLanguage = sender.nation!!.name.lowercase(),
+                    sourceLanguage = nationName,
                     targetLanguage = targetLanguage.name.lowercase(),
                 )
                 message.applyTranslation(translated, targetLanguage)

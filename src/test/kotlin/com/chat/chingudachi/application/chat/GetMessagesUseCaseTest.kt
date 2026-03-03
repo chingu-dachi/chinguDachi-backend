@@ -3,9 +3,7 @@ package com.chat.chingudachi.application.chat
 import com.chat.chingudachi.application.chat.port.ChatMessageStore
 import com.chat.chingudachi.application.chat.port.ChatRoomStore
 import com.chat.chingudachi.application.chat.port.RoomMemberStore
-import com.chat.chingudachi.application.chat.port.TranslationPort
 import com.chat.chingudachi.application.common.PaginationConstants
-import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.domain.common.ForbiddenException
 import com.chat.chingudachi.fixture.ChatMessageFixture
@@ -24,12 +22,10 @@ class GetMessagesUseCaseTest : DescribeSpec() {
     private val chatRoomStore = mockk<ChatRoomStore>()
     private val roomMemberStore = mockk<RoomMemberStore>()
     private val chatMessageStore = mockk<ChatMessageStore>()
-    private val translationPort = mockk<TranslationPort>()
-    private val accountStore = mockk<AccountStore>()
-    private val useCase = GetMessagesUseCase(chatRoomStore, roomMemberStore, chatMessageStore, translationPort, accountStore)
+    private val useCase = GetMessagesUseCase(chatRoomStore, roomMemberStore, chatMessageStore)
 
     init {
-        afterEach { clearMocks(chatRoomStore, roomMemberStore, chatMessageStore, translationPort, accountStore) }
+        afterEach { clearMocks(chatRoomStore, roomMemberStore, chatMessageStore) }
 
         describe("execute") {
             val myId = 1L
