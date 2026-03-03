@@ -46,6 +46,10 @@ class RoomMemberStoreAdapter(
 
     override fun findByRoomIdAndAccountId(roomId: Long, accountId: Long): RoomMember? =
         roomMemberRepository.findByChatRoomIdAndAccountId(roomId, accountId)
+
+    override fun incrementUnreadForOtherMembers(roomId: Long, excludeAccountId: Long) {
+        roomMemberRepository.incrementUnreadForOtherMembers(roomId, excludeAccountId)
+    }
 }
 
 @Repository

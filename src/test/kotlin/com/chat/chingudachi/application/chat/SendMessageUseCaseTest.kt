@@ -107,7 +107,6 @@ class SendMessageUseCaseTest : DescribeSpec() {
                 it("메시지를 저장하고 결과를 반환한다") {
                     val room = ChatRoomFixture.create(id = roomId)
                     val myMember = RoomMemberFixture.create(id = 1L, chatRoom = room, accountId = myId)
-                    val otherMember = RoomMemberFixture.create(id = 2L, chatRoom = room, accountId = otherId, unreadCount = 0)
                     val savedMessage = ChatMessageFixture.create(id = 100L, chatRoomId = roomId, senderId = myId, content = "hello")
                     val account = AccountFixture.create(id = myId, translateLanguage = null)
 
@@ -116,7 +115,7 @@ class SendMessageUseCaseTest : DescribeSpec() {
                     every { accountStore.getById(myId) } returns account
                     val messageSlot = slot<ChatMessage>()
                     every { chatMessageStore.save(capture(messageSlot)) } returns savedMessage
-                    every { roomMemberStore.findByRoomId(roomId) } returns listOf(myMember, otherMember)
+                    every { roomMemberStore.incrementUnreadForOtherMembers(roomId, myId) } returns Unit
 
                     val result = useCase.execute(myId, roomId, "hello")
 
@@ -124,14 +123,12 @@ class SendMessageUseCaseTest : DescribeSpec() {
                     result.chatRoomId shouldBe roomId
                     result.senderId shouldBe myId
                     result.content shouldBe "hello"
-                    otherMember.unreadCount shouldBe 1
                     room.lastMessageAt shouldBe result.createdAt.let { room.lastMessageAt }
                 }
 
-                it("상대방의 unreadCount를 증가시킨다") {
+                it("상대방의 unreadCount를 배치로 증가시킨다") {
                     val room = ChatRoomFixture.create(id = roomId)
                     val myMember = RoomMemberFixture.create(id = 1L, chatRoom = room, accountId = myId)
-                    val otherMember = RoomMemberFixture.create(id = 2L, chatRoom = room, accountId = otherId, unreadCount = 3)
                     val savedMessage = ChatMessageFixture.create(id = 100L, chatRoomId = roomId, senderId = myId)
                     val account = AccountFixture.create(id = myId, translateLanguage = null)
 
@@ -139,12 +136,11 @@ class SendMessageUseCaseTest : DescribeSpec() {
                     every { roomMemberStore.findByRoomIdAndAccountId(roomId, myId) } returns myMember
                     every { accountStore.getById(myId) } returns account
                     every { chatMessageStore.save(any()) } returns savedMessage
-                    every { roomMemberStore.findByRoomId(roomId) } returns listOf(myMember, otherMember)
+                    every { roomMemberStore.incrementUnreadForOtherMembers(roomId, myId) } returns Unit
 
                     useCase.execute(myId, roomId, "hello")
 
-                    otherMember.unreadCount shouldBe 4
-                    verify { roomMemberStore.findByRoomId(roomId) }
+                    verify { roomMemberStore.incrementUnreadForOtherMembers(roomId, myId) }
                 }
             }
         }

@@ -53,7 +53,7 @@ class SendMessageUseCaseTranslationTest : DescribeSpec() {
                     every { translationPort.translate("안녕하세요", "kr", "ja") } returns "こんにちは"
                     val messageSlot = slot<ChatMessage>()
                     every { chatMessageStore.save(capture(messageSlot)) } answers { messageSlot.captured }
-                    every { roomMemberStore.findByRoomId(roomId) } returns listOf(myMember, otherMember)
+                    every { roomMemberStore.incrementUnreadForOtherMembers(roomId, myId) } returns Unit
 
                     val result = useCase.execute(myId, roomId, "안녕하세요")
 
@@ -82,7 +82,7 @@ class SendMessageUseCaseTranslationTest : DescribeSpec() {
                     every { translationPort.translate(any(), any(), any()) } throws RuntimeException("API error")
                     val messageSlot = slot<ChatMessage>()
                     every { chatMessageStore.save(capture(messageSlot)) } answers { messageSlot.captured }
-                    every { roomMemberStore.findByRoomId(roomId) } returns listOf(myMember, otherMember)
+                    every { roomMemberStore.incrementUnreadForOtherMembers(roomId, myId) } returns Unit
 
                     val result = useCase.execute(myId, roomId, "안녕하세요")
 
@@ -105,7 +105,7 @@ class SendMessageUseCaseTranslationTest : DescribeSpec() {
                     every { accountStore.getById(myId) } returns sender
                     val messageSlot = slot<ChatMessage>()
                     every { chatMessageStore.save(capture(messageSlot)) } answers { messageSlot.captured }
-                    every { roomMemberStore.findByRoomId(roomId) } returns listOf(myMember, otherMember)
+                    every { roomMemberStore.incrementUnreadForOtherMembers(roomId, myId) } returns Unit
 
                     val result = useCase.execute(myId, roomId, "hello")
 
@@ -134,7 +134,7 @@ class SendMessageUseCaseTranslationTest : DescribeSpec() {
                     every { translationPort.translate("こんにちは", "jp", "ko") } returns "안녕하세요"
                     val messageSlot = slot<ChatMessage>()
                     every { chatMessageStore.save(capture(messageSlot)) } answers { messageSlot.captured }
-                    every { roomMemberStore.findByRoomId(roomId) } returns listOf(myMember, otherMember)
+                    every { roomMemberStore.incrementUnreadForOtherMembers(roomId, myId) } returns Unit
 
                     val result = useCase.execute(myId, roomId, "こんにちは")
 

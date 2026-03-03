@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: chinguDachi
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:5432/chingudachi
+    username: chingudachi
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: false
+        show_sql: false
+    open-in-view: false
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 6MB
+
+upload:
+  profile-image:
+    directory: /app/uploads/profile-images
+    base-url: https://${DOMAIN:localhost}/uploads/profile-images
+
+cors:
+  allowed-origins:
+    - ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiry: 1h
+  refresh-token-expiry: 30d
+
+oauth:
+  google:
+    client-id: ${GOOGLE_CLIENT_ID}
+    client-secret: ${GOOGLE_CLIENT_SECRET}
+    redirect-uri: ${GOOGLE_REDIRECT_URI:https://chingu-dachi.com/auth/callback}
+    allowed-redirect-uris:
+      - ${GOOGLE_REDIRECT_URI:https://chingu-dachi.com/auth/callback}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+openai:
+  api-key: ${OPENAI_API_KEY}
+  api-url: https://api.openai.com/v1/chat/completions
+  model: gpt-4.1-mini
