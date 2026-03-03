@@ -8,12 +8,14 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer
+import com.chat.chingudachi.infrastructure.config.CorsProperties
 
 @Configuration
 @EnableWebSocketMessageBroker
 class WebSocketConfig(
     private val stompAuthChannelInterceptor: StompAuthChannelInterceptor,
     private val stompErrorHandler: StompErrorHandler,
+    private val corsProperties: CorsProperties,
 ) : WebSocketMessageBrokerConfigurer {
     override fun configureMessageBroker(config: MessageBrokerRegistry) {
         config.enableSimpleBroker("/topic", "/queue")
@@ -34,8 +36,7 @@ class WebSocketConfig(
     override fun registerStompEndpoints(registry: StompEndpointRegistry) {
         registry.setErrorHandler(stompErrorHandler)
         registry.addEndpoint("/ws")
-            // TODO: 프로덕션 배포 시 실제 도메인으로 제한
-            .setAllowedOriginPatterns("*")
+            .setAllowedOrigins(*corsProperties.allowedOrigins.toTypedArray())
             .withSockJS()
     }
 

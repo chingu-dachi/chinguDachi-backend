@@ -42,6 +42,7 @@ class SecurityConfig(
                 authorize(HttpMethod.GET, "/api/interest-tags", permitAll)
                 authorize(HttpMethod.GET, "/api/users/check-nickname", permitAll)
                 authorize("/ws/**", permitAll)
+                authorize(HttpMethod.GET, "/actuator/health", permitAll)
                 authorize("/error", permitAll)
                 authorize(anyRequest, authenticated)
             }

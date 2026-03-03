@@ -34,6 +34,10 @@ class GetMessagesUseCase(
                 senderId = msg.senderId,
                 content = msg.content,
                 messageStatus = msg.messageStatus,
+                translatedContent = msg.translatedContent,
+                translationStatus = msg.translationStatus,
+                sourceLanguage = msg.sourceLanguage,
+                targetLanguage = msg.targetLanguage,
                 createdAt = msg.createdAt,
             )
         }

@@ -8,6 +8,7 @@ import com.chat.chingudachi.application.chat.result.ChatRoomResult
 import com.chat.chingudachi.application.chat.result.MessageItem
 import com.chat.chingudachi.application.chat.result.MessagesResult
 import com.chat.chingudachi.domain.chat.MessageStatus
+import com.chat.chingudachi.domain.chat.TranslationStatus
 import com.chat.chingudachi.presentation.common.AuthAccountId
 import com.chat.chingudachi.presentation.common.PaginatedResponse
 import org.springframework.http.HttpStatus
@@ -111,6 +112,10 @@ data class MessageResponse(
     val senderId: String,
     val content: String,
     val messageStatus: MessageStatus,
+    val translatedContent: String?,
+    val translationStatus: TranslationStatus,
+    val sourceLanguage: String?,
+    val targetLanguage: String?,
     val createdAt: Instant,
 ) {
     companion object {
@@ -119,6 +124,10 @@ data class MessageResponse(
             senderId = item.senderId.toString(),
             content = item.content,
             messageStatus = item.messageStatus,
+            translatedContent = item.translatedContent,
+            translationStatus = item.translationStatus,
+            sourceLanguage = item.sourceLanguage,
+            targetLanguage = item.targetLanguage,
             createdAt = item.createdAt,
         )
     }

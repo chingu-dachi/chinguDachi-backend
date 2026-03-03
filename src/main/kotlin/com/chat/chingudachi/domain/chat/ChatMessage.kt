@@ -1,5 +1,6 @@
 package com.chat.chingudachi.domain.chat
 
+import com.chat.chingudachi.domain.account.TranslateLanguage
 import com.chat.chingudachi.domain.common.BaseTimeEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -25,7 +26,27 @@ class ChatMessage(
     @Enumerated(EnumType.STRING)
     @Column(name = "message_status", nullable = false, length = 10)
     var messageStatus: MessageStatus = MessageStatus.SENT,
+    @Column(name = "translated_content", length = MAX_CONTENT_LENGTH)
+    var translatedContent: String? = null,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "translation_status", nullable = false, length = 10)
+    var translationStatus: TranslationStatus = TranslationStatus.NONE,
+    @Column(name = "source_language", length = 2)
+    var sourceLanguage: String? = null,
+    @Column(name = "target_language", length = 2)
+    var targetLanguage: String? = null,
 ) : BaseTimeEntity() {
+
+    fun applyTranslation(translated: String, targetLang: TranslateLanguage) {
+        this.translatedContent = translated
+        this.translationStatus = TranslationStatus.DONE
+        this.targetLanguage = targetLang.name.lowercase()
+    }
+
+    fun markTranslationFailed() {
+        this.translationStatus = TranslationStatus.FAILED
+    }
+
     companion object {
         const val MAX_CONTENT_LENGTH = 1000
 
@@ -40,5 +61,11 @@ class ChatMessage(
 
 enum class MessageStatus {
     SENT,
+    FAILED,
+}
+
+enum class TranslationStatus {
+    NONE,
+    DONE,
     FAILED,
 }
