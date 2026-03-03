@@ -25,3 +25,8 @@ upload:
   profile-image:
     directory: build/test-uploads/profile-images
     base-url: http://localhost:8080/uploads/profile-images
+
+openai:
+  api-key: test-api-key
+  api-url: https://api.openai.com/v1/chat/completions
+  model: gpt-4.1-mini

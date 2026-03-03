@@ -40,3 +40,8 @@ oauth:
     redirect-uri: "http://localhost:3000/auth/callback"
     allowed-redirect-uris:
       - "https://auth.expo.io/@won123457/chingu-dachi"
+
+openai:
+  api-key: ${OPENAI_API_KEY:sk-placeholder}
+  api-url: https://api.openai.com/v1/chat/completions
+  model: gpt-4.1-mini
