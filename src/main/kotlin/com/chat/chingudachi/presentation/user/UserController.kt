@@ -18,6 +18,7 @@ import com.chat.chingudachi.presentation.common.PaginatedResponse
 import com.chat.chingudachi.presentation.common.clearRefreshTokenCookie
 import jakarta.servlet.http.HttpServletResponse
 import jakarta.validation.Valid
+import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotEmpty
@@ -159,6 +160,7 @@ data class CompleteOnboardingRequest(
     @field:Size(min = 2, max = 20)
     val nickname: String,
     @field:Min(1900)
+    @field:Max(2025)
     val birthYear: Int,
     @field:NotBlank
     val nationality: String,
