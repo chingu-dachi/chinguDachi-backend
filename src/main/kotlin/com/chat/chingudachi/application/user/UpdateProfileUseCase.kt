@@ -59,7 +59,15 @@ class UpdateProfileUseCase(
             log.warn { "Interest tags not found: $missing" }
             throw BadRequestException(ErrorCode.INTEREST_TAG_NOT_FOUND)
         }
-        userInterestStore.deleteByAccountId(accountId)
-        userInterestStore.saveAll(tags.map { UserInterest(account = account, interestTag = it) })
+
+        val existing = userInterestStore.findByAccountId(accountId)
+        val existingTagKeys = existing.map { it.interestTag.tagKey }.toSet()
+        val newTagKeys = distinctKeys.toSet()
+
+        val toRemove = existing.filter { it.interestTag.tagKey !in newTagKeys }
+        val toAdd = tags.filter { it.tagKey !in existingTagKeys }
+
+        if (toRemove.isNotEmpty()) userInterestStore.deleteAll(toRemove)
+        if (toAdd.isNotEmpty()) userInterestStore.saveAll(toAdd.map { UserInterest(account = account, interestTag = it) })
     }
 }

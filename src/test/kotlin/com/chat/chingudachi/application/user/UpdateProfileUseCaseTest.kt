@@ -108,7 +108,7 @@ class UpdateProfileUseCaseTest : DescribeSpec() {
             }
 
             context("관심사 변경") {
-                it("기존 관심사를 삭제하고 새로 저장한다") {
+                it("동일한 관심사를 보내면 삭제/저장 없이 유지한다") {
                     val account = AccountFixture.create(
                         id = accountId,
                         accountStatus = AccountStatus.ACTIVE,
@@ -118,18 +118,63 @@ class UpdateProfileUseCaseTest : DescribeSpec() {
                         translateLanguage = TranslateLanguage.JA,
                     )
                     val command = UpdateProfileCommand(interests = listOf("TRAVEL", "FOOD"))
+                    val existingInterests = testTags.map { UserInterest(account = account, interestTag = it) }
 
                     every { accountStore.getById(accountId) } returns account
                     every { interestTagStore.findAllByTagKeys(listOf("TRAVEL", "FOOD")) } returns testTags
-                    every { userInterestStore.findByAccountId(accountId) } returns testTags.map {
-                        UserInterest(account = account, interestTag = it)
-                    }
+                    every { userInterestStore.findByAccountId(accountId) } returns existingInterests
 
                     val result = useCase.execute(accountId, command)
 
-                    verify { userInterestStore.deleteByAccountId(accountId) }
-                    verify { userInterestStore.saveAll(match<List<UserInterest>> { it.size == 2 }) }
+                    verify(exactly = 0) { userInterestStore.deleteAll(any()) }
+                    verify(exactly = 0) { userInterestStore.saveAll(any<List<UserInterest>>()) }
                     result.interests.size shouldBe 2
+                }
+
+                it("일부 관심사가 변경되면 제거분만 삭제하고 추가분만 저장한다") {
+                    val account = AccountFixture.create(
+                        id = accountId,
+                        accountStatus = AccountStatus.ACTIVE,
+                        nickname = Nickname("테스트유저"),
+                        birthDate = LocalDate.of(1995, 5, 15),
+                        nation = Nation.KR,
+                        translateLanguage = TranslateLanguage.JA,
+                    )
+                    val musicTag = InterestTag(id = 3, tagKey = "MUSIC", labelKo = "음악", labelJa = "音楽", displayOrder = 3)
+                    val command = UpdateProfileCommand(interests = listOf("TRAVEL", "MUSIC"))
+                    val existingInterests = testTags.map { UserInterest(account = account, interestTag = it) }
+
+                    every { accountStore.getById(accountId) } returns account
+                    every { interestTagStore.findAllByTagKeys(listOf("TRAVEL", "MUSIC")) } returns listOf(testTags[0], musicTag)
+                    every { userInterestStore.findByAccountId(accountId) } returns existingInterests
+
+                    useCase.execute(accountId, command)
+
+                    verify { userInterestStore.deleteAll(match<List<UserInterest>> { it.size == 1 && it[0].interestTag.tagKey == "FOOD" }) }
+                    verify { userInterestStore.saveAll(match<List<UserInterest>> { it.size == 1 && it[0].interestTag.tagKey == "MUSIC" }) }
+                }
+
+                it("전체 관심사가 교체되면 기존 전체 삭제 후 새로 저장한다") {
+                    val account = AccountFixture.create(
+                        id = accountId,
+                        accountStatus = AccountStatus.ACTIVE,
+                        nickname = Nickname("테스트유저"),
+                        birthDate = LocalDate.of(1995, 5, 15),
+                        nation = Nation.KR,
+                        translateLanguage = TranslateLanguage.JA,
+                    )
+                    val musicTag = InterestTag(id = 3, tagKey = "MUSIC", labelKo = "음악", labelJa = "音楽", displayOrder = 3)
+                    val command = UpdateProfileCommand(interests = listOf("MUSIC"))
+                    val existingInterests = testTags.map { UserInterest(account = account, interestTag = it) }
+
+                    every { accountStore.getById(accountId) } returns account
+                    every { interestTagStore.findAllByTagKeys(listOf("MUSIC")) } returns listOf(musicTag)
+                    every { userInterestStore.findByAccountId(accountId) } returns existingInterests
+
+                    useCase.execute(accountId, command)
+
+                    verify { userInterestStore.deleteAll(match<List<UserInterest>> { it.size == 2 }) }
+                    verify { userInterestStore.saveAll(match<List<UserInterest>> { it.size == 1 && it[0].interestTag.tagKey == "MUSIC" }) }
                 }
             }
 
