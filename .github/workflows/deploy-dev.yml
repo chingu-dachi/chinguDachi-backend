@@ -56,18 +56,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Dev EC2
+        env:
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.DEV_EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: GHCR_TOKEN,IMAGE
           script: |
             cd /app/chingudachi-backend
             git pull origin main
 
             # Login to GHCR and pull latest image
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker pull ${{ env.IMAGE }}:latest
+            echo "$GHCR_TOKEN" | docker login ghcr.io --username chingu-dachi --password-stdin
+            docker pull $IMAGE:latest
 
             # Generate nginx conf
             if [ -f nginx/conf.d/default.conf.template ]; then
@@ -78,8 +81,14 @@ jobs:
             fi
 
             docker compose -f docker-compose.dev.yml --env-file .env.dev up -d
-            sleep 30
-            curl -f http://localhost:8080/actuator/health || exit 1
+
+            # Health check with retry (max 5 attempts, 10s interval)
+            for i in 1 2 3 4 5; do
+              sleep 10
+              curl -sf http://localhost:8080/actuator/health && break
+              [ "$i" = "5" ] && { echo "Health check failed"; exit 1; }
+              echo "Retry $i/5..."
+            done
             echo "Dev deployment successful!"
 
   cleanup:
