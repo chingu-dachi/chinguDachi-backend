@@ -8,8 +8,11 @@ on:
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
       - 'Dockerfile'
-      - 'docker-compose.prod.yml'
+      - 'docker-compose.dev.yml'
       - 'nginx/**'
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}
 
 jobs:
   test:
@@ -23,8 +26,33 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - run: ./gradlew test
 
-  deploy:
+  build-and-push:
     needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ github.sha }}
+
+  deploy:
+    needs: build-and-push
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Dev EC2
@@ -36,14 +64,34 @@ jobs:
           script: |
             cd /app/chingudachi-backend
             git pull origin main
-            # Generate nginx conf from template
+
+            # Login to GHCR and pull latest image
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker pull ${{ env.IMAGE }}:latest
+
+            # Generate nginx conf
             if [ -f nginx/conf.d/default.conf.template ]; then
               DOMAIN=$(grep '^DOMAIN=' .env.dev | cut -d'=' -f2)
               sed "s|DOMAIN_PLACEHOLDER|${DOMAIN}|g" \
                 nginx/conf.d/default.conf.template \
                 > nginx/conf.d/default.conf
             fi
-            docker compose -f docker-compose.prod.yml --env-file .env.dev up -d --build
+
+            docker compose -f docker-compose.dev.yml --env-file .env.dev up -d
             sleep 30
             curl -f http://localhost:8080/actuator/health || exit 1
             echo "Dev deployment successful!"
+
+  cleanup:
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Delete old GHCR images (keep latest 3)
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: chingudachi-backend
+          package-type: container
+          min-versions-to-keep: 3
+          delete-only-untagged-versions: false
