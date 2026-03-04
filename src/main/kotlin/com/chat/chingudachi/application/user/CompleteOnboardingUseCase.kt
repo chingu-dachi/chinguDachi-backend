@@ -3,12 +3,14 @@ package com.chat.chingudachi.application.user
 import com.chat.chingudachi.application.interest.port.InterestTagStore
 import com.chat.chingudachi.application.user.command.CompleteOnboardingCommand
 import com.chat.chingudachi.application.user.port.AccountStore
+import com.chat.chingudachi.application.user.port.TermsAgreementStore
 import com.chat.chingudachi.application.user.port.UserInterestStore
 import com.chat.chingudachi.domain.account.Nation
 import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.common.BadRequestException
 import com.chat.chingudachi.domain.common.ConflictException
 import com.chat.chingudachi.domain.common.ErrorCode
+import com.chat.chingudachi.domain.common.NotFoundException
 import com.chat.chingudachi.domain.interest.UserInterest
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
@@ -19,12 +21,17 @@ private val log = KotlinLogging.logger {}
 @Service
 class CompleteOnboardingUseCase(
     private val accountStore: AccountStore,
+    private val termsAgreementStore: TermsAgreementStore,
     private val interestTagStore: InterestTagStore,
     private val userInterestStore: UserInterestStore,
 ) {
     @Transactional
     fun execute(accountId: Long, command: CompleteOnboardingCommand) {
         val account = accountStore.getById(accountId)
+
+        if (!termsAgreementStore.existsByAccountId(accountId)) {
+            throw NotFoundException(ErrorCode.CONSENT_NOT_FOUND)
+        }
 
         if (account.isOnboardingComplete()) {
             throw ConflictException(ErrorCode.ACCOUNT_ALREADY_ONBOARDED)

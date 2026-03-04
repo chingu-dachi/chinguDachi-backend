@@ -47,6 +47,7 @@ class RefreshTokenUseCase(
             accessToken = newAccessToken,
             refreshToken = newRefreshToken,
             onboardingRequired = onboardingRequired,
+            consentRequired = account.isConsentRequired(),
         )
     }
 

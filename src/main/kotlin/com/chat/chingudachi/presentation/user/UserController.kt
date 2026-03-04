@@ -1,6 +1,7 @@
 package com.chat.chingudachi.presentation.user
 
 import com.chat.chingudachi.application.common.PaginationConstants
+import com.chat.chingudachi.application.user.AgreeToTermsUseCase
 import com.chat.chingudachi.application.user.CheckNicknameUseCase
 import com.chat.chingudachi.application.user.CompleteOnboardingUseCase
 import com.chat.chingudachi.application.user.DeleteAccountUseCase
@@ -9,6 +10,7 @@ import com.chat.chingudachi.application.user.GetMyProfileUseCase
 import com.chat.chingudachi.application.user.GetUserProfileUseCase
 import com.chat.chingudachi.application.user.MyProfile
 import com.chat.chingudachi.application.user.UpdateProfileUseCase
+import com.chat.chingudachi.application.user.command.AgreeToTermsCommand
 import com.chat.chingudachi.application.user.command.CompleteOnboardingCommand
 import com.chat.chingudachi.application.user.command.UpdateProfileCommand
 import com.chat.chingudachi.application.user.query.DiscoverUsersQuery
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -38,6 +41,7 @@ import java.time.Instant
 @RestController
 @RequestMapping("/api/users")
 class UserController(
+    private val agreeToTermsUseCase: AgreeToTermsUseCase,
     private val getMyProfileUseCase: GetMyProfileUseCase,
     private val checkNicknameUseCase: CheckNicknameUseCase,
     private val completeOnboardingUseCase: CompleteOnboardingUseCase,
@@ -104,6 +108,15 @@ class UserController(
         completeOnboardingUseCase.execute(accountId, request.toCommand())
     }
 
+    @PostMapping("/consent")
+    fun agreeToTerms(
+        @AuthAccountId accountId: Long,
+        @Valid @RequestBody request: AgreeToTermsRequest,
+    ): ResponseEntity<Unit> {
+        agreeToTermsUseCase.execute(accountId, request.toCommand())
+        return ResponseEntity.noContent().build()
+    }
+
     @DeleteMapping("/me")
     fun deleteAccount(
         @AuthAccountId accountId: Long,
@@ -126,6 +139,7 @@ data class MyProfileResponse(
     val profileImageUrl: String?,
     val bio: String?,
     val onboardingRequired: Boolean,
+    val consentRequired: Boolean,
     val isOnline: Boolean,
     val lastSeenAt: Instant?,
     val createdAt: Instant,
@@ -143,6 +157,7 @@ data class MyProfileResponse(
             profileImageUrl = profile.account.profileImageUrl,
             bio = profile.account.bio,
             onboardingRequired = !profile.account.isOnboardingComplete(),
+            consentRequired = profile.account.isConsentRequired(),
             isOnline = false, // TODO: 온라인 상태 구현 시 교체
             lastSeenAt = null, // TODO: 온라인 상태 구현 시 교체
             createdAt = profile.account.createdAt,
@@ -199,5 +214,19 @@ data class UpdateProfileRequest(
         city = city,
         interests = interests,
         profileImageUrl = profileImageUrl,
+    )
+}
+
+data class AgreeToTermsRequest(
+    val termsOfServiceAgree: Boolean,
+    val privacyPolicyAgree: Boolean,
+    val crossBorderDataAgree: Boolean,
+    val marketingAgree: Boolean = false,
+) {
+    fun toCommand() = AgreeToTermsCommand(
+        termsOfServiceAgree = termsOfServiceAgree,
+        privacyPolicyAgree = privacyPolicyAgree,
+        crossBorderDataAgree = crossBorderDataAgree,
+        marketingAgree = marketingAgree,
     )
 }

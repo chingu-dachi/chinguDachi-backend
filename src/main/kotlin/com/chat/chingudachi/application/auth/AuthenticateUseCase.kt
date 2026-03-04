@@ -81,6 +81,7 @@ class AuthenticateUseCase(
             accessToken = accessToken,
             refreshToken = refreshToken,
             onboardingRequired = !account.isOnboardingComplete(),
+            consentRequired = account.isConsentRequired(),
         )
     }
 

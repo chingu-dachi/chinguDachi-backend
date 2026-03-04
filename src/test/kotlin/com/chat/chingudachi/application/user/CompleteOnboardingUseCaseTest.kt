@@ -3,6 +3,7 @@ package com.chat.chingudachi.application.user
 import com.chat.chingudachi.application.interest.port.InterestTagStore
 import com.chat.chingudachi.application.user.command.CompleteOnboardingCommand
 import com.chat.chingudachi.application.user.port.AccountStore
+import com.chat.chingudachi.application.user.port.TermsAgreementStore
 import com.chat.chingudachi.application.user.port.UserInterestStore
 import com.chat.chingudachi.domain.account.AccountStatus
 import com.chat.chingudachi.domain.account.Nation
@@ -26,9 +27,10 @@ import java.time.LocalDate
 
 class CompleteOnboardingUseCaseTest : DescribeSpec() {
     private val accountStore = mockk<AccountStore>(relaxed = true)
+    private val termsAgreementStore = mockk<TermsAgreementStore>()
     private val interestTagStore = mockk<InterestTagStore>()
     private val userInterestStore = mockk<UserInterestStore>(relaxed = true)
-    private val useCase = CompleteOnboardingUseCase(accountStore, interestTagStore, userInterestStore)
+    private val useCase = CompleteOnboardingUseCase(accountStore, termsAgreementStore, interestTagStore, userInterestStore)
 
     private val validCommand = CompleteOnboardingCommand(
         nickname = "테스트닉네임",
@@ -43,13 +45,14 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
     )
 
     init {
-        afterEach { clearMocks(accountStore, interestTagStore, userInterestStore) }
+        afterEach { clearMocks(accountStore, termsAgreementStore, interestTagStore, userInterestStore) }
 
         describe("execute") {
             context("유효한 온보딩 데이터") {
                 it("계정 상태를 ACTIVE로 변경하고 관심사를 저장한다") {
-                    val account = AccountFixture.create(id = 1)
+                    val account = AccountFixture.create(id = 1, accountStatus = AccountStatus.NOT_ENOUGH_DETAIL)
                     every { accountStore.getById(1L) } returns account
+                    every { termsAgreementStore.existsByAccountId(1L) } returns true
                     every { accountStore.existsByNickname(Nickname("테스트닉네임")) } returns false
                     every { interestTagStore.findAllByTagKeys(listOf("TRAVEL", "FOOD")) } returns testTags
 
@@ -75,6 +78,19 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
                 }
             }
 
+            context("동의 미완료 계정") {
+                it("NotFoundException을 던진다") {
+                    val account = AccountFixture.create(id = 1)
+                    every { accountStore.getById(1L) } returns account
+                    every { termsAgreementStore.existsByAccountId(1L) } returns false
+
+                    val exception = shouldThrow<NotFoundException> {
+                        useCase.execute(1L, validCommand)
+                    }
+                    exception.errorCode shouldBe ErrorCode.CONSENT_NOT_FOUND
+                }
+            }
+
             context("이미 온보딩 완료된 계정") {
                 it("ConflictException을 던진다") {
                     val account = AccountFixture.create(
@@ -86,6 +102,7 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
                         translateLanguage = TranslateLanguage.JA,
                     )
                     every { accountStore.getById(1L) } returns account
+                    every { termsAgreementStore.existsByAccountId(1L) } returns true
 
                     shouldThrow<ConflictException> {
                         useCase.execute(1L, validCommand)
@@ -95,8 +112,9 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
 
             context("중복 닉네임") {
                 it("ConflictException을 던진다") {
-                    val account = AccountFixture.create(id = 1)
+                    val account = AccountFixture.create(id = 1, accountStatus = AccountStatus.NOT_ENOUGH_DETAIL)
                     every { accountStore.getById(1L) } returns account
+                    every { termsAgreementStore.existsByAccountId(1L) } returns true
                     every { accountStore.existsByNickname(Nickname("테스트닉네임")) } returns true
 
                     shouldThrow<ConflictException> {
@@ -107,8 +125,9 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
 
             context("관심사 미선택") {
                 it("BadRequestException을 던진다") {
-                    val account = AccountFixture.create(id = 1)
+                    val account = AccountFixture.create(id = 1, accountStatus = AccountStatus.NOT_ENOUGH_DETAIL)
                     every { accountStore.getById(1L) } returns account
+                    every { termsAgreementStore.existsByAccountId(1L) } returns true
                     every { accountStore.existsByNickname(Nickname("테스트닉네임")) } returns false
 
                     val emptyInterests = validCommand.copy(interests = emptyList())
@@ -121,8 +140,9 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
 
             context("유효하지 않은 nationality") {
                 it("BadRequestException을 던진다") {
-                    val account = AccountFixture.create(id = 1)
+                    val account = AccountFixture.create(id = 1, accountStatus = AccountStatus.NOT_ENOUGH_DETAIL)
                     every { accountStore.getById(1L) } returns account
+                    every { termsAgreementStore.existsByAccountId(1L) } returns true
 
                     val invalidNationality = validCommand.copy(nationality = "US")
 
@@ -134,8 +154,9 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
 
             context("유효하지 않은 birthYear") {
                 it("BadRequestException을 던진다") {
-                    val account = AccountFixture.create(id = 1)
+                    val account = AccountFixture.create(id = 1, accountStatus = AccountStatus.NOT_ENOUGH_DETAIL)
                     every { accountStore.getById(1L) } returns account
+                    every { termsAgreementStore.existsByAccountId(1L) } returns true
 
                     val invalidBirthYear = validCommand.copy(birthYear = 2030)
 
@@ -147,8 +168,9 @@ class CompleteOnboardingUseCaseTest : DescribeSpec() {
 
             context("존재하지 않는 관심사 태그 키") {
                 it("BadRequestException을 던진다") {
-                    val account = AccountFixture.create(id = 1)
+                    val account = AccountFixture.create(id = 1, accountStatus = AccountStatus.NOT_ENOUGH_DETAIL)
                     every { accountStore.getById(1L) } returns account
+                    every { termsAgreementStore.existsByAccountId(1L) } returns true
                     every { accountStore.existsByNickname(Nickname("테스트닉네임")) } returns false
                     every { interestTagStore.findAllByTagKeys(listOf("TRAVEL", "INVALID")) } returns listOf(testTags[0])
 

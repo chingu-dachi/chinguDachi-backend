@@ -2,15 +2,18 @@ package com.chat.chingudachi.infrastructure.persistence
 
 import com.chat.chingudachi.application.auth.port.AccountCredentialStore
 import com.chat.chingudachi.application.user.port.AccountStore
+import com.chat.chingudachi.application.user.port.TermsAgreementStore
 import com.chat.chingudachi.application.auth.port.AuthTokenStore
 import com.chat.chingudachi.domain.account.Account
 import com.chat.chingudachi.domain.account.AccountCredential
+import com.chat.chingudachi.domain.account.AccountTermsAgreement
 import com.chat.chingudachi.domain.account.CredentialType
 import com.chat.chingudachi.domain.account.Nation
 import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.auth.AuthToken
 import com.chat.chingudachi.infrastructure.persistence.account.AccountCredentialRepository
 import com.chat.chingudachi.infrastructure.persistence.account.AccountRepository
+import com.chat.chingudachi.infrastructure.persistence.account.AccountTermsAgreementRepository
 import com.chat.chingudachi.infrastructure.persistence.auth.AuthTokenRepository
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
@@ -80,4 +83,18 @@ class AuthTokenStoreAdapter(
         authTokenRepository.findByAccountIdAndRefreshToken(accountId, refreshToken)
 
     override fun deleteByAccountId(accountId: Long) = authTokenRepository.deleteByAccountId(accountId)
+}
+
+@Repository
+class TermsAgreementStoreAdapter(
+    private val accountTermsAgreementRepository: AccountTermsAgreementRepository,
+) : TermsAgreementStore {
+    override fun save(agreement: AccountTermsAgreement): AccountTermsAgreement =
+        accountTermsAgreementRepository.save(agreement)
+
+    override fun findByAccountId(accountId: Long): AccountTermsAgreement? =
+        accountTermsAgreementRepository.findByAccountId(accountId)
+
+    override fun existsByAccountId(accountId: Long): Boolean =
+        accountTermsAgreementRepository.existsByAccountId(accountId)
 }
