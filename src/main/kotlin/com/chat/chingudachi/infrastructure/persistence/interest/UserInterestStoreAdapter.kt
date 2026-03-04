@@ -17,6 +17,9 @@ class UserInterestStoreAdapter(
     override fun saveAll(userInterests: List<UserInterest>): List<UserInterest> =
         userInterestRepository.saveAll(userInterests)
 
+    override fun deleteAll(userInterests: List<UserInterest>) =
+        userInterestRepository.deleteAll(userInterests)
+
     override fun deleteByAccountId(accountId: Long) =
         userInterestRepository.deleteByAccountId(accountId)
 }
