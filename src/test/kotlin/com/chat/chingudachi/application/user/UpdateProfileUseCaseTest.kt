@@ -178,6 +178,30 @@ class UpdateProfileUseCaseTest : DescribeSpec() {
                 }
             }
 
+            context("중복 관심사 키 입력") {
+                it("distinct 처리 후 정상 동작한다") {
+                    val account = AccountFixture.create(
+                        id = accountId,
+                        accountStatus = AccountStatus.ACTIVE,
+                        nickname = Nickname("테스트유저"),
+                        birthDate = LocalDate.of(1995, 5, 15),
+                        nation = Nation.KR,
+                        translateLanguage = TranslateLanguage.JA,
+                    )
+                    val command = UpdateProfileCommand(interests = listOf("TRAVEL", "TRAVEL", "FOOD"))
+                    val savedInterests = testTags.map { UserInterest(account = account, interestTag = it) }
+
+                    every { accountStore.getById(accountId) } returns account
+                    every { interestTagStore.findAllByTagKeys(listOf("TRAVEL", "FOOD")) } returns testTags
+                    every { userInterestStore.findByAccountId(accountId) } returns emptyList() andThen savedInterests
+
+                    val result = useCase.execute(accountId, command)
+
+                    result.interests.size shouldBe 2
+                    verify { userInterestStore.saveAll(match<List<UserInterest>> { it.size == 2 }) }
+                }
+            }
+
             context("빈 관심사 목록") {
                 it("BadRequestException을 던진다") {
                     val account = AccountFixture.create(

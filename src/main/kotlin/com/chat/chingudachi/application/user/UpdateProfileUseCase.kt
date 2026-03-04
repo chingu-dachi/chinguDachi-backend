@@ -61,13 +61,26 @@ class UpdateProfileUseCase(
         }
 
         val existing = userInterestStore.findByAccountId(accountId)
+        val (toRemove, toAdd) = calculateInterestDiff(existing, distinctKeys.toSet(), tags)
+
+        if (toRemove.isNotEmpty()) {
+            userInterestStore.deleteAll(toRemove)
+            log.info { "Removed ${toRemove.size} interests for account $accountId: ${toRemove.map { it.interestTag.tagKey }}" }
+        }
+        if (toAdd.isNotEmpty()) {
+            userInterestStore.saveAll(toAdd.map { UserInterest(account = account, interestTag = it) })
+            log.info { "Added ${toAdd.size} interests for account $accountId: ${toAdd.map { it.tagKey }}" }
+        }
+    }
+
+    private fun calculateInterestDiff(
+        existing: List<UserInterest>,
+        newTagKeys: Set<String>,
+        newTags: List<com.chat.chingudachi.domain.interest.InterestTag>,
+    ): Pair<List<UserInterest>, List<com.chat.chingudachi.domain.interest.InterestTag>> {
         val existingTagKeys = existing.map { it.interestTag.tagKey }.toSet()
-        val newTagKeys = distinctKeys.toSet()
-
         val toRemove = existing.filter { it.interestTag.tagKey !in newTagKeys }
-        val toAdd = tags.filter { it.tagKey !in existingTagKeys }
-
-        if (toRemove.isNotEmpty()) userInterestStore.deleteAll(toRemove)
-        if (toAdd.isNotEmpty()) userInterestStore.saveAll(toAdd.map { UserInterest(account = account, interestTag = it) })
+        val toAdd = newTags.filter { it.tagKey !in existingTagKeys }
+        return toRemove to toAdd
     }
 }
