@@ -21,6 +21,7 @@ interface ChatMessageRepository : JpaRepository<ChatMessage, Long> {
         pageable: Pageable,
     ): List<ChatMessage>
 
+    // id(auto-increment PK) 순서 == 시간 순서 가정. createdAt 대신 MAX(id)로 성능 최적화.
     @Query(
         """
         SELECT m FROM ChatMessage m

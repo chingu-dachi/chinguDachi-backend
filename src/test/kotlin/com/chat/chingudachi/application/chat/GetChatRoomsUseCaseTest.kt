@@ -48,6 +48,30 @@ class GetChatRoomsUseCaseTest : DescribeSpec() {
                 }
             }
 
+            context("채팅방은 있지만 메시지가 없을 때") {
+                it("lastMessage가 null이다") {
+                    val room = ChatRoomFixture.create(id = 10L, lastMessageAt = null)
+                    val myMember = RoomMemberFixture.create(id = 1L, chatRoom = room, accountId = myId)
+                    val me = AccountFixture.create(
+                        id = myId,
+                        accountStatus = AccountStatus.ACTIVE,
+                        nickname = Nickname("나유저"),
+                        nation = Nation.KR,
+                        translateLanguage = TranslateLanguage.JA,
+                    )
+
+                    every { roomMemberStore.findByAccountId(myId, null, 21) } returns listOf(myMember)
+                    every { roomMemberStore.findByRoomIds(listOf(10L)) } returns listOf(myMember)
+                    every { accountStore.findByIds(listOf(myId)) } returns listOf(me)
+                    every { chatMessageStore.findLatestByRoomIds(listOf(10L)) } returns emptyList()
+
+                    val result = useCase.execute(myId, null)
+
+                    result.items shouldHaveSize 1
+                    result.items[0].lastMessage.shouldBeNull()
+                }
+            }
+
             context("채팅방이 있을 때") {
                 it("채팅방 목록을 반환한다") {
                     val now = Instant.now()
@@ -137,6 +161,7 @@ class GetChatRoomsUseCaseTest : DescribeSpec() {
                     result.items shouldHaveSize 20
                     result.hasMore shouldBe true
                     result.nextCursor shouldBe resultRoomIds.last()
+                    result.items.forEach { it.lastMessage.shouldBeNull() }
                 }
             }
         }
