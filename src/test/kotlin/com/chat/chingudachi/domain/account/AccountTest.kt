@@ -81,7 +81,7 @@ class AccountTest : DescribeSpec() {
 
         describe("completeOnboarding") {
             it("상태를 ACTIVE로 변경하고 프로필 필드를 설정한다") {
-                val account = AccountFixture.create()
+                val account = AccountFixture.create(accountStatus = AccountStatus.NOT_ENOUGH_DETAIL)
                 val nickname = Nickname("테스트유저")
                 val birthYear = 2000
                 val nation = Nation.KR

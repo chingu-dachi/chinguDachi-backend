@@ -8,6 +8,7 @@ import com.chat.chingudachi.domain.interest.InterestTag
 import com.chat.chingudachi.fixture.AccountFixture
 import com.chat.chingudachi.infrastructure.persistence.account.AccountCredentialRepository
 import com.chat.chingudachi.infrastructure.persistence.account.AccountRepository
+import com.chat.chingudachi.infrastructure.persistence.account.AccountTermsAgreementRepository
 import com.chat.chingudachi.infrastructure.persistence.auth.AuthTokenRepository
 import com.chat.chingudachi.infrastructure.persistence.interest.InterestTagRepository
 import com.chat.chingudachi.infrastructure.persistence.interest.UserInterestRepository
@@ -24,7 +25,6 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
-import org.springframework.test.web.servlet.put
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -39,6 +39,7 @@ class OnboardingIntegrationTest(
     private val accountRepository: AccountRepository,
     private val interestTagRepository: InterestTagRepository,
     private val userInterestRepository: UserInterestRepository,
+    private val termsAgreementRepository: AccountTermsAgreementRepository,
 ) : DescribeSpec() {
 
     private fun loginAndGetToken(oauthKey: String = "google-300", email: String = "onboard@example.com"): String {
@@ -65,6 +66,14 @@ class OnboardingIntegrationTest(
             ),
         )
 
+    private fun agreeToTerms(token: String) {
+        mockMvc.post("/api/users/consent") {
+            header("Authorization", "Bearer $token")
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"termsOfServiceAgree":true,"privacyPolicyAgree":true,"crossBorderDataAgree":true}"""
+        }.andExpect { status { isNoContent() } }
+    }
+
     private fun onboardingRequest(
         nickname: String = "테스트유저",
         birthYear: Int = 2000,
@@ -83,19 +92,21 @@ class OnboardingIntegrationTest(
         afterEach {
             clearMocks(oAuthClient)
             userInterestRepository.deleteAll()
+            termsAgreementRepository.deleteAll()
             authTokenRepository.deleteAll()
             accountCredentialRepository.deleteAll()
             accountRepository.deleteAll()
             interestTagRepository.deleteAll()
         }
 
-        describe("PUT /api/users/me") {
+        describe("POST /api/users/me/onboarding") {
             context("유효한 온보딩 데이터") {
                 it("계정 상태를 ACTIVE로 변경한다") {
                     val token = loginAndGetToken()
                     seedInterestTags()
+                    agreeToTerms(token)
 
-                    mockMvc.put("/api/users/me") {
+                    mockMvc.post("/api/users/me/onboarding") {
                         header("Authorization", "Bearer $token")
                         contentType = MediaType.APPLICATION_JSON
                         content = onboardingRequest(
@@ -123,8 +134,9 @@ class OnboardingIntegrationTest(
                 it("409를 반환한다") {
                     val token = loginAndGetToken()
                     seedInterestTags()
+                    agreeToTerms(token)
 
-                    mockMvc.put("/api/users/me") {
+                    mockMvc.post("/api/users/me/onboarding") {
                         header("Authorization", "Bearer $token")
                         contentType = MediaType.APPLICATION_JSON
                         content = onboardingRequest(
@@ -135,7 +147,7 @@ class OnboardingIntegrationTest(
                         status { isOk() }
                     }
 
-                    mockMvc.put("/api/users/me") {
+                    mockMvc.post("/api/users/me/onboarding") {
                         header("Authorization", "Bearer $token")
                         contentType = MediaType.APPLICATION_JSON
                         content = onboardingRequest(
@@ -152,9 +164,10 @@ class OnboardingIntegrationTest(
                 it("409를 반환한다") {
                     val token = loginAndGetToken()
                     seedInterestTags()
+                    agreeToTerms(token)
                     accountRepository.save(AccountFixture.create(id = 0, nickname = Nickname("중복닉네임")))
 
-                    mockMvc.put("/api/users/me") {
+                    mockMvc.post("/api/users/me/onboarding") {
                         header("Authorization", "Bearer $token")
                         contentType = MediaType.APPLICATION_JSON
                         content = onboardingRequest(
@@ -171,7 +184,7 @@ class OnboardingIntegrationTest(
                 it("400을 반환한다") {
                     val token = loginAndGetToken()
 
-                    mockMvc.put("/api/users/me") {
+                    mockMvc.post("/api/users/me/onboarding") {
                         header("Authorization", "Bearer $token")
                         contentType = MediaType.APPLICATION_JSON
                         content = onboardingRequest(interests = emptyList())
@@ -184,8 +197,9 @@ class OnboardingIntegrationTest(
             context("존재하지 않는 관심사 태그 키") {
                 it("400을 반환한다") {
                     val token = loginAndGetToken()
+                    agreeToTerms(token)
 
-                    mockMvc.put("/api/users/me") {
+                    mockMvc.post("/api/users/me/onboarding") {
                         header("Authorization", "Bearer $token")
                         contentType = MediaType.APPLICATION_JSON
                         content = onboardingRequest(interests = listOf("INVALID_TAG"))
@@ -197,7 +211,7 @@ class OnboardingIntegrationTest(
 
             context("인증 없이 요청하면") {
                 it("401을 반환한다") {
-                    mockMvc.put("/api/users/me") {
+                    mockMvc.post("/api/users/me/onboarding") {
                         contentType = MediaType.APPLICATION_JSON
                         content = onboardingRequest(interests = listOf("TRAVEL"))
                     }.andExpect {

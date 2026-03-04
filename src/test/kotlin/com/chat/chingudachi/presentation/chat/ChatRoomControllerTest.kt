@@ -214,6 +214,7 @@ class ChatRoomControllerTest(
 
     private fun activateAccount(accountId: Long, nickname: Nickname, nation: Nation) {
         val account = accountRepository.findById(accountId).get()
+        account.agreeToTerms()
         account.completeOnboarding(
             nickname = nickname,
             birthYear = 1995,
