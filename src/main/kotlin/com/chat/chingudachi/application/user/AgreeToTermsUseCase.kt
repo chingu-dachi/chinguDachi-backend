@@ -22,12 +22,12 @@ class AgreeToTermsUseCase(
     fun execute(accountId: Long, command: AgreeToTermsCommand) {
         val account = accountStore.getById(accountId)
 
-        if (termsAgreementStore.existsByAccountId(accountId)) {
-            throw ConflictException(ErrorCode.CONSENT_ALREADY_EXISTS)
-        }
-
         if (!command.termsOfServiceAgree || !command.privacyPolicyAgree || !command.crossBorderDataAgree) {
             throw BadRequestException(ErrorCode.CONSENT_REQUIRED_FIELDS_MISSING)
+        }
+
+        if (termsAgreementStore.existsByAccountId(accountId)) {
+            throw ConflictException(ErrorCode.CONSENT_ALREADY_EXISTS)
         }
 
         val agreement = AccountTermsAgreement(

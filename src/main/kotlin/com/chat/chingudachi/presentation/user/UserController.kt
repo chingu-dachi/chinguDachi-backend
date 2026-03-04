@@ -14,7 +14,6 @@ import com.chat.chingudachi.application.user.command.AgreeToTermsCommand
 import com.chat.chingudachi.application.user.command.CompleteOnboardingCommand
 import com.chat.chingudachi.application.user.command.UpdateProfileCommand
 import com.chat.chingudachi.application.user.query.DiscoverUsersQuery
-import com.chat.chingudachi.domain.account.AccountStatus
 import com.chat.chingudachi.domain.account.Nation
 import com.chat.chingudachi.presentation.common.AuthAccountId
 import com.chat.chingudachi.presentation.common.PaginatedResponse
@@ -158,7 +157,7 @@ data class MyProfileResponse(
             profileImageUrl = profile.account.profileImageUrl,
             bio = profile.account.bio,
             onboardingRequired = !profile.account.isOnboardingComplete(),
-            consentRequired = profile.account.accountStatus == AccountStatus.NOT_CONSENT,
+            consentRequired = profile.account.isConsentRequired(),
             isOnline = false, // TODO: 온라인 상태 구현 시 교체
             lastSeenAt = null, // TODO: 온라인 상태 구현 시 교체
             createdAt = profile.account.createdAt,

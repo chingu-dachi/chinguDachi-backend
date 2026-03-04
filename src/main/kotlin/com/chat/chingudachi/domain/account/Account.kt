@@ -49,8 +49,12 @@ class Account(
 ) : BaseTimeEntity() {
     fun isOnboardingComplete(): Boolean = accountStatus.isOnboarded
 
+    fun isConsentRequired(): Boolean = accountStatus == AccountStatus.NOT_CONSENT
+
     fun agreeToTerms() {
-        check(accountStatus == AccountStatus.NOT_CONSENT) { "Cannot agree to terms in status: $accountStatus" }
+        if (accountStatus != AccountStatus.NOT_CONSENT) {
+            throw ConflictException(ErrorCode.CONSENT_ALREADY_EXISTS)
+        }
         this.accountStatus = AccountStatus.NOT_ENOUGH_DETAIL
     }
 
@@ -62,7 +66,9 @@ class Account(
         city: String?,
         profileImageUrl: String?,
     ) {
-        check(accountStatus == AccountStatus.NOT_ENOUGH_DETAIL) { "Cannot complete onboarding in status: $accountStatus" }
+        if (accountStatus != AccountStatus.NOT_ENOUGH_DETAIL) {
+            throw ConflictException(ErrorCode.ACCOUNT_ALREADY_ONBOARDED)
+        }
         this.nickname = nickname
         this.birthDate = LocalDate.of(birthYear, 1, 1)
         this.nation = nation

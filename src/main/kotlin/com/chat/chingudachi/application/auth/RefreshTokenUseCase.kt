@@ -3,7 +3,6 @@ package com.chat.chingudachi.application.auth
 import com.chat.chingudachi.application.auth.port.AuthTokenStore
 import com.chat.chingudachi.application.auth.port.TokenProvider
 import com.chat.chingudachi.application.auth.result.AuthenticateResult
-import com.chat.chingudachi.domain.account.AccountStatus
 import com.chat.chingudachi.domain.auth.AuthToken
 import com.chat.chingudachi.domain.common.ErrorCode
 import com.chat.chingudachi.domain.common.UnauthorizedException
@@ -48,7 +47,7 @@ class RefreshTokenUseCase(
             accessToken = newAccessToken,
             refreshToken = newRefreshToken,
             onboardingRequired = onboardingRequired,
-            consentRequired = account.accountStatus == AccountStatus.NOT_CONSENT,
+            consentRequired = account.isConsentRequired(),
         )
     }
 
