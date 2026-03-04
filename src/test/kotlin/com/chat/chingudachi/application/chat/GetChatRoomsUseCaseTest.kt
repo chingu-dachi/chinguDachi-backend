@@ -1,17 +1,22 @@
 package com.chat.chingudachi.application.chat
 
+import com.chat.chingudachi.application.chat.port.ChatMessageStore
 import com.chat.chingudachi.application.chat.port.RoomMemberStore
 import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.domain.account.AccountStatus
 import com.chat.chingudachi.domain.account.Nation
 import com.chat.chingudachi.domain.account.Nickname
 import com.chat.chingudachi.domain.account.TranslateLanguage
+import com.chat.chingudachi.domain.chat.TranslationStatus
 import com.chat.chingudachi.fixture.AccountFixture
+import com.chat.chingudachi.fixture.ChatMessageFixture
 import com.chat.chingudachi.fixture.ChatRoomFixture
 import com.chat.chingudachi.fixture.RoomMemberFixture
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.clearMocks
 import io.mockk.every
@@ -21,10 +26,11 @@ import java.time.Instant
 class GetChatRoomsUseCaseTest : DescribeSpec() {
     private val roomMemberStore = mockk<RoomMemberStore>()
     private val accountStore = mockk<AccountStore>()
-    private val useCase = GetChatRoomsUseCase(roomMemberStore, accountStore)
+    private val chatMessageStore = mockk<ChatMessageStore>()
+    private val useCase = GetChatRoomsUseCase(roomMemberStore, accountStore, chatMessageStore)
 
     init {
-        afterEach { clearMocks(roomMemberStore, accountStore) }
+        afterEach { clearMocks(roomMemberStore, accountStore, chatMessageStore) }
 
         describe("execute") {
             val myId = 1L
@@ -64,8 +70,20 @@ class GetChatRoomsUseCaseTest : DescribeSpec() {
                     )
 
                     every { roomMemberStore.findByAccountId(myId, null, 21) } returns listOf(myMember)
+                    val lastMsg = ChatMessageFixture.create(
+                        id = 100L,
+                        chatRoomId = 10L,
+                        senderId = otherId,
+                        originalContent = "こんにちは",
+                        translatedContent = "안녕하세요",
+                        translationStatus = TranslationStatus.DONE,
+                        originalLanguage = "ja",
+                        translatedLanguage = "ko",
+                    )
+
                     every { roomMemberStore.findByRoomIds(listOf(10L)) } returns listOf(myMember, otherMember)
                     every { accountStore.findByIds(listOf(myId, otherId)) } returns listOf(me, other)
+                    every { chatMessageStore.findLatestByRoomIds(listOf(10L)) } returns listOf(lastMsg)
 
                     val result = useCase.execute(myId, null)
 
@@ -73,6 +91,14 @@ class GetChatRoomsUseCaseTest : DescribeSpec() {
                     result.items[0].roomId shouldBe 10L
                     result.items[0].participants shouldHaveSize 2
                     result.hasMore shouldBe false
+
+                    val summary = result.items[0].lastMessage
+                    summary.shouldNotBeNull()
+                    summary.messageId shouldBe 100L
+                    summary.senderId shouldBe otherId
+                    summary.originalContent shouldBe "こんにちは"
+                    summary.translatedContent shouldBe "안녕하세요"
+                    summary.translationStatus shouldBe TranslationStatus.DONE
                 }
             }
 
@@ -104,6 +130,7 @@ class GetChatRoomsUseCaseTest : DescribeSpec() {
                     every { roomMemberStore.findByAccountId(myId, null, 21) } returns myMembers
                     every { roomMemberStore.findByRoomIds(resultRoomIds) } returns resultRoomMembers
                     every { accountStore.findByIds(listOf(myId)) } returns listOf(me)
+                    every { chatMessageStore.findLatestByRoomIds(resultRoomIds) } returns emptyList()
 
                     val result = useCase.execute(myId, null)
 

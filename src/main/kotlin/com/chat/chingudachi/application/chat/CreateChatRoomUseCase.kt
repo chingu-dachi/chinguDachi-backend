@@ -95,6 +95,7 @@ class CreateChatRoomUseCase(
             roomId = chatRoom.id,
             roomName = chatRoom.roomName,
             participants = participants,
+            lastMessage = null,
             lastMessageAt = chatRoom.lastMessageAt,
             createdAt = chatRoom.createdAt,
         )
