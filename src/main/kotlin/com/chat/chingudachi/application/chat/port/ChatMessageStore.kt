@@ -9,6 +9,8 @@ interface ChatMessageStore {
     fun findById(id: Long): ChatMessage?
     fun findByRoomId(roomId: Long, cursor: Long?, size: Int): List<ChatMessage>
 
+    fun findLatestByRoomIds(roomIds: List<Long>): List<ChatMessage>
+
     fun getById(id: Long): ChatMessage =
         findById(id) ?: throw NotFoundException(ErrorCode.CHAT_MESSAGE_NOT_FOUND)
 }

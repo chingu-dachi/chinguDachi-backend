@@ -62,4 +62,9 @@ class ChatMessageStoreAdapter(
 
     override fun findByRoomId(roomId: Long, cursor: Long?, size: Int): List<ChatMessage> =
         chatMessageRepository.findByRoomId(roomId, cursor, PageRequest.of(0, size))
+
+    override fun findLatestByRoomIds(roomIds: List<Long>): List<ChatMessage> {
+        if (roomIds.isEmpty()) return emptyList()
+        return chatMessageRepository.findLatestByRoomIds(roomIds)
+    }
 }

@@ -6,6 +6,7 @@ import com.chat.chingudachi.application.chat.GetMessagesUseCase
 import com.chat.chingudachi.application.chat.RetryTranslationUseCase
 import com.chat.chingudachi.application.chat.result.ChatParticipant
 import com.chat.chingudachi.application.chat.result.ChatRoomResult
+import com.chat.chingudachi.application.chat.result.LastMessageSummary
 import com.chat.chingudachi.application.chat.result.MessageItem
 import com.chat.chingudachi.application.chat.result.MessagesResult
 import com.chat.chingudachi.presentation.common.AuthAccountId
@@ -99,6 +100,7 @@ data class ChatRoomResponse(
     val roomId: String,
     val roomName: String,
     val participants: List<ParticipantResponse>,
+    val lastMessage: LastMessageResponse?,
     val lastMessageAt: Instant?,
     val createdAt: Instant,
 ) {
@@ -107,8 +109,33 @@ data class ChatRoomResponse(
             roomId = result.roomId.toString(),
             roomName = result.roomName,
             participants = result.participants.map { ParticipantResponse.from(it) },
+            lastMessage = result.lastMessage?.let { LastMessageResponse.from(it) },
             lastMessageAt = result.lastMessageAt,
             createdAt = result.createdAt,
+        )
+    }
+}
+
+data class LastMessageResponse(
+    val messageId: String,
+    val senderId: String,
+    val originalContent: String,
+    val translatedContent: String?,
+    val translationStatus: String,
+    val originalLanguage: String?,
+    val translatedLanguage: String?,
+    val createdAt: Instant,
+) {
+    companion object {
+        fun from(summary: LastMessageSummary) = LastMessageResponse(
+            messageId = summary.messageId.toString(),
+            senderId = summary.senderId.toString(),
+            originalContent = summary.originalContent,
+            translatedContent = summary.translatedContent,
+            translationStatus = summary.translationStatus.name,
+            originalLanguage = summary.originalLanguage,
+            translatedLanguage = summary.translatedLanguage,
+            createdAt = summary.createdAt,
         )
     }
 }

@@ -1,12 +1,15 @@
 package com.chat.chingudachi.application.chat
 
+import com.chat.chingudachi.application.chat.port.ChatMessageStore
 import com.chat.chingudachi.application.chat.port.RoomMemberStore
 import com.chat.chingudachi.application.chat.result.ChatParticipant
 import com.chat.chingudachi.application.chat.result.ChatRoomResult
 import com.chat.chingudachi.application.chat.result.ChatRoomsResult
+import com.chat.chingudachi.application.chat.result.LastMessageSummary
 import com.chat.chingudachi.application.common.PaginationConstants
 import com.chat.chingudachi.application.user.port.AccountStore
 import com.chat.chingudachi.domain.account.Account
+import com.chat.chingudachi.domain.chat.ChatMessage
 import com.chat.chingudachi.domain.chat.RoomMember
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -15,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 class GetChatRoomsUseCase(
     private val roomMemberStore: RoomMemberStore,
     private val accountStore: AccountStore,
+    private val chatMessageStore: ChatMessageStore,
 ) {
     @Transactional(readOnly = true)
     fun execute(accountId: Long, cursor: Long?): ChatRoomsResult {
@@ -27,8 +31,9 @@ class GetChatRoomsUseCase(
         val roomIds = pageMembers.map { it.chatRoom.id }
         val membersByRoomId = loadRoomMembers(roomIds)
         val accountsById = loadAccounts(membersByRoomId.values.flatten())
+        val lastMessagesByRoomId = loadLastMessages(roomIds)
 
-        val items = buildChatRoomResults(pageMembers, membersByRoomId, accountsById)
+        val items = buildChatRoomResults(pageMembers, membersByRoomId, accountsById, lastMessagesByRoomId)
         val nextCursor = if (hasMore) pageMembers.lastOrNull()?.chatRoom?.id else null
 
         return ChatRoomsResult(items, nextCursor, hasMore)
@@ -45,10 +50,16 @@ class GetChatRoomsUseCase(
         return accountStore.findByIds(accountIds).associateBy { it.id }
     }
 
+    private fun loadLastMessages(roomIds: List<Long>): Map<Long, ChatMessage> {
+        if (roomIds.isEmpty()) return emptyMap()
+        return chatMessageStore.findLatestByRoomIds(roomIds).associateBy { it.chatRoomId }
+    }
+
     private fun buildChatRoomResults(
         pageMembers: List<RoomMember>,
         membersByRoomId: Map<Long, List<RoomMember>>,
         accountsById: Map<Long, Account>,
+        lastMessagesByRoomId: Map<Long, ChatMessage>,
     ): List<ChatRoomResult> = pageMembers.map { myMember ->
         val chatRoom = myMember.chatRoom
         val roomMembers = membersByRoomId[chatRoom.id] ?: emptyList()
@@ -58,6 +69,7 @@ class GetChatRoomsUseCase(
             roomId = chatRoom.id,
             roomName = chatRoom.roomName,
             participants = participants,
+            lastMessage = lastMessagesByRoomId[chatRoom.id]?.toSummary(),
             lastMessageAt = chatRoom.lastMessageAt,
             createdAt = chatRoom.createdAt,
         )
@@ -76,4 +88,15 @@ class GetChatRoomsUseCase(
             unreadCount = member.unreadCount,
         )
     }
+
+    private fun ChatMessage.toSummary() = LastMessageSummary(
+        messageId = id,
+        senderId = senderId,
+        originalContent = originalContent,
+        translatedContent = translatedContent,
+        translationStatus = translationStatus,
+        originalLanguage = originalLanguage,
+        translatedLanguage = translatedLanguage,
+        createdAt = createdAt,
+    )
 }

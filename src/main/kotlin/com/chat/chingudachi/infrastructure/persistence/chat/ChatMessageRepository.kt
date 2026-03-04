@@ -20,4 +20,17 @@ interface ChatMessageRepository : JpaRepository<ChatMessage, Long> {
         @Param("cursor") cursor: Long?,
         pageable: Pageable,
     ): List<ChatMessage>
+
+    // id(auto-increment PK) 순서 == 시간 순서 가정. createdAt 대신 MAX(id)로 성능 최적화.
+    @Query(
+        """
+        SELECT m FROM ChatMessage m
+        WHERE m.id IN (
+            SELECT MAX(m2.id) FROM ChatMessage m2
+            WHERE m2.chatRoomId IN :roomIds
+            GROUP BY m2.chatRoomId
+        )
+        """,
+    )
+    fun findLatestByRoomIds(@Param("roomIds") roomIds: List<Long>): List<ChatMessage>
 }

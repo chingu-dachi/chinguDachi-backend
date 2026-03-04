@@ -1,12 +1,25 @@
 package com.chat.chingudachi.application.chat.result
 
+import com.chat.chingudachi.domain.chat.TranslationStatus
 import java.time.Instant
 
 data class ChatRoomResult(
     val roomId: Long,
     val roomName: String,
     val participants: List<ChatParticipant>,
+    val lastMessage: LastMessageSummary?,
     val lastMessageAt: Instant?,
+    val createdAt: Instant,
+)
+
+data class LastMessageSummary(
+    val messageId: Long,
+    val senderId: Long,
+    val originalContent: String,
+    val translatedContent: String?,
+    val translationStatus: TranslationStatus,
+    val originalLanguage: String?,
+    val translatedLanguage: String?,
     val createdAt: Instant,
 )
 
