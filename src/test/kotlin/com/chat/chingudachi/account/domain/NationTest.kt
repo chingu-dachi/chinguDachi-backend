@@ -1,0 +1,15 @@
+package com.chat.chingudachi.account.domain
+
+import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.matchers.shouldBe
+
+class NationTest : DescribeSpec() {
+    init {
+        describe("toTranslateLanguage") {
+            it("각 Nation에 맞춘 번역 대상 Language를 제공한다.") {
+                Nation.KR.toTranslateLanguage() shouldBe TranslateLanguage.JA
+                Nation.JP.toTranslateLanguage() shouldBe TranslateLanguage.KO
+            }
+        }
+    }
+}

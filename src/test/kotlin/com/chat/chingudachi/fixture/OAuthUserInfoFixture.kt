@@ -1,7 +1,7 @@
 package com.chat.chingudachi.fixture
 
-import com.chat.chingudachi.domain.auth.OAuthProvider
-import com.chat.chingudachi.domain.auth.OAuthUserInfo
+import com.chat.chingudachi.auth.domain.OAuthProvider
+import com.chat.chingudachi.auth.domain.OAuthUserInfo
 
 object OAuthUserInfoFixture {
     fun create(

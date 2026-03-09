@@ -1,7 +1,7 @@
 package com.chat.chingudachi.fixture
 
-import com.chat.chingudachi.domain.account.Account
-import com.chat.chingudachi.domain.auth.AuthToken
+import com.chat.chingudachi.account.domain.Account
+import com.chat.chingudachi.auth.domain.AuthToken
 import java.time.Duration
 import java.time.Instant
 

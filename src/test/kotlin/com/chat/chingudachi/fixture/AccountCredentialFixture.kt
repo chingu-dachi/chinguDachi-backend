@@ -1,8 +1,8 @@
 package com.chat.chingudachi.fixture
 
-import com.chat.chingudachi.domain.account.Account
-import com.chat.chingudachi.domain.account.AccountCredential
-import com.chat.chingudachi.domain.account.CredentialType
+import com.chat.chingudachi.account.domain.Account
+import com.chat.chingudachi.account.domain.AccountCredential
+import com.chat.chingudachi.account.domain.CredentialType
 
 object AccountCredentialFixture {
     fun create(

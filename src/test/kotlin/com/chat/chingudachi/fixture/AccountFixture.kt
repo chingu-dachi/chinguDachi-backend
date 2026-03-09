@@ -1,11 +1,11 @@
 package com.chat.chingudachi.fixture
 
-import com.chat.chingudachi.domain.account.Account
-import com.chat.chingudachi.domain.account.AccountStatus
-import com.chat.chingudachi.domain.account.AccountType
-import com.chat.chingudachi.domain.account.Nation
-import com.chat.chingudachi.domain.account.TranslateLanguage
-import com.chat.chingudachi.domain.account.Nickname
+import com.chat.chingudachi.account.domain.Account
+import com.chat.chingudachi.account.domain.AccountStatus
+import com.chat.chingudachi.account.domain.AccountType
+import com.chat.chingudachi.account.domain.Nation
+import com.chat.chingudachi.account.domain.TranslateLanguage
+import com.chat.chingudachi.account.domain.Nickname
 import java.time.LocalDate
 
 object AccountFixture {
