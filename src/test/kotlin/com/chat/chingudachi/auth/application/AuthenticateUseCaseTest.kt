@@ -8,7 +8,7 @@ import com.chat.chingudachi.auth.application.port.OAuthClient
 import com.chat.chingudachi.auth.application.port.TokenProvider
 import com.chat.chingudachi.account.domain.AccountStatus
 import com.chat.chingudachi.account.domain.AccountType
-import com.chat.chingudachi.account.domain.CredentialType
+import com.chat.chingudachi.auth.domain.CredentialType
 import com.chat.chingudachi.account.domain.Nation
 import com.chat.chingudachi.account.domain.TranslateLanguage
 import com.chat.chingudachi.account.domain.Nickname
@@ -85,7 +85,7 @@ class AuthenticateUseCaseTest : DescribeSpec() {
             context("기존 유저인 경우") {
                 it("기존 Account를 사용하고 새 Account를 생성하지 않는다") {
                     val existingAccount = AccountFixture.create(id = 10L)
-                    val existingCredential = com.chat.chingudachi.account.domain.AccountCredential(
+                    val existingCredential = com.chat.chingudachi.auth.domain.AccountCredential(
                         id = 1L,
                         account = existingAccount,
                         credentialType = CredentialType.GOOGLE_OAUTH,
@@ -124,7 +124,7 @@ class AuthenticateUseCaseTest : DescribeSpec() {
                         nation = Nation.KR,
                         translateLanguage = TranslateLanguage.JA,
                     )
-                    val existingCredential = com.chat.chingudachi.account.domain.AccountCredential(
+                    val existingCredential = com.chat.chingudachi.auth.domain.AccountCredential(
                         id = 2L,
                         account = completedAccount,
                         credentialType = CredentialType.GOOGLE_OAUTH,
@@ -151,7 +151,7 @@ class AuthenticateUseCaseTest : DescribeSpec() {
             context("기존 refresh token이 있는 경우") {
                 it("기존 토큰을 삭제하고 새로 생성한다") {
                     val existingAccount = AccountFixture.create(id = 30L)
-                    val existingCredential = com.chat.chingudachi.account.domain.AccountCredential(
+                    val existingCredential = com.chat.chingudachi.auth.domain.AccountCredential(
                         id = 3L,
                         account = existingAccount,
                         credentialType = CredentialType.GOOGLE_OAUTH,

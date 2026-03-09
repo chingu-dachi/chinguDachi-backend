@@ -8,10 +8,10 @@ import com.chat.chingudachi.auth.application.port.OAuthClient
 import com.chat.chingudachi.auth.application.port.TokenProvider
 import com.chat.chingudachi.auth.application.result.AuthenticateResult
 import com.chat.chingudachi.account.domain.Account
-import com.chat.chingudachi.account.domain.AccountCredential
 import com.chat.chingudachi.account.domain.AccountStatus
 import com.chat.chingudachi.account.domain.AccountType
-import com.chat.chingudachi.account.domain.CredentialType
+import com.chat.chingudachi.auth.domain.AccountCredential
+import com.chat.chingudachi.auth.domain.CredentialType
 import com.chat.chingudachi.auth.domain.AuthToken
 import com.chat.chingudachi.auth.domain.OAuthProvider
 import com.chat.chingudachi.auth.domain.OAuthUserInfo

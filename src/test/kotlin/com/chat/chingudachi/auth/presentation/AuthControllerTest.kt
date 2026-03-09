@@ -4,7 +4,7 @@ import com.chat.chingudachi.auth.application.port.OAuthClient
 import com.chat.chingudachi.auth.domain.OAuthProvider
 import com.chat.chingudachi.auth.domain.OAuthUserInfo
 import com.chat.chingudachi.core.domain.UnauthorizedException
-import com.chat.chingudachi.account.infrastructure.persistence.AccountCredentialRepository
+import com.chat.chingudachi.auth.infrastructure.persistence.AccountCredentialRepository
 import com.chat.chingudachi.account.infrastructure.persistence.AccountRepository
 import com.chat.chingudachi.auth.infrastructure.persistence.AuthTokenRepository
 import com.chat.chingudachi.support.MockOAuthConfig

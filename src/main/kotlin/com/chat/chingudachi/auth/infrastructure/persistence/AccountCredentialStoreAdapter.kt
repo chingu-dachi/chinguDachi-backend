@@ -1,8 +1,7 @@
 package com.chat.chingudachi.auth.infrastructure.persistence
 
-import com.chat.chingudachi.account.domain.AccountCredential
-import com.chat.chingudachi.account.domain.CredentialType
-import com.chat.chingudachi.account.infrastructure.persistence.AccountCredentialRepository
+import com.chat.chingudachi.auth.domain.AccountCredential
+import com.chat.chingudachi.auth.domain.CredentialType
 import com.chat.chingudachi.auth.application.port.AccountCredentialStore
 import org.springframework.stereotype.Repository
 

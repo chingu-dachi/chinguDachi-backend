@@ -5,7 +5,7 @@ import com.chat.chingudachi.account.domain.Nickname
 import com.chat.chingudachi.auth.domain.OAuthProvider
 import com.chat.chingudachi.auth.domain.OAuthUserInfo
 import com.chat.chingudachi.fixture.AccountFixture
-import com.chat.chingudachi.account.infrastructure.persistence.AccountCredentialRepository
+import com.chat.chingudachi.auth.infrastructure.persistence.AccountCredentialRepository
 import com.chat.chingudachi.account.infrastructure.persistence.AccountRepository
 import com.chat.chingudachi.auth.infrastructure.persistence.AuthTokenRepository
 import com.chat.chingudachi.support.MockOAuthConfig

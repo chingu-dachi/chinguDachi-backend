@@ -1,5 +1,6 @@
-package com.chat.chingudachi.account.domain
+package com.chat.chingudachi.auth.domain
 
+import com.chat.chingudachi.account.domain.Account
 import com.chat.chingudachi.core.domain.BaseTimeEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

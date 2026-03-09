@@ -1,6 +1,7 @@
-package com.chat.chingudachi.account.infrastructure.persistence
+package com.chat.chingudachi.auth.infrastructure.persistence
 
-import com.chat.chingudachi.account.domain.CredentialType
+import com.chat.chingudachi.account.infrastructure.persistence.AccountRepository
+import com.chat.chingudachi.auth.domain.CredentialType
 import com.chat.chingudachi.fixture.AccountCredentialFixture
 import com.chat.chingudachi.fixture.AccountFixture
 import io.kotest.core.spec.style.DescribeSpec

@@ -1,6 +1,5 @@
-package com.chat.chingudachi.core.infrastructure.config
+package com.chat.chingudachi.chat.infrastructure.translation
 
-import com.chat.chingudachi.chat.infrastructure.translation.OpenAiProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -12,17 +11,7 @@ import java.time.Duration
 
 @Configuration
 @EnableConfigurationProperties(OpenAiProperties::class)
-class RestClientConfig {
-    @Bean("googleRestClient")
-    fun googleRestClient(): RestClient {
-        val factory = SimpleClientHttpRequestFactory()
-        factory.setConnectTimeout(Duration.ofSeconds(5))
-        factory.setReadTimeout(Duration.ofSeconds(10))
-        return RestClient.builder()
-            .requestFactory(factory)
-            .build()
-    }
-
+class TranslationRestClientConfig {
     @Bean("openaiRestClient")
     fun openaiRestClient(): RestClient {
         val factory = SimpleClientHttpRequestFactory()
