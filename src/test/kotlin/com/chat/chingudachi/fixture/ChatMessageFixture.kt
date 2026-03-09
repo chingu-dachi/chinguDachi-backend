@@ -1,8 +1,8 @@
 package com.chat.chingudachi.fixture
 
-import com.chat.chingudachi.domain.chat.ChatMessage
-import com.chat.chingudachi.domain.chat.MessageStatus
-import com.chat.chingudachi.domain.chat.TranslationStatus
+import com.chat.chingudachi.chat.domain.ChatMessage
+import com.chat.chingudachi.chat.domain.MessageStatus
+import com.chat.chingudachi.chat.domain.TranslationStatus
 
 object ChatMessageFixture {
     fun create(

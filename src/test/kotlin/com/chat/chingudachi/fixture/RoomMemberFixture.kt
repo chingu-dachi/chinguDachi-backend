@@ -1,8 +1,8 @@
 package com.chat.chingudachi.fixture
 
-import com.chat.chingudachi.domain.chat.ChatRoom
-import com.chat.chingudachi.domain.chat.MemberStatus
-import com.chat.chingudachi.domain.chat.RoomMember
+import com.chat.chingudachi.chat.domain.ChatRoom
+import com.chat.chingudachi.chat.domain.MemberStatus
+import com.chat.chingudachi.chat.domain.RoomMember
 import java.time.Instant
 
 object RoomMemberFixture {
