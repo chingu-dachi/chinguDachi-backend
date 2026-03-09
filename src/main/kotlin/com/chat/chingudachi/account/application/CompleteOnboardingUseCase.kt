@@ -4,7 +4,7 @@ import com.chat.chingudachi.interest.application.port.InterestTagStore
 import com.chat.chingudachi.account.application.command.CompleteOnboardingCommand
 import com.chat.chingudachi.account.application.port.AccountStore
 import com.chat.chingudachi.account.application.port.TermsAgreementStore
-import com.chat.chingudachi.account.application.port.UserInterestStore
+import com.chat.chingudachi.interest.application.port.UserInterestStore
 import com.chat.chingudachi.account.domain.Nation
 import com.chat.chingudachi.account.domain.Nickname
 import com.chat.chingudachi.core.domain.BadRequestException

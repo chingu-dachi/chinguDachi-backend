@@ -1,4 +1,4 @@
-package com.chat.chingudachi.account.application.port
+package com.chat.chingudachi.interest.application.port
 
 import com.chat.chingudachi.interest.domain.UserInterest
 

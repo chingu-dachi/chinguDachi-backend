@@ -1,6 +1,5 @@
 package com.chat.chingudachi.auth.domain
 
-import com.chat.chingudachi.fixture.AccountFixture
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import java.time.Duration
@@ -13,7 +12,7 @@ class AuthTokenTest : DescribeSpec() {
                 it("만료 시점이 현재보다 과거이면 true를 반환한다") {
                     val token =
                         AuthToken(
-                            account = AccountFixture.create(),
+                            accountId = 1L,
                             refreshToken = "test-refresh-token",
                             expiresAt = Instant.now().minus(Duration.ofHours(1)),
                         )
@@ -24,7 +23,7 @@ class AuthTokenTest : DescribeSpec() {
                 it("만료 시점이 현재보다 미래이면 false를 반환한다") {
                     val token =
                         AuthToken(
-                            account = AccountFixture.create(),
+                            accountId = 1L,
                             refreshToken = "test-refresh-token",
                             expiresAt = Instant.now().plus(Duration.ofHours(1)),
                         )

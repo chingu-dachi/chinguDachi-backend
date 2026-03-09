@@ -8,6 +8,7 @@ import com.chat.chingudachi.auth.application.port.OAuthClient
 import com.chat.chingudachi.auth.application.port.TokenProvider
 import com.chat.chingudachi.account.domain.AccountStatus
 import com.chat.chingudachi.account.domain.AccountType
+import com.chat.chingudachi.auth.domain.AccountCredential
 import com.chat.chingudachi.auth.domain.CredentialType
 import com.chat.chingudachi.account.domain.Nation
 import com.chat.chingudachi.account.domain.TranslateLanguage
@@ -85,9 +86,9 @@ class AuthenticateUseCaseTest : DescribeSpec() {
             context("기존 유저인 경우") {
                 it("기존 Account를 사용하고 새 Account를 생성하지 않는다") {
                     val existingAccount = AccountFixture.create(id = 10L)
-                    val existingCredential = com.chat.chingudachi.auth.domain.AccountCredential(
+                    val existingCredential = AccountCredential(
                         id = 1L,
-                        account = existingAccount,
+                        accountId = 10L,
                         credentialType = CredentialType.GOOGLE_OAUTH,
                         oauthKey = oAuthUserInfo.providerUserId,
                     )
@@ -99,6 +100,7 @@ class AuthenticateUseCaseTest : DescribeSpec() {
                             oAuthUserInfo.providerUserId,
                         )
                     } returns existingCredential
+                    every { accountStore.getById(10L) } returns existingAccount
                     every { tokenProvider.createAccessToken(10L) } returns "existing-access"
                     every { tokenProvider.createRefreshToken(10L) } returns "existing-refresh"
                     every { authTokenStore.save(any()) } answers { firstArg() }
@@ -124,9 +126,9 @@ class AuthenticateUseCaseTest : DescribeSpec() {
                         nation = Nation.KR,
                         translateLanguage = TranslateLanguage.JA,
                     )
-                    val existingCredential = com.chat.chingudachi.auth.domain.AccountCredential(
+                    val existingCredential = AccountCredential(
                         id = 2L,
-                        account = completedAccount,
+                        accountId = 20L,
                         credentialType = CredentialType.GOOGLE_OAUTH,
                         oauthKey = oAuthUserInfo.providerUserId,
                     )
@@ -138,6 +140,7 @@ class AuthenticateUseCaseTest : DescribeSpec() {
                             oAuthUserInfo.providerUserId,
                         )
                     } returns existingCredential
+                    every { accountStore.getById(20L) } returns completedAccount
                     every { tokenProvider.createAccessToken(20L) } returns "completed-access"
                     every { tokenProvider.createRefreshToken(20L) } returns "completed-refresh"
                     every { authTokenStore.save(any()) } answers { firstArg() }
@@ -151,9 +154,9 @@ class AuthenticateUseCaseTest : DescribeSpec() {
             context("기존 refresh token이 있는 경우") {
                 it("기존 토큰을 삭제하고 새로 생성한다") {
                     val existingAccount = AccountFixture.create(id = 30L)
-                    val existingCredential = com.chat.chingudachi.auth.domain.AccountCredential(
+                    val existingCredential = AccountCredential(
                         id = 3L,
-                        account = existingAccount,
+                        accountId = 30L,
                         credentialType = CredentialType.GOOGLE_OAUTH,
                         oauthKey = oAuthUserInfo.providerUserId,
                     )
@@ -165,6 +168,7 @@ class AuthenticateUseCaseTest : DescribeSpec() {
                             oAuthUserInfo.providerUserId,
                         )
                     } returns existingCredential
+                    every { accountStore.getById(30L) } returns existingAccount
                     every { tokenProvider.createAccessToken(30L) } returns "new-access"
                     every { tokenProvider.createRefreshToken(30L) } returns "new-refresh"
                     every { authTokenStore.save(any()) } answers { firstArg() }

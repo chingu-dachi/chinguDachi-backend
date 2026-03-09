@@ -27,7 +27,7 @@ class AuthTokenRepositoryTest(
                     AccountFixture.create(id = 0),
                 )
                 val authToken = AuthTokenFixture.create(
-                    account = account,
+                    accountId = account.id,
                     refreshToken = "saved-refresh-token",
                 )
 
@@ -36,7 +36,7 @@ class AuthTokenRepositoryTest(
 
                 val found = authTokenRepository.findById(saved.id).get()
                 found.refreshToken shouldBe "saved-refresh-token"
-                found.account.id shouldBe account.id
+                found.accountId shouldBe account.id
             }
         }
 
@@ -47,7 +47,7 @@ class AuthTokenRepositoryTest(
                 )
                 val authToken = authTokenRepository.saveAndFlush(
                     AuthTokenFixture.create(
-                        account = account,
+                        accountId = account.id,
                         refreshToken = "matching-token",
                     ),
                 )
@@ -68,7 +68,7 @@ class AuthTokenRepositoryTest(
                 )
                 authTokenRepository.saveAndFlush(
                     AuthTokenFixture.create(
-                        account = account,
+                        accountId = account.id,
                         refreshToken = "original-token",
                     ),
                 )
@@ -89,10 +89,10 @@ class AuthTokenRepositoryTest(
                     AccountFixture.create(id = 0),
                 )
                 authTokenRepository.saveAndFlush(
-                    AuthTokenFixture.create(account = account, refreshToken = "token-1"),
+                    AuthTokenFixture.create(accountId = account.id, refreshToken = "token-1"),
                 )
                 authTokenRepository.saveAndFlush(
-                    AuthTokenFixture.create(account = account, refreshToken = "token-2"),
+                    AuthTokenFixture.create(accountId = account.id, refreshToken = "token-2"),
                 )
                 entityManager.flush()
                 entityManager.clear()
@@ -112,14 +112,14 @@ class AuthTokenRepositoryTest(
                 )
                 authTokenRepository.saveAndFlush(
                     AuthTokenFixture.create(
-                        account = account,
+                        accountId = account.id,
                         refreshToken = "expired-token",
                         expiresAt = Instant.now().minus(Duration.ofDays(1)),
                     ),
                 )
                 authTokenRepository.saveAndFlush(
                     AuthTokenFixture.create(
-                        account = account,
+                        accountId = account.id,
                         refreshToken = "valid-token",
                         expiresAt = Instant.now().plus(Duration.ofDays(30)),
                     ),

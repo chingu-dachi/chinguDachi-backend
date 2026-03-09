@@ -1,5 +1,6 @@
 package com.chat.chingudachi.auth.application
 
+import com.chat.chingudachi.account.application.port.AccountStore
 import com.chat.chingudachi.auth.application.port.AuthTokenStore
 import com.chat.chingudachi.auth.application.port.TokenProvider
 import com.chat.chingudachi.account.domain.AccountStatus
@@ -22,17 +23,19 @@ import java.time.Instant
 import java.time.LocalDate
 
 class RefreshTokenUseCaseTest : DescribeSpec() {
+    private val accountStore = mockk<AccountStore>()
     private val authTokenStore = mockk<AuthTokenStore>(relaxUnitFun = true)
     private val tokenProvider = mockk<TokenProvider>()
 
     private val useCase = RefreshTokenUseCase(
+        accountStore = accountStore,
         authTokenStore = authTokenStore,
         tokenProvider = tokenProvider,
     )
 
     init {
         beforeEach {
-            clearMocks(authTokenStore, tokenProvider)
+            clearMocks(accountStore, authTokenStore, tokenProvider)
             every { tokenProvider.refreshTokenExpiry } returns Duration.ofDays(30)
         }
 
@@ -44,7 +47,7 @@ class RefreshTokenUseCaseTest : DescribeSpec() {
                 it("기존 토큰을 삭제하고 새 토큰 쌍을 발급한다") {
                     val account = AccountFixture.create(id = accountId)
                     val authToken = AuthTokenFixture.create(
-                        account = account,
+                        accountId = accountId,
                         refreshToken = oldRefreshToken,
                         expiresAt = Instant.now().plus(Duration.ofDays(29)),
                     )
@@ -53,6 +56,7 @@ class RefreshTokenUseCaseTest : DescribeSpec() {
                     every {
                         authTokenStore.findByAccountIdAndRefreshToken(accountId, oldRefreshToken)
                     } returns authToken
+                    every { accountStore.getById(accountId) } returns account
                     every { tokenProvider.createAccessToken(accountId) } returns "new-access-token"
                     every { tokenProvider.createRefreshToken(accountId) } returns "new-refresh-token"
                     every { authTokenStore.save(any()) } answers { firstArg() }
@@ -79,7 +83,7 @@ class RefreshTokenUseCaseTest : DescribeSpec() {
                         translateLanguage = TranslateLanguage.JA,
                     )
                     val authToken = AuthTokenFixture.create(
-                        account = completedAccount,
+                        accountId = accountId,
                         refreshToken = oldRefreshToken,
                     )
 
@@ -87,6 +91,7 @@ class RefreshTokenUseCaseTest : DescribeSpec() {
                     every {
                         authTokenStore.findByAccountIdAndRefreshToken(accountId, oldRefreshToken)
                     } returns authToken
+                    every { accountStore.getById(accountId) } returns completedAccount
                     every { tokenProvider.createAccessToken(accountId) } returns "new-access"
                     every { tokenProvider.createRefreshToken(accountId) } returns "new-refresh"
                     every { authTokenStore.save(any()) } answers { firstArg() }
@@ -114,9 +119,8 @@ class RefreshTokenUseCaseTest : DescribeSpec() {
 
             context("만료된 refresh token인 경우") {
                 it("AUTH_REFRESH_TOKEN_EXPIRED 예외를 던지고 기존 토큰을 삭제한다") {
-                    val account = AccountFixture.create(id = accountId)
                     val expiredToken = AuthTokenFixture.create(
-                        account = account,
+                        accountId = accountId,
                         refreshToken = oldRefreshToken,
                         expiresAt = Instant.now().minus(Duration.ofHours(1)),
                     )

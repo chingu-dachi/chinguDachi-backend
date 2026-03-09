@@ -42,7 +42,7 @@ class AuthenticateUseCase(
         )
 
         if (existing != null) {
-            return existing.account
+            return accountStore.getById(existing.accountId)
         }
 
         val account = accountStore.save(
@@ -55,7 +55,7 @@ class AuthenticateUseCase(
 
         accountCredentialStore.save(
             AccountCredential(
-                account = account,
+                accountId = account.id,
                 credentialType = credentialType,
                 oauthKey = oAuthUserInfo.providerUserId,
             ),
@@ -71,7 +71,7 @@ class AuthenticateUseCase(
         authTokenStore.deleteByAccountId(account.id)
         authTokenStore.save(
             AuthToken(
-                account = account,
+                accountId = account.id,
                 refreshToken = refreshToken,
                 expiresAt = Instant.now().plus(tokenProvider.refreshTokenExpiry),
             ),

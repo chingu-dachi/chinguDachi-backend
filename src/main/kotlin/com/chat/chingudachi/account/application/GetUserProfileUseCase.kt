@@ -1,7 +1,7 @@
 package com.chat.chingudachi.account.application
 
 import com.chat.chingudachi.account.application.port.AccountStore
-import com.chat.chingudachi.account.application.port.UserInterestStore
+import com.chat.chingudachi.interest.application.port.UserInterestStore
 import com.chat.chingudachi.core.domain.ErrorCode
 import com.chat.chingudachi.core.domain.NotFoundException
 import io.github.oshai.kotlinlogging.KotlinLogging

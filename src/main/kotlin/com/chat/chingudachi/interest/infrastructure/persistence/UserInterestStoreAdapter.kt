@@ -1,6 +1,6 @@
 package com.chat.chingudachi.interest.infrastructure.persistence
 
-import com.chat.chingudachi.account.application.port.UserInterestStore
+import com.chat.chingudachi.interest.application.port.UserInterestStore
 import com.chat.chingudachi.interest.domain.UserInterest
 import org.springframework.stereotype.Repository
 

@@ -1,5 +1,6 @@
 package com.chat.chingudachi.auth.application
 
+import com.chat.chingudachi.account.application.port.AccountStore
 import com.chat.chingudachi.auth.application.port.AuthTokenStore
 import com.chat.chingudachi.auth.application.port.TokenProvider
 import com.chat.chingudachi.auth.application.result.AuthenticateResult
@@ -12,6 +13,7 @@ import java.time.Instant
 
 @Service
 class RefreshTokenUseCase(
+    private val accountStore: AccountStore,
     private val authTokenStore: AuthTokenStore,
     private val tokenProvider: TokenProvider,
 ) {
@@ -27,8 +29,7 @@ class RefreshTokenUseCase(
             throw UnauthorizedException(ErrorCode.AUTH_REFRESH_TOKEN_EXPIRED)
         }
 
-        val account = authToken.account
-        val onboardingRequired = !account.isOnboardingComplete()
+        val account = accountStore.getById(accountId)
 
         authTokenStore.deleteByAccountId(accountId)
 
@@ -37,7 +38,7 @@ class RefreshTokenUseCase(
 
         authTokenStore.save(
             AuthToken(
-                account = account,
+                accountId = accountId,
                 refreshToken = newRefreshToken,
                 expiresAt = Instant.now().plus(tokenProvider.refreshTokenExpiry),
             ),
@@ -46,7 +47,7 @@ class RefreshTokenUseCase(
         return AuthenticateResult(
             accessToken = newAccessToken,
             refreshToken = newRefreshToken,
-            onboardingRequired = onboardingRequired,
+            onboardingRequired = !account.isOnboardingComplete(),
             consentRequired = account.isConsentRequired(),
         )
     }

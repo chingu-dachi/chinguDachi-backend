@@ -25,7 +25,7 @@ class AccountCredentialRepositoryTest(
                     AccountFixture.create(id = 0),
                 )
                 val credential = AccountCredentialFixture.create(
-                    account = account,
+                    accountId = account.id,
                     oauthKey = "google-user-id-123",
                 )
 
@@ -35,7 +35,7 @@ class AccountCredentialRepositoryTest(
                 val found = accountCredentialRepository.findById(saved.id).get()
                 found.credentialType shouldBe CredentialType.GOOGLE_OAUTH
                 found.oauthKey shouldBe "google-user-id-123"
-                found.account.id shouldBe account.id
+                found.accountId shouldBe account.id
             }
         }
 
@@ -46,7 +46,7 @@ class AccountCredentialRepositoryTest(
                 )
                 accountCredentialRepository.saveAndFlush(
                     AccountCredentialFixture.create(
-                        account = account,
+                        accountId = account.id,
                         credentialType = CredentialType.GOOGLE_OAUTH,
                         oauthKey = "google-user-id-456",
                     ),
@@ -59,7 +59,7 @@ class AccountCredentialRepositoryTest(
                 )
 
                 found.shouldNotBeNull()
-                found.account.id shouldBe account.id
+                found.accountId shouldBe account.id
             }
 
             it("존재하지 않는 oauthKey이면 null을 반환한다") {
@@ -77,7 +77,7 @@ class AccountCredentialRepositoryTest(
                 )
                 accountCredentialRepository.saveAndFlush(
                     AccountCredentialFixture.create(
-                        account = account,
+                        accountId = account.id,
                         credentialType = CredentialType.GOOGLE_OAUTH,
                         oauthKey = "google-user-id-789",
                     ),

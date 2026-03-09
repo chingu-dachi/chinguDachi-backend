@@ -2,7 +2,7 @@ package com.chat.chingudachi.account.application
 
 import com.chat.chingudachi.auth.application.port.AuthTokenStore
 import com.chat.chingudachi.account.application.port.AccountStore
-import com.chat.chingudachi.account.application.port.UserInterestStore
+import com.chat.chingudachi.interest.application.port.UserInterestStore
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
