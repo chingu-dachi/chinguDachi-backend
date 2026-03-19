@@ -13,7 +13,7 @@ on:
       - 'nginx/**'
 
 env:
-  IMAGE: ghcr.io/${{ github.repository }}
+  IMAGE: ghcr.io/chingu-dachi/chingudachi-backend
 
 jobs:
   test:
