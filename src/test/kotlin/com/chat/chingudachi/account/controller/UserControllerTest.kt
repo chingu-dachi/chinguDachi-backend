@@ -1,0 +1,134 @@
+package com.chat.chingudachi.account.controller
+
+import com.chat.chingudachi.auth.infra.OAuthClient
+import com.chat.chingudachi.account.domain.Nickname
+import com.chat.chingudachi.auth.domain.OAuthProvider
+import com.chat.chingudachi.auth.domain.OAuthUserInfo
+import com.chat.chingudachi.fixture.AccountFixture
+import com.chat.chingudachi.auth.repository.AccountCredentialRepository
+import com.chat.chingudachi.account.repository.AccountRepository
+import com.chat.chingudachi.auth.repository.AuthTokenRepository
+import com.chat.chingudachi.support.MockOAuthConfig
+import io.kotest.core.spec.style.DescribeSpec
+import io.mockk.clearMocks
+import io.mockk.every
+import io.zonky.test.db.AutoConfigureEmbeddedDatabase
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+import org.springframework.context.annotation.Import
+import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@AutoConfigureEmbeddedDatabase
+@Import(MockOAuthConfig::class)
+class UserControllerTest(
+    private val mockMvc: MockMvc,
+    private val oAuthClient: OAuthClient,
+    private val authTokenRepository: AuthTokenRepository,
+    private val accountCredentialRepository: AccountCredentialRepository,
+    private val accountRepository: AccountRepository,
+) : DescribeSpec() {
+    init {
+        afterEach {
+            clearMocks(oAuthClient)
+            authTokenRepository.deleteAll()
+            accountCredentialRepository.deleteAll()
+            accountRepository.deleteAll()
+        }
+
+        describe("GET /api/users/me") {
+            context("인증된 유저가 요청하면") {
+                it("프로필 정보를 반환한다") {
+                    every { oAuthClient.authenticate("valid-code", any()) } returns
+                        OAuthUserInfo(OAuthProvider.GOOGLE, "google-100", "user@example.com")
+
+                    val loginResult = mockMvc.post("/api/auth/google") {
+                        contentType = MediaType.APPLICATION_JSON
+                        content = """{"code":"valid-code"}"""
+                    }.andReturn()
+
+                    val accessToken = com.jayway.jsonpath.JsonPath.read<String>(
+                        loginResult.response.contentAsString,
+                        "$.data.accessToken",
+                    )
+
+                    mockMvc.get("/api/users/me") {
+                        header("Authorization", "Bearer $accessToken")
+                    }.andExpect {
+                        status { isOk() }
+                        jsonPath("$.data.email") { value("user@example.com") }
+                        jsonPath("$.data.onboardingRequired") { value(true) }
+                        jsonPath("$.data.interests") { isArray() }
+                    }
+                }
+            }
+
+            context("인증 없이 요청하면") {
+                it("401을 반환한다") {
+                    mockMvc.get("/api/users/me")
+                        .andExpect {
+                            status { isUnauthorized() }
+                        }
+                }
+            }
+        }
+
+        describe("GET /api/users/check-nickname") {
+            fun loginAndGetToken(): String {
+                every { oAuthClient.authenticate("valid-code", any()) } returns
+                    OAuthUserInfo(OAuthProvider.GOOGLE, "google-200", "nick@example.com")
+
+                val result = mockMvc.post("/api/auth/google") {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = """{"code":"valid-code"}"""
+                }.andReturn()
+
+                return com.jayway.jsonpath.JsonPath.read(
+                    result.response.contentAsString,
+                    "$.data.accessToken",
+                )
+            }
+
+            context("사용 가능한 닉네임") {
+                it("available: true를 반환한다") {
+                    val token = loginAndGetToken()
+
+                    mockMvc.get("/api/users/check-nickname?nickname=새닉네임") {
+                        header("Authorization", "Bearer $token")
+                    }.andExpect {
+                        status { isOk() }
+                        jsonPath("$.data.available") { value(true) }
+                    }
+                }
+            }
+
+            context("이미 사용 중인 닉네임") {
+                it("available: false를 반환한다") {
+                    val token = loginAndGetToken()
+                    accountRepository.save(AccountFixture.create(id = 0, nickname = Nickname("중복닉네임")))
+
+                    mockMvc.get("/api/users/check-nickname?nickname=중복닉네임") {
+                        header("Authorization", "Bearer $token")
+                    }.andExpect {
+                        status { isOk() }
+                        jsonPath("$.data.available") { value(false) }
+                    }
+                }
+            }
+
+            context("인증 없이 요청해도") {
+                it("200을 반환한다") {
+                    mockMvc.get("/api/users/check-nickname?nickname=테스트")
+                        .andExpect {
+                            status { isOk() }
+                            jsonPath("$.data.available") { value(true) }
+                        }
+                }
+            }
+        }
+    }
+}

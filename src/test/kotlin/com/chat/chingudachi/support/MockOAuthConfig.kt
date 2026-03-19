@@ -1,6 +1,6 @@
 package com.chat.chingudachi.support
 
-import com.chat.chingudachi.auth.application.port.OAuthClient
+import com.chat.chingudachi.auth.infra.OAuthClient
 import io.mockk.mockk
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
