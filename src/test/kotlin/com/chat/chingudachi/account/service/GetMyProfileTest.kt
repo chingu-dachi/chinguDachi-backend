@@ -46,8 +46,8 @@ class GetMyProfileTest : DescribeSpec() {
 
                     val result = accountService.getMyProfile(accountId)
 
-                    result.account.id shouldBe accountId
-                    result.account.accountStatus shouldBe AccountStatus.NOT_CONSENT
+                    result.userId shouldBe accountId
+                    result.onboardingRequired shouldBe true
                     result.interests shouldBe emptyList()
                 }
             }
@@ -70,9 +70,9 @@ class GetMyProfileTest : DescribeSpec() {
 
                     val result = accountService.getMyProfile(accountId)
 
-                    result.account.nickname?.value shouldBe "테스트유저"
+                    result.nickname shouldBe "테스트유저"
                     result.interests.size shouldBe 1
-                    result.interests[0].interestTag.tagKey shouldBe "TRAVEL"
+                    result.interests[0] shouldBe "TRAVEL"
                 }
             }
 

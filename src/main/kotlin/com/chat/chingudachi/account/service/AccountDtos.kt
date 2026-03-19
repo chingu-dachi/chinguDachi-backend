@@ -40,9 +40,38 @@ data class DiscoverUsersQuery(
 )
 
 data class MyProfile(
-    val account: Account,
-    val interests: List<UserInterest>,
-)
+    val userId: Long,
+    val email: String?,
+    val nickname: String?,
+    val birthYear: Int?,
+    val nationality: String?,
+    val translateLanguage: String?,
+    val city: String?,
+    val profileImageUrl: String?,
+    val bio: String?,
+    val onboardingRequired: Boolean,
+    val consentRequired: Boolean,
+    val createdAt: Instant,
+    val interests: List<String>,
+) {
+    companion object {
+        fun from(account: Account, interests: List<UserInterest>) = MyProfile(
+            userId = account.id,
+            email = account.email,
+            nickname = account.nickname?.value,
+            birthYear = account.birthDate?.year,
+            nationality = account.nation?.name,
+            translateLanguage = account.translateLanguage?.name?.lowercase(),
+            city = account.city,
+            profileImageUrl = account.profileImageUrl,
+            bio = account.bio,
+            onboardingRequired = !account.isOnboardingComplete(),
+            consentRequired = account.isConsentRequired(),
+            createdAt = account.createdAt,
+            interests = interests.map { it.interestTag.tagKey },
+        )
+    }
+}
 
 data class UserPublicProfile(
     val userId: Long,

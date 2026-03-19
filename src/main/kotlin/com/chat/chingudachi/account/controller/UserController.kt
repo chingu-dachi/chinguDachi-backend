@@ -132,21 +132,21 @@ data class MyProfileResponse(
 ) {
     companion object {
         fun from(profile: MyProfile) = MyProfileResponse(
-            userId = profile.account.id.toString(),
-            email = profile.account.email,
-            nickname = profile.account.nickname?.value,
-            birthYear = profile.account.birthDate?.year,
-            nationality = profile.account.nation?.name,
-            translateLanguage = profile.account.translateLanguage?.name?.lowercase(),
-            city = profile.account.city,
-            profileImageUrl = profile.account.profileImageUrl,
-            bio = profile.account.bio,
-            onboardingRequired = !profile.account.isOnboardingComplete(),
-            consentRequired = profile.account.isConsentRequired(),
+            userId = profile.userId.toString(),
+            email = profile.email,
+            nickname = profile.nickname,
+            birthYear = profile.birthYear,
+            nationality = profile.nationality,
+            translateLanguage = profile.translateLanguage,
+            city = profile.city,
+            profileImageUrl = profile.profileImageUrl,
+            bio = profile.bio,
+            onboardingRequired = profile.onboardingRequired,
+            consentRequired = profile.consentRequired,
             isOnline = false,
             lastSeenAt = null,
-            createdAt = profile.account.createdAt,
-            interests = profile.interests.map { it.interestTag.tagKey },
+            createdAt = profile.createdAt,
+            interests = profile.interests,
         )
     }
 }

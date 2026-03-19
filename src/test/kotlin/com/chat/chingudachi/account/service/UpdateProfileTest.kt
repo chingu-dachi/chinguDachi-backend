@@ -68,7 +68,7 @@ class UpdateProfileTest : DescribeSpec() {
 
                     val result = accountService.updateProfile(accountId, command)
 
-                    result.account.nickname shouldBe Nickname("새닉네임")
+                    result.nickname shouldBe "새닉네임"
                     verify { accountRepository.save(account) }
                 }
             }
@@ -111,7 +111,7 @@ class UpdateProfileTest : DescribeSpec() {
 
                     val result = accountService.updateProfile(accountId, command)
 
-                    result.account.nickname shouldBe Nickname("기존닉네임")
+                    result.nickname shouldBe "기존닉네임"
                     verify(exactly = 0) { accountRepository.existsByNickname(Nickname("기존닉네임")) }
                 }
             }
@@ -269,9 +269,9 @@ class UpdateProfileTest : DescribeSpec() {
 
                     val result = accountService.updateProfile(accountId, command)
 
-                    result.account.bio shouldBe "새로운 자기소개"
-                    result.account.city shouldBe "서울"
-                    result.account.nickname shouldBe Nickname("테스트유저")
+                    result.bio shouldBe "새로운 자기소개"
+                    result.city shouldBe "서울"
+                    result.nickname shouldBe "테스트유저"
                     verify { accountRepository.save(account) }
                 }
             }

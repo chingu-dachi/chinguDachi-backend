@@ -152,7 +152,7 @@ class AccountService(
     fun getMyProfile(accountId: Long): MyProfile {
         val account = findAccountOrThrow(accountId)
         val interests = userInterestRepository.findByAccountId(accountId)
-        return MyProfile(account, interests)
+        return MyProfile.from(account, interests)
     }
 
     @Transactional(readOnly = true)
@@ -194,7 +194,7 @@ class AccountService(
 
         command.interests?.let { replaceInterests(accountId, account, it) }
 
-        return MyProfile(account, userInterestRepository.findByAccountId(accountId))
+        return MyProfile.from(account, userInterestRepository.findByAccountId(accountId))
     }
 
     private fun findAccountOrThrow(id: Long): Account =
